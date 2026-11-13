@@ -13,6 +13,12 @@ Staff app for **Meridian The School, Gopalganj, Bihar**: timetable, teacher leav
 ## Install on a phone
 Open the link in Chrome, then tap **⋮ → Add to Home screen**.
 
+## AI assistant
+Admin, Coordinator and teachers can ask questions about school data in Hindi or English. It uses Claude through the
+`ai-assistant` Supabase Edge Function (code in `supabase/functions/`). The Claude API key is stored only as the
+`ANTHROPIC_API_KEY` secret in Supabase, never in this repository. Daily limit: 500 AI calls per Admin/Coordinator,
+120 per teacher. Teachers' answers only use data the database lets them see.
+
 ## Technical notes
 - Single-page web app (`index.html`), hosted on GitHub Pages.
 - Data is stored in Supabase (PostgreSQL), protected by row-level security. Setup SQL is in `setup/`.
