@@ -1,0 +1,2098 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#2f3192">
+<meta name="description" content="Staff app of Meridian The School, Gopalganj — timetable, leave, arrangements, DPP and worksheets.">
+<title>MTS Staff App — Meridian The School</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="MTS Staff">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap">
+<style>
+:root {
+  --navy: #2f3192; --navy-2: #24257a; --navy-soft: #ecedfb; --red: #e01f27; --red-soft: #fdeceb;
+  --ink: #1b1d2e; --ink-2: #4a4d63; --muted: #7a7d92; --line: #e3e4ee; --bg: #f5f6fb; --card: #fff;
+  --ok: #128a4b; --ok-soft: #e5f6ec; --warn: #b26b00; --warn-soft: #fff4de; --violet: #6b4bd8; --violet-soft: #efeafd;
+  --r: 12px; --shadow: 0 1px 2px rgba(20, 22, 60, .06), 0 4px 16px rgba(20, 22, 60, .06);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { font-family: 'Inter', 'Noto Sans Devanagari', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: var(--ink); background: var(--bg); font-size: 15px; line-height: 1.45; }
+button, input, select, textarea { font: inherit; color: inherit; }
+h1, h2, h3 { margin: 0; line-height: 1.2; }
+h2 { font-size: 22px; } h3 { font-size: 16px; }
+small { color: var(--muted); }
+.muted { color: var(--muted); }
+.hidden { display: none !important; }
+.bad { color: var(--red); font-weight: 600; }
+.ok-text { color: var(--ok); font-weight: 600; }
+
+/* buttons */
+.btn { border: 1px solid var(--line); background: #fff; padding: 9px 14px; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; justify-content: center; white-space: nowrap; }
+.btn:hover { border-color: #c9cbe0; }
+.btn:disabled { opacity: .6; cursor: default; }
+.btn.primary { background: var(--navy); border-color: var(--navy); color: #fff; }
+.btn.primary:hover { background: var(--navy-2); }
+.btn.ok { background: var(--ok); border-color: var(--ok); color: #fff; }
+.btn.danger { background: var(--red); border-color: var(--red); color: #fff; }
+.btn.danger-ghost { color: var(--red); border-color: #f2c4c6; background: #fff; }
+.btn.ghost { background: transparent; }
+.btn.ai { background: var(--violet-soft); border-color: #d9cff9; color: var(--violet); }
+.btn.small { padding: 6px 11px; font-size: 13px; }
+.btn.tiny { padding: 4px 9px; font-size: 12px; border-radius: 8px; }
+.btn.block { width: 100%; }
+.btn.center { margin: 14px auto 0; display: flex; }
+.icon-btn { border: 0; background: transparent; cursor: pointer; font-size: 20px; padding: 6px 8px; border-radius: 8px; position: relative; }
+.icon-btn:hover { background: var(--navy-soft); }
+.row-end { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.btns { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+/* top bar */
+.topbar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 10px; background: #fff; border-bottom: 3px solid var(--red); padding: 8px 16px; }
+.topbar .logo { width: 40px; height: 40px; object-fit: contain; }
+.brand { display: flex; flex-direction: column; line-height: 1.15; }
+.brand strong { color: var(--navy); font-size: 16px; }
+.brand span { font-size: 12px; color: var(--muted); }
+.top-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.bell b { position: absolute; top: 0; right: 0; background: var(--red); color: #fff; font-size: 10px; border-radius: 10px; padding: 1px 5px; }
+.me { display: flex; align-items: center; gap: 8px; }
+.me div { display: flex; flex-direction: column; line-height: 1.15; }
+.me strong { font-size: 13px; } .me span { font-size: 11px; color: var(--muted); }
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--navy-soft); color: var(--navy); display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex: none; }
+.menu-btn { display: none; }
+
+/* layout */
+.layout { display: flex; min-height: calc(100vh - 59px); }
+.sidebar { width: 232px; flex: none; background: #fff; border-right: 1px solid var(--line); padding: 12px 10px; display: flex; flex-direction: column; gap: 2px; position: sticky; top: 59px; height: calc(100vh - 59px); overflow: auto; }
+.nav { display: flex; align-items: center; gap: 10px; border: 0; background: transparent; text-align: left; padding: 9px 12px; border-radius: 10px; cursor: pointer; font-weight: 500; color: var(--ink-2); }
+.nav span { width: 22px; text-align: center; }
+.nav:hover { background: var(--bg); }
+.nav.active { background: var(--navy-soft); color: var(--navy); font-weight: 700; }
+.nav.logout { margin-top: auto; }
+.nav.lang-mobile { display: none; }
+.demo-note { font-size: 11px; color: var(--muted); padding: 8px 12px; }
+.content { flex: 1; padding: 22px 26px 60px; max-width: 1240px; min-width: 0; }
+.page-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+
+/* date bar */
+.datebar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.datebar input[type=date] { border: 1px solid var(--line); border-radius: 10px; padding: 7px 10px; background: #fff; }
+.dayname { font-weight: 600; color: var(--navy); margin: 0 4px; }
+
+/* cards and panels */
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.stat { background: #fff; border-radius: var(--r); padding: 14px 16px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 4px; border-left: 4px solid var(--navy); }
+.stat span { font-size: 13px; color: var(--muted); }
+.stat b { font-size: 28px; color: var(--navy); }
+.stat.warn { border-left-color: var(--red); } .stat.warn b { color: var(--red); }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; }
+.panel { background: #fff; border-radius: var(--r); box-shadow: var(--shadow); padding: 16px 18px; margin-bottom: 16px; }
+.panel > h3 { margin-bottom: 12px; }
+.panel-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.list { list-style: none; margin: 0; padding: 0; }
+.list li { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 0; border-top: 1px solid var(--line); }
+.list li:first-child { border-top: 0; }
+.list li > div:first-child { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.list li > div > div { display: flex; flex-direction: column; min-width: 0; }
+.list.compact li { padding: 7px 0; }
+.banner { background: var(--navy-soft); color: var(--navy); padding: 10px 14px; border-radius: 10px; margin-bottom: 14px; font-weight: 500; }
+.banner.warn { background: var(--warn-soft); color: var(--warn); }
+.empty { background: #fff; border: 1px dashed #cfd1e3; border-radius: var(--r); padding: 28px; text-align: center; color: var(--muted); }
+.empty.small { padding: 18px; border: 0; }
+.chip { display: inline-block; font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 20px; background: var(--bg); color: var(--ink-2); white-space: nowrap; }
+.st-pending, .st-requested, .st-draft { background: var(--warn-soft); color: var(--warn); }
+.st-approved, .st-published, .st-delivered { background: var(--ok-soft); color: var(--ok); }
+.st-rejected { background: var(--red-soft); color: var(--red); }
+.st-in_progress, .st-ready { background: var(--navy-soft); color: var(--navy); }
+.kind { font-size: 11px; font-weight: 700; padding: 3px 7px; border-radius: 6px; flex: none; }
+.kind.dpp { background: #e7f0ff; color: #1f5fbf; } .kind.worksheet { background: #fff0e3; color: #b35a00; }
+
+/* substitution table */
+.table-wrap { overflow-x: auto; background: #fff; border-radius: var(--r); box-shadow: var(--shadow); }
+.panel .table-wrap { box-shadow: none; }
+table { border-collapse: collapse; width: 100%; }
+th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+thead th { font-size: 12px; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); background: #fafbfe; }
+td small, th small { display: block; }
+table.subs select { border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; background: #fff; max-width: 280px; }
+table.subs .why { font-size: 13px; color: var(--ink-2); min-width: 240px; }
+.score { color: var(--navy); }
+.row-bad { background: var(--red-soft); }
+.plan-status { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; font-size: 13px; }
+.absent-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.achip { background: var(--red-soft); color: var(--red); border-radius: 20px; padding: 5px 6px 5px 12px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+.achip button { border: 0; background: rgba(224, 31, 39, .12); color: var(--red); border-radius: 50%; width: 20px; height: 20px; cursor: pointer; font-size: 11px; }
+.howto { margin-top: 16px; background: #fff; border-radius: var(--r); padding: 12px 16px; box-shadow: var(--shadow); }
+.howto summary { cursor: pointer; font-weight: 600; color: var(--navy); }
+
+/* my day */
+.day { list-style: none; margin: 0; padding: 0; }
+.day li { display: flex; gap: 12px; align-items: stretch; padding: 6px 0; }
+.ptime { width: 86px; flex: none; display: flex; flex-direction: column; justify-content: center; }
+.slot { flex: 1; background: var(--bg); border-radius: 10px; padding: 10px 12px; display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
+.slot.free { color: var(--muted); background: transparent; border: 1px dashed var(--line); }
+.slot.sub { background: var(--warn-soft); border: 1px solid #f3d29a; }
+.slot.off { background: var(--red-soft); color: var(--red); }
+.day li.lunch .slot { background: transparent; color: var(--muted); padding: 4px 12px; }
+.quick { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.qa { border: 1px solid var(--line); background: #fff; border-radius: 12px; padding: 14px 10px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 22px; }
+.qa span { font-size: 13px; font-weight: 600; color: var(--ink-2); text-align: center; }
+.qa:hover { border-color: var(--navy); background: var(--navy-soft); }
+
+/* request / leave cards */
+.tabs { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+.tab { border: 1px solid var(--line); background: #fff; border-radius: 20px; padding: 6px 14px; cursor: pointer; font-weight: 600; font-size: 13px; color: var(--ink-2); }
+.tab.active { background: var(--navy); color: #fff; border-color: var(--navy); }
+.cards-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; }
+.card { background: #fff; border-radius: var(--r); box-shadow: var(--shadow); padding: 14px 16px; display: flex; flex-direction: column; }
+.card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.card-top > div:first-child { display: flex; gap: 10px; align-items: center; min-width: 0; }
+.card-top > div > div { display: flex; flex-direction: column; }
+.desc { margin: 10px 0 6px; color: var(--ink-2); white-space: pre-wrap; }
+.remark { margin: 4px 0; font-size: 13px; background: var(--bg); padding: 7px 10px; border-radius: 8px; }
+.facts { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0; }
+.facts span { font-size: 12px; background: var(--bg); padding: 3px 8px; border-radius: 6px; }
+.meta { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.hist { font-size: 12px; margin-top: 6px; color: var(--muted); }
+.hist ul { margin: 6px 0 0; padding-left: 18px; }
+.card .row-end { margin-top: auto; padding-top: 10px; }
+
+/* timetable grid */
+.tt-controls { display: flex; gap: 8px; align-items: center; }
+.tt-controls select, .page-head select, .page-head input[type=month] { border: 1px solid var(--line); border-radius: 10px; padding: 7px 10px; background: #fff; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: #fff; }
+.seg button { border: 0; background: transparent; padding: 7px 14px; cursor: pointer; font-weight: 600; }
+.seg button.active { background: var(--navy); color: #fff; }
+table.tt th, table.tt td { border: 1px solid var(--line); text-align: center; min-width: 96px; }
+table.tt thead th, table.tt tr:first-child th { background: #fafbfe; }
+table.tt th:first-child { min-width: 86px; }
+table.tt td b { display: block; font-size: 13px; }
+table.tt td small { font-size: 11px; }
+table.tt .today { background: #fffbea; }
+table.tt th.today { color: var(--navy); }
+table.tt td.editable { cursor: pointer; }
+table.tt td.editable:hover { outline: 2px solid var(--navy); outline-offset: -2px; }
+table.tt .freecell { color: #b0b2c4; }
+table.tt .lunchrow td { background: var(--bg); color: var(--muted); font-size: 13px; padding: 4px; }
+.subj-MAT { box-shadow: inset 3px 0 #2f3192; } .subj-SCI { box-shadow: inset 3px 0 #128a4b; } .subj-ENG { box-shadow: inset 3px 0 #1f5fbf; }
+.subj-HIN { box-shadow: inset 3px 0 #e01f27; } .subj-SST { box-shadow: inset 3px 0 #b35a00; } .subj-SKT { box-shadow: inset 3px 0 #8a5a00; }
+.subj-CMP { box-shadow: inset 3px 0 #0f8a8a; } .subj-GAM { box-shadow: inset 3px 0 #6b4bd8; } .subj-ART { box-shadow: inset 3px 0 #c2407e; } .subj-LIB { box-shadow: inset 3px 0 #7a7d92; }
+
+/* data tables, bars */
+table.data tr.inactive { opacity: .55; }
+table.data td { vertical-align: middle; }
+.bar { position: relative; background: var(--bg); border-radius: 6px; height: 22px; min-width: 140px; }
+.bar i { position: absolute; left: 0; top: 0; bottom: 0; background: #c9cbf0; border-radius: 6px; }
+.bar.sub i { background: #f6b9bc; }
+.bar span { position: relative; padding-left: 8px; font-size: 12px; font-weight: 700; line-height: 22px; }
+
+/* chat */
+.chat { display: flex; flex-direction: column; gap: 10px; }
+.chat-log { min-height: 260px; max-height: 52vh; overflow: auto; display: flex; flex-direction: column; gap: 10px; padding: 4px; }
+.msg { display: flex; gap: 8px; max-width: 86%; }
+.msg > div { padding: 10px 13px; border-radius: 12px; background: var(--bg); white-space: normal; }
+.msg.user { align-self: flex-end; }
+.msg.user > div { background: var(--navy); color: #fff; }
+.ai-badge { width: 28px; height: 28px; flex: none; border-radius: 50%; background: var(--violet-soft); display: inline-flex; align-items: center; justify-content: center; }
+.suggest { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip-btn { border: 1px solid var(--line); background: #fff; border-radius: 20px; padding: 5px 12px; cursor: pointer; font-size: 13px; }
+.chip-btn:hover { border-color: var(--violet); color: var(--violet); }
+.chat-in { display: flex; gap: 8px; }
+.chat-in input { flex: 1; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.typing { white-space: pre-wrap; }
+
+/* notifications, audit */
+.notif { list-style: none; margin: 0; padding: 0; }
+.notif li { padding: 10px 0; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 2px; }
+.notif li.unread span { font-weight: 600; }
+.audit { list-style: none; margin: 0; padding: 0; font-size: 13px; }
+.audit li { display: grid; grid-template-columns: 130px 160px 1fr; gap: 10px; padding: 7px 0; border-top: 1px solid var(--line); }
+
+/* forms */
+.stack { display: flex; flex-direction: column; gap: 12px; }
+label { display: flex; flex-direction: column; gap: 5px; font-size: 13px; font-weight: 600; color: var(--ink-2); }
+label.inline { flex-direction: row; align-items: center; gap: 8px; }
+input, select, textarea { border: 1px solid #d5d7e5; border-radius: 10px; padding: 9px 11px; background: #fff; font-weight: 400; color: var(--ink); width: 100%; }
+input[type=checkbox] { width: auto; }
+textarea { resize: vertical; }
+input:focus, select:focus, textarea:focus { outline: 2px solid #b9bbf0; border-color: var(--navy); }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.periods-pick, .checks { display: flex; flex-wrap: wrap; gap: 6px; }
+.pp { flex-direction: row; align-items: center; gap: 6px; border: 1px solid var(--line); padding: 6px 10px; border-radius: 8px; font-weight: 500; }
+fieldset { border: 1px solid var(--line); border-radius: 10px; padding: 10px; }
+legend { font-size: 13px; font-weight: 600; color: var(--ink-2); padding: 0 4px; }
+.hint { font-size: 12.5px; color: var(--muted); margin: 0; }
+.error { background: var(--red-soft); color: var(--red); padding: 8px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; }
+.phone-in { display: flex; align-items: center; border: 1px solid #d5d7e5; border-radius: 10px; overflow: hidden; background: #fff; }
+.phone-in span { padding: 0 10px; color: var(--muted); border-right: 1px solid var(--line); }
+.phone-in input { border: 0; border-radius: 0; }
+.draft, .copybox { font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace; font-size: 13px; }
+
+/* modal & toast */
+.modal-back { position: fixed; inset: 0; background: rgba(20, 22, 50, .45); z-index: 100; display: flex; align-items: flex-start; justify-content: center; padding: 6vh 14px; overflow: auto; }
+.modal { background: #fff; border-radius: 16px; width: 100%; max-width: 480px; box-shadow: 0 20px 60px rgba(0, 0, 0, .25); }
+.modal.wide { max-width: 720px; }
+.modal-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+.modal-body { padding: 16px 18px 18px; }
+.modal-body p { margin: 0 0 8px; }
+#toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(30px); background: var(--ink); color: #fff; padding: 10px 18px; border-radius: 10px; opacity: 0; transition: .25s; z-index: 200; pointer-events: none; font-weight: 500; max-width: 90vw; text-align: center; }
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* login */
+.login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px 14px; background: linear-gradient(160deg, #2f3192 0%, #24257a 55%, #e01f27 140%); }
+.login-card { background: #fff; border-radius: 20px; padding: 28px 24px; width: 100%; max-width: 420px; box-shadow: 0 30px 80px rgba(0, 0, 0, .3); text-align: center; }
+.login-card form { text-align: left; margin-top: 18px; }
+.login-logo { width: 96px; height: 96px; object-fit: contain; }
+.login-card h1 { color: var(--navy); font-size: 22px; margin-top: 6px; }
+.login-card .muted { margin: 4px 0 0; }
+.demo-box { margin-top: 18px; text-align: left; background: var(--bg); border-radius: 12px; padding: 12px; font-size: 13px; }
+.demo-list { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; }
+.demo-acc { border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 7px 9px; cursor: pointer; text-align: left; display: flex; flex-direction: column; }
+.demo-acc span { font-weight: 600; font-size: 13px; }
+.demo-acc small { font-size: 11px; }
+.demo-acc:hover { border-color: var(--navy); }
+
+#print-root { display: none; }
+@media print {
+  body > *:not(#print-root) { display: none !important; }
+  #print-root { display: block !important; font-size: 13px; }
+}
+
+/* phones */
+@media (max-width: 860px) {
+  .menu-btn { display: inline-block; }
+  .me div, .top-actions .btn.ghost { display: none; }
+  .brand span { display: none; }
+  .sidebar { position: fixed; top: 59px; left: 0; bottom: 0; height: auto; z-index: 30; transform: translateX(-100%); transition: transform .2s; box-shadow: 4px 0 20px rgba(0, 0, 0, .1); }
+  .sidebar.open { transform: none; }
+  .content { padding: 16px 12px 60px; }
+  .grid2, .cards-list { grid-template-columns: 1fr; }
+  .cards { grid-template-columns: repeat(2, 1fr); }
+  .three { grid-template-columns: 1fr 1fr; }
+  .audit li { grid-template-columns: 1fr; gap: 2px; }
+  .sidebar .nav.lang-mobile { display: flex; }
+}
+
+/* keep small controls compact (global inputs are full width) */
+.datebar input, .tt-controls select, .page-head select, .page-head input, table.subs select { width: auto; }
+.chat-in input { width: auto; min-width: 0; }
+
+@media (max-width: 860px) {
+  table.subs, table.subs tbody { display: block; }
+  table.subs thead { display: none; }
+  table.subs tr { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 12px; padding: 12px 14px; border-bottom: 6px solid var(--bg); }
+  table.subs td { border: 0; padding: 4px 0; }
+  table.subs td::before { content: attr(data-label); display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); }
+  table.subs td:nth-child(5), table.subs td.why { grid-column: 1 / -1; }
+  table.subs select { width: 100%; max-width: none; }
+  table.subs .why { min-width: 0; }
+}
+
+/* live version */
+.net { font-size: 11px; padding: 8px 12px 8px 26px; position: relative; color: var(--muted); }
+.net::before { content: ''; position: absolute; left: 12px; top: 50%; width: 8px; height: 8px; margin-top: -4px; border-radius: 50%; background: #c9cbe0; }
+.net.ok::before { background: var(--ok); }
+.net.busy::before { background: var(--warn); }
+.net.bad { color: var(--red); } .net.bad::before { background: var(--red); }
+.spinner { width: 34px; height: 34px; border: 3px solid var(--navy-soft); border-top-color: var(--navy); border-radius: 50%; margin: 18px auto 4px; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.code { font-family: ui-monospace, Consolas, monospace; font-weight: 700; letter-spacing: .08em; background: var(--warn-soft); color: var(--warn); padding: 2px 7px; border-radius: 6px; }
+.bigcode { font-family: ui-monospace, Consolas, monospace; font-size: 34px; font-weight: 800; letter-spacing: .2em; text-align: center; color: var(--navy); background: var(--navy-soft); border-radius: 12px; padding: 12px; margin: 8px 0 12px; }
+.login-card .error { margin: 12px 0; text-align: left; }
+
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="modal-root"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="print-root"></div>
+<script src="supabase.js"></script>
+<script>
+const APP_CONFIG = {"url": "https://xvctfmxavqzkslhwfxia.supabase.co", "key": "sb_publishable_u_5dJzH4_ih65HdWUaMZ9g_LWkVro2R", "siteUrl": "https://ravis995692-ui.github.io/mts-staff-app/"};
+const LOGO_SRC = "data:image/png;base64,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";
+/* ===== Meridian The School — sample data & constants ===== */
+const SCHOOL = { name: 'Meridian The School', short: 'MTS', place: 'Gopalganj, Bihar' };
+
+const PERIODS = [
+  { n: 1, start: '08:00', end: '08:40' },
+  { n: 2, start: '08:40', end: '09:20' },
+  { n: 3, start: '09:20', end: '10:00' },
+  { n: 4, start: '10:00', end: '10:40' },
+  { n: 5, start: '11:10', end: '11:50' },
+  { n: 6, start: '11:50', end: '12:30' },
+  { n: 7, start: '12:30', end: '13:10' },
+  { n: 8, start: '13:10', end: '13:50' },
+];
+const LUNCH = { after: 4, start: '10:40', end: '11:10' };
+const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const DAYS_LONG = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const DAYS_HI = ['सोमवार', 'मंगलवार', 'बुधवार', 'गुरुवार', 'शुक्रवार', 'शनिवार'];
+
+const SUBJECTS = {
+  ENG: { en: 'English', hi: 'अंग्रेज़ी' },
+  HIN: { en: 'Hindi', hi: 'हिंदी' },
+  MAT: { en: 'Mathematics', hi: 'गणित' },
+  SCI: { en: 'Science', hi: 'विज्ञान' },
+  SST: { en: 'Social Science', hi: 'सामाजिक विज्ञान' },
+  SKT: { en: 'Sanskrit', hi: 'संस्कृत' },
+  CMP: { en: 'Computer', hi: 'कंप्यूटर' },
+  GAM: { en: 'Games', hi: 'खेल' },
+  ART: { en: 'Art', hi: 'कला' },
+  LIB: { en: 'Library', hi: 'पुस्तकालय' },
+};
+const WEEKLY = { ENG: 7, HIN: 6, MAT: 8, SCI: 8, SST: 6, SKT: 3, CMP: 3, GAM: 3, ART: 2, LIB: 2 };
+const CLASSES = ['6A', '6B', '7A', '7B', '8A', '8B', '9A', '9B', '10A', '10B'];
+
+/* Sample staff — names and numbers are made up for the demo */
+const SEED_STAFF = [
+  { id: 'u1', name: 'Office Admin', phone: '9000000001', role: 'admin', subjects: [] },
+  { id: 'u2', name: 'Nidhi Srivastava', phone: '9000000002', role: 'coordinator', subjects: [] },
+  { id: 't1', name: 'Rajesh Kumar', phone: '9000000101', role: 'teacher', subjects: ['MAT'] },
+  { id: 't2', name: 'Sunita Devi', phone: '9000000102', role: 'teacher', subjects: ['MAT'] },
+  { id: 't3', name: 'Amit Singh', phone: '9000000103', role: 'teacher', subjects: ['MAT'] },
+  { id: 't4', name: 'Priya Sharma', phone: '9000000104', role: 'teacher', subjects: ['SCI'] },
+  { id: 't5', name: 'Manoj Prasad', phone: '9000000105', role: 'teacher', subjects: ['SCI'] },
+  { id: 't6', name: 'Neha Kumari', phone: '9000000106', role: 'teacher', subjects: ['SCI'] },
+  { id: 't7', name: 'Anjali Verma', phone: '9000000107', role: 'teacher', subjects: ['ENG'] },
+  { id: 't8', name: 'Rahul Mishra', phone: '9000000108', role: 'teacher', subjects: ['ENG'] },
+  { id: 't9', name: 'Kavita Sinha', phone: '9000000109', role: 'teacher', subjects: ['ENG'] },
+  { id: 't10', name: 'Ramesh Pandey', phone: '9000000110', role: 'teacher', subjects: ['HIN'] },
+  { id: 't11', name: 'Pooja Tiwari', phone: '9000000111', role: 'teacher', subjects: ['HIN', 'SKT'] },
+  { id: 't12', name: 'Vikash Yadav', phone: '9000000112', role: 'teacher', subjects: ['SST'] },
+  { id: 't13', name: 'Archana Jha', phone: '9000000113', role: 'teacher', subjects: ['SST'] },
+  { id: 't14', name: 'Shashi Bhushan Dubey', phone: '9000000114', role: 'teacher', subjects: ['SKT', 'HIN'] },
+  { id: 't15', name: 'Ravi Ranjan', phone: '9000000115', role: 'teacher', subjects: ['CMP', 'MAT'] },
+  { id: 't16', name: 'Sanjay Kumar', phone: '9000000116', role: 'teacher', subjects: ['GAM'] },
+  { id: 't17', name: 'Meena Kumari', phone: '9000000117', role: 'teacher', subjects: ['ART'] },
+  { id: 't18', name: 'Dinesh Gupta', phone: '9000000118', role: 'teacher', subjects: ['LIB', 'ENG'] },
+];
+
+/* Which teacher teaches which subject in which class */
+const SEED_MAPPING = (() => {
+  const m = {};
+  CLASSES.forEach(c => (m[c] = {}));
+  const split = (subject, groups) => groups.forEach(([tid, list]) => list.forEach(c => (m[c][subject] = tid)));
+  split('MAT', [['t1', ['6A', '6B', '7A']], ['t2', ['7B', '8A', '8B']], ['t3', ['9A', '9B', '10A', '10B']]]);
+  split('SCI', [['t4', ['6A', '6B', '7A']], ['t5', ['7B', '8A', '8B']], ['t6', ['9A', '9B', '10A', '10B']]]);
+  split('ENG', [['t7', ['6A', '6B', '7A']], ['t8', ['7B', '8A', '8B']], ['t9', ['9A', '9B', '10A', '10B']]]);
+  split('HIN', [['t10', ['6A', '6B', '7A', '7B', '8A']], ['t11', ['8B', '9A', '9B', '10A', '10B']]]);
+  split('SST', [['t12', ['6A', '6B', '7A', '7B', '8A']], ['t13', ['8B', '9A', '9B', '10A', '10B']]]);
+  split('SKT', [['t14', CLASSES]]);
+  split('CMP', [['t15', CLASSES]]);
+  split('GAM', [['t16', CLASSES]]);
+  split('ART', [['t17', CLASSES]]);
+  split('LIB', [['t18', CLASSES]]);
+  return m;
+})();
+
+const SEED_CLASS_TEACHERS = {
+  '6A': 't7', '6B': 't10', '7A': 't1', '7B': 't5', '8A': 't12',
+  '8B': 't2', '9A': 't6', '9B': 't9', '10A': 't3', '10B': 't13',
+};
+
+/* Seeded random numbers so the sample timetable is the same every time */
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/* Build a clash-free weekly timetable: no teacher in two classes at once,
+   at most 2 periods of a subject per class per day. */
+function generateTimetable(mapping, seed) {
+  const ND = DAYS.length, NP = PERIODS.length, NS = ND * NP;
+  for (let attempt = 0; attempt < 50; attempt++) {
+    const rnd = mulberry32(seed + attempt * 7919);
+    // each class: a flat list of 48 subject codes, shuffled
+    const rows = {};
+    CLASSES.forEach(c => {
+      const list = [];
+      Object.keys(WEEKLY).forEach(s => { for (let i = 0; i < WEEKLY[s]; i++) list.push(s); });
+      for (let i = list.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [list[i], list[j]] = [list[j], list[i]]; }
+      rows[c] = list;
+    });
+    const teacherAt = (c, i) => mapping[c][rows[c][i]];
+    // cost of one cell: clashes of its teacher in that slot + too many of that subject that day
+    const cellCost = (c, i) => {
+      const t = teacherAt(c, i);
+      let cost = 0;
+      for (const o of CLASSES) if (o !== c && teacherAt(o, i) === t) cost += 1;
+      const d = Math.floor(i / NP), s = rows[c][i];
+      let same = 0;
+      for (let k = d * NP; k < d * NP + NP; k++) if (rows[c][k] === s) same++;
+      if (same > 2) cost += same - 2;
+      return cost;
+    };
+    const totalCost = () => { let t = 0; CLASSES.forEach(c => { for (let i = 0; i < NS; i++) t += cellCost(c, i); }); return t; };
+    let cost = totalCost();
+    for (let step = 0; step < 60000 && cost > 0; step++) {
+      const c = CLASSES[Math.floor(rnd() * CLASSES.length)];
+      const i = Math.floor(rnd() * NS);
+      if (cellCost(c, i) === 0 && rnd() > 0.02) continue;
+      let best = null, bestDelta = Infinity;
+      for (let tries = 0; tries < 20; tries++) {
+        const j = Math.floor(rnd() * NS);
+        if (j === i || rows[c][j] === rows[c][i]) continue;
+        const before = cellCost(c, i) + cellCost(c, j);
+        [rows[c][i], rows[c][j]] = [rows[c][j], rows[c][i]];
+        const after = cellCost(c, i) + cellCost(c, j);
+        [rows[c][i], rows[c][j]] = [rows[c][j], rows[c][i]];
+        const delta = after - before + (rnd() - 0.5) * 0.2;
+        if (delta < bestDelta) { bestDelta = delta; best = j; }
+      }
+      if (best !== null && bestDelta <= 0.1) {
+        [rows[c][i], rows[c][best]] = [rows[c][best], rows[c][i]];
+        if (step % 200 === 0) cost = totalCost();
+      }
+      if (step % 1000 === 0) cost = totalCost();
+    }
+    cost = totalCost();
+    if (cost === 0) {
+      const tt = {};
+      CLASSES.forEach(c => {
+        tt[c] = [];
+        for (let d = 0; d < ND; d++) {
+          tt[c].push([]);
+          for (let p = 0; p < NP; p++) { const s = rows[c][d * NP + p]; tt[c][d].push({ s, t: mapping[c][s] }); }
+        }
+      });
+      return tt;
+    }
+  }
+  throw new Error('Could not build sample timetable');
+}
+
+/* ===== English / Hindi labels ===== */
+const I18N = {
+  en: {
+    dashboard: 'Dashboard', myDay: 'My Day', substitutions: 'Substitutions', leave: 'Leave', timetable: 'Timetable',
+    requests: 'DPP & Worksheets', staff: 'Staff', reports: 'Reports', assistant: 'AI Assistant', notices: 'Notices',
+    audit: 'Audit Log', settings: 'Settings', logout: 'Log out', today: 'Today', markAbsent: 'Mark absent',
+    publish: 'Publish', regenerate: 'Re-plan', approve: 'Approve', reject: 'Reject', apply: 'Apply',
+    loginTitle: 'Staff login', mobile: 'Mobile number', sendOtp: 'Send OTP', otp: 'Enter OTP', verify: 'Verify & log in',
+    period: 'Period', class: 'Class', subject: 'Subject', teacher: 'Teacher', free: 'Free', lunch: 'Lunch break',
+    absentToday: 'Absent today', toCover: 'Periods to cover', unfilled: 'Not covered', pendingLeave: 'Leave to decide',
+    openRequests: 'Open requests', applyLeave: 'Apply for leave', raiseDpp: 'Raise DPP request', raiseWs: 'Raise worksheet request',
+    newRequest: 'New request', status: 'Status', description: 'Description', save: 'Save', cancel: 'Cancel', close: 'Close',
+    seen: 'Seen', markSeen: 'Mark as seen', substitution: 'Substitution', forTeacher: 'for', noClasses: 'No school today (Sunday)',
+    onLeave: 'You are on leave', date: 'Date', from: 'From', to: 'To', type: 'Type', duration: 'Duration',
+    fullDay: 'Full day', firstHalf: 'First half (P1–4)', secondHalf: 'Second half (P5–8)', specific: 'Specific periods',
+    pending: 'Pending', approved: 'Approved', rejected: 'Rejected', requested: 'Requested', in_progress: 'In progress',
+    ready: 'Ready', delivered: 'Delivered', draft: 'Draft', published: 'Published', notifications: 'Notifications',
+    language: 'भाषा: हिंदी', copySheet: 'Copy sheet', print: 'Print', ask: 'Ask', aiDraft: 'Draft with AI',
+    worksheet: 'Worksheet', dpp: 'DPP', all: 'All', myRequests: 'My requests', remark: 'Remark',
+  },
+  hi: {
+    dashboard: 'डैशबोर्ड', myDay: 'मेरा दिन', substitutions: 'अरेंजमेंट (प्रॉक्सी)', leave: 'छुट्टी', timetable: 'समय-सारणी',
+    requests: 'DPP और वर्कशीट', staff: 'स्टाफ़', reports: 'रिपोर्ट', assistant: 'AI सहायक', notices: 'सूचनाएँ',
+    audit: 'बदलाव रिकॉर्ड', settings: 'सेटिंग्स', logout: 'लॉग आउट', today: 'आज', markAbsent: 'अनुपस्थित दर्ज करें',
+    publish: 'प्रकाशित करें', regenerate: 'फिर से योजना', approve: 'स्वीकृत करें', reject: 'अस्वीकार करें', apply: 'आवेदन करें',
+    loginTitle: 'स्टाफ़ लॉगिन', mobile: 'मोबाइल नंबर', sendOtp: 'OTP भेजें', otp: 'OTP डालें', verify: 'सत्यापित करें',
+    period: 'पीरियड', class: 'कक्षा', subject: 'विषय', teacher: 'शिक्षक', free: 'खाली', lunch: 'भोजनावकाश',
+    absentToday: 'आज अनुपस्थित', toCover: 'भरने वाले पीरियड', unfilled: 'खाली रह गए', pendingLeave: 'लंबित छुट्टी',
+    openRequests: 'खुले अनुरोध', applyLeave: 'छुट्टी के लिए आवेदन', raiseDpp: 'DPP अनुरोध', raiseWs: 'वर्कशीट अनुरोध',
+    newRequest: 'नया अनुरोध', status: 'स्थिति', description: 'विवरण', save: 'सहेजें', cancel: 'रद्द करें', close: 'बंद करें',
+    seen: 'देख लिया', markSeen: 'देख लिया ✓', substitution: 'अरेंजमेंट', forTeacher: 'की जगह', noClasses: 'आज स्कूल बंद (रविवार)',
+    onLeave: 'आप छुट्टी पर हैं', date: 'तारीख़', from: 'से', to: 'तक', type: 'प्रकार', duration: 'अवधि',
+    fullDay: 'पूरा दिन', firstHalf: 'पहली पाली (P1–4)', secondHalf: 'दूसरी पाली (P5–8)', specific: 'चुने हुए पीरियड',
+    pending: 'लंबित', approved: 'स्वीकृत', rejected: 'अस्वीकृत', requested: 'अनुरोधित', in_progress: 'काम जारी',
+    ready: 'तैयार', delivered: 'पहुँचा दिया', draft: 'ड्राफ़्ट', published: 'प्रकाशित', notifications: 'सूचनाएँ',
+    language: 'Language: English', copySheet: 'शीट कॉपी करें', print: 'प्रिंट', ask: 'पूछें', aiDraft: 'AI से ड्राफ़्ट',
+    worksheet: 'वर्कशीट', dpp: 'DPP', all: 'सभी', myRequests: 'मेरे अनुरोध', remark: 'टिप्पणी',
+  },
+};
+
+/* ===== State, storage and the substitution engine ===== */
+let S = null; // whole app state
+
+/* ---------- small helpers ---------- */
+const uid = (p = 'id') => p + '_' + Math.random().toString(36).slice(2, 9) + Date.now().toString(36).slice(-3);
+const pad = n => String(n).padStart(2, '0');
+const toISO = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const todayISO = () => toISO(new Date());
+const parseISO = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+const addDays = (iso, n) => { const d = parseISO(iso); d.setDate(d.getDate() + n); return toISO(d); };
+/* 0 = Monday … 5 = Saturday, -1 = Sunday */
+const dayIdx = iso => { const g = parseISO(iso).getDay(); return g === 0 ? -1 : g - 1; };
+const weekStart = iso => { const d = parseISO(iso); const g = d.getDay(); const back = g === 0 ? 6 : g - 1; d.setDate(d.getDate() - back); return toISO(d); };
+const nowStamp = () => new Date().toISOString();
+const fmtDate = iso => {
+  if (!iso) return '';
+  const d = parseISO(iso);
+  return d.toLocaleDateString(S && S.lang === 'hi' ? 'hi-IN' : 'en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
+};
+const fmtTime = ts => new Date(ts).toLocaleString(S && S.lang === 'hi' ? 'hi-IN' : 'en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+
+/* ---------- storage ----------
+   Data lives in the shared Supabase database (see sync.js). */
+function saveState() { queueFlush(); }
+
+/* ---------- lookups ---------- */
+const staffById = id => S.staff.find(s => s.id === id);
+const nameOf = id => (staffById(id) || { name: id === 'system' ? 'System' : '—' }).name;
+const teachers = () => S.staff.filter(s => s.role === 'teacher' && s.active);
+const subjName = code => (SUBJECTS[code] ? SUBJECTS[code][S.lang] || SUBJECTS[code].en : code);
+const isManager = u => u && (u.role === 'admin' || u.role === 'coordinator');
+
+function lessonAt(cls, d, p) { return (S.tt[cls] && S.tt[cls][d] && S.tt[cls][d][p - 1]) || null; }
+function teacherLessonAt(tid, d, p) {
+  for (const c of CLASSES) { const l = lessonAt(c, d, p); if (l && l.t === tid) return { cls: c, ...l }; }
+  return null;
+}
+function periodsOnDay(tid, d) { let n = 0; for (let p = 1; p <= PERIODS.length; p++) if (teacherLessonAt(tid, d, p)) n++; return n; }
+function weeklyLoad(tid) { let n = 0; for (let d = 0; d < DAYS.length; d++) n += periodsOnDay(tid, d); return n; }
+function teachesClass(tid, cls) { return !!(S.tt[cls] && S.tt[cls].some(day => day.some(l => l && l.t === tid))); }
+
+/* ---------- absences ---------- */
+function scopePeriods(scope, periods) {
+  if (scope === 'first') return [1, 2, 3, 4];
+  if (scope === 'second') return [5, 6, 7, 8];
+  if (scope === 'periods') return (periods || []).map(Number);
+  return PERIODS.map(p => p.n);
+}
+const absencesOn = date => S.absences.filter(a => a.date === date);
+function isAbsent(tid, date, p) { return S.absences.some(a => a.teacherId === tid && a.date === date && scopePeriods(a.scope, a.periods).includes(p)); }
+function absenceLabel(a) {
+  if (a.scope === 'full') return t('fullDay');
+  if (a.scope === 'first') return t('firstHalf');
+  if (a.scope === 'second') return t('secondHalf');
+  return 'P' + scopePeriods(a.scope, a.periods).join(', P');
+}
+
+/* ---------- the substitution engine ---------- */
+/* Every period an absent teacher leaves empty */
+function computeGaps(date) {
+  const d = dayIdx(date);
+  if (d < 0) return [];
+  const gaps = [];
+  for (const a of absencesOn(date)) {
+    for (const p of scopePeriods(a.scope, a.periods)) {
+      const l = teacherLessonAt(a.teacherId, d, p);
+      if (l) gaps.push({ key: `${l.cls}|${p}`, cls: l.cls, p, subject: l.s, absentId: a.teacherId });
+    }
+  }
+  // de-duplicate (same teacher marked twice)
+  const seen = new Set();
+  return gaps.filter(g => (seen.has(g.key) ? false : seen.add(g.key))).sort((a, b) => a.p - b.p || CLASSES.indexOf(a.cls) - CLASSES.indexOf(b.cls));
+}
+
+/* Substitutions a teacher already has in the same week, before this date */
+function weekSubsBefore(tid, date) {
+  const ws = weekStart(date);
+  let n = 0;
+  for (const [dt, plan] of Object.entries(S.plans)) {
+    if (dt >= ws && dt < date) n += Object.values(plan.items).filter(i => i.teacherId === tid).length;
+  }
+  return n;
+}
+
+/* Rank every possible substitute for one gap.
+   others = substitutions already placed today (excluding this gap). */
+function rankCandidates(date, gap, others) {
+  const d = dayIdx(date);
+  const w = S.settings;
+  const out = [];
+  for (const tch of teachers()) {
+    if (isAbsent(tch.id, date, gap.p)) continue;
+    if (teacherLessonAt(tch.id, d, gap.p)) continue;
+    if (others.some(o => o.teacherId === tch.id && o.p === gap.p)) continue;
+    const subsToday = others.filter(o => o.teacherId === tch.id).length;
+    if (subsToday >= w.dailyCap) continue;
+    let score = 0;
+    const why = [];
+    if (tch.subjects.includes(gap.subject)) { score += w.subject; why.push({ en: `teaches ${SUBJECTS[gap.subject].en}`, hi: `${SUBJECTS[gap.subject].hi} पढ़ाते हैं`, pts: +w.subject }); }
+    if (teachesClass(tch.id, gap.cls)) { score += w.classKnown; why.push({ en: `already teaches ${gap.cls}`, hi: `${gap.cls} को पहले से पढ़ाते हैं`, pts: +w.classKnown }); }
+    if (S.classTeachers[gap.cls] === tch.id) { score += w.classTeacher; why.push({ en: `class teacher of ${gap.cls}`, hi: `${gap.cls} के कक्षा-शिक्षक`, pts: +w.classTeacher }); }
+    const load = periodsOnDay(tch.id, d) + subsToday;
+    score -= w.periodLoad * load;
+    why.push({ en: `${load} periods today`, hi: `आज ${load} पीरियड`, pts: -w.periodLoad * load });
+    const wk = weekSubsBefore(tch.id, date) + subsToday;
+    if (wk) { score -= w.weekSubs * wk; why.push({ en: `${wk} substitution${wk > 1 ? 's' : ''} this week`, hi: `इस सप्ताह ${wk} अरेंजमेंट`, pts: -w.weekSubs * wk }); }
+    const busy = p => p >= 1 && p <= PERIODS.length && (!!teacherLessonAt(tch.id, d, p) || others.some(o => o.teacherId === tch.id && o.p === p));
+    const p = gap.p;
+    // lunch breaks the run between P4 and P5
+    const run = (a, b) => busy(a) && busy(b) && !((a <= 4 && b >= 5) || (a <= 4 && p >= 5) || (p <= 4 && b >= 5));
+    if (run(p - 2, p - 1) || run(p - 1, p + 1) || run(p + 1, p + 2)) {
+      score -= w.consecutive; why.push({ en: 'would make 3 periods in a row', hi: 'लगातार 3 पीरियड हो जाएँगे', pts: -w.consecutive });
+    }
+    out.push({ id: tch.id, score, why });
+  }
+  out.sort((a, b) => b.score - a.score || nameOf(a.id).localeCompare(nameOf(b.id)));
+  return out;
+}
+
+/* Build (or refresh) the substitution plan for a date.
+   Manual choices that are still valid are kept. */
+function generatePlan(date, by) {
+  const gaps = computeGaps(date);
+  const old = S.plans[date];
+  if (!gaps.length) {
+    if (old) { delete S.plans[date]; }
+    return null;
+  }
+  const items = {};
+  const placed = [];
+  for (const g of gaps) {
+    const prev = old && old.items[g.key];
+    const ranked = rankCandidates(date, g, placed);
+    let choice = null;
+    if (prev && prev.manual && prev.teacherId && ranked.find(r => r.id === prev.teacherId)) choice = ranked.find(r => r.id === prev.teacherId);
+    else if (prev && prev.teacherId && old.status === 'published' && ranked.find(r => r.id === prev.teacherId)) choice = ranked.find(r => r.id === prev.teacherId);
+    else choice = ranked[0] || null;
+    const item = {
+      key: g.key, cls: g.cls, p: g.p, subject: g.subject, absentId: g.absentId,
+      teacherId: choice ? choice.id : null, score: choice ? choice.score : null, why: choice ? choice.why : [],
+      manual: !!(prev && prev.manual && choice && prev.teacherId === choice.id),
+      alternatives: ranked.filter(r => !choice || r.id !== choice.id).slice(0, 2).map(r => ({ id: r.id, score: r.score })),
+    };
+    items[g.key] = item;
+    if (item.teacherId) placed.push({ teacherId: item.teacherId, p: g.p });
+  }
+  const changed = !old || JSON.stringify(Object.values(old.items).map(i => [i.key, i.teacherId])) !== JSON.stringify(Object.values(items).map(i => [i.key, i.teacherId]));
+  const status = old && old.status === 'published' && !changed ? 'published' : 'draft';
+  S.plans[date] = {
+    date, items, status,
+    changedAfterPublish: !!(old && old.status === 'published' && changed) || !!(old && old.changedAfterPublish && status === 'draft'),
+    updatedAt: nowStamp(), updatedBy: by || 'system', publishedAt: old ? old.publishedAt : null,
+  };
+  return S.plans[date];
+}
+
+/* Admin overrides one slot */
+function setSubstitute(date, key, tid, by) {
+  const plan = S.plans[date];
+  if (!plan) return;
+  const item = plan.items[key];
+  const others = Object.values(plan.items).filter(i => i.key !== key && i.teacherId).map(i => ({ teacherId: i.teacherId, p: i.p }));
+  const ranked = rankCandidates(date, item, others);
+  const r = ranked.find(x => x.id === tid);
+  item.teacherId = tid || null;
+  item.score = r ? r.score : null;
+  item.why = r ? r.why : [];
+  item.manual = true;
+  item.alternatives = ranked.filter(x => x.id !== tid).slice(0, 2).map(x => ({ id: x.id, score: x.score }));
+  if (plan.status === 'published') { plan.status = 'draft'; plan.changedAfterPublish = true; }
+  plan.updatedAt = nowStamp(); plan.updatedBy = by;
+  logAudit(by, `Changed ${item.cls} P${item.p} on ${date} to ${tid ? nameOf(tid) : 'not covered'}`);
+}
+
+function publishPlan(date, by) {
+  const plan = S.plans[date];
+  if (!plan) return;
+  plan.status = 'published';
+  plan.changedAfterPublish = false;
+  plan.publishedAt = nowStamp();
+  const perTeacher = {};
+  Object.values(plan.items).forEach(i => { if (i.teacherId) (perTeacher[i.teacherId] = perTeacher[i.teacherId] || []).push(i); });
+  Object.entries(perTeacher).forEach(([tid, list]) => {
+    const txt = list.map(i => `P${i.p} ${i.cls} ${SUBJECTS[i.subject].en}`).join(', ');
+    notify(tid, `Arrangement on ${fmtDate(date)}: ${txt}`, { en: `Arrangement on ${fmtDate(date)}: ${txt}`, hi: `${fmtDate(date)} को अरेंजमेंट: ${txt}` });
+  });
+  logAudit(by, `Published substitution plan for ${date} (${Object.keys(plan.items).length} periods)`);
+}
+
+/* ---------- leave ---------- */
+function eachSchoolDay(from, to, fn) { let d = from; let guard = 0; while (d <= to && guard++ < 60) { if (dayIdx(d) >= 0) fn(d); d = addDays(d, 1); } }
+
+function decideLeave(id, approve, remark, by) {
+  const lv = S.leaves.find(l => l.id === id);
+  if (!lv) return;
+  lv.status = approve ? 'approved' : 'rejected';
+  lv.remark = remark || '';
+  lv.decidedBy = by; lv.decidedAt = nowStamp();
+  if (approve) {
+    eachSchoolDay(lv.from, lv.to, d => {
+      S.absences.push({ id: uid('ab'), teacherId: lv.teacherId, date: d, scope: lv.scope, periods: lv.periods, note: `${lv.type} leave`, source: 'leave', leaveId: lv.id, createdAt: nowStamp() });
+      if (d >= todayISO()) generatePlan(d, by);
+    });
+  }
+  notify(lv.teacherId, '', {
+    en: `Your leave (${fmtDate(lv.from)}${lv.to !== lv.from ? ' – ' + fmtDate(lv.to) : ''}) was ${approve ? 'approved' : 'rejected'}${remark ? ': ' + remark : ''}`,
+    hi: `आपकी छुट्टी (${fmtDate(lv.from)}${lv.to !== lv.from ? ' – ' + fmtDate(lv.to) : ''}) ${approve ? 'स्वीकृत' : 'अस्वीकृत'} हुई${remark ? ': ' + remark : ''}`,
+  });
+  logAudit(by, `${approve ? 'Approved' : 'Rejected'} leave of ${nameOf(lv.teacherId)} (${lv.from} to ${lv.to})`);
+}
+
+function addAbsence(tid, date, scope, periods, note, by) {
+  S.absences.push({ id: uid('ab'), teacherId: tid, date, scope, periods, note, source: 'admin', createdAt: nowStamp() });
+  generatePlan(date, by);
+  logAudit(by, `Marked ${nameOf(tid)} absent on ${date} (${scope})`);
+}
+function removeAbsence(id, by) {
+  const a = S.absences.find(x => x.id === id);
+  if (!a) return;
+  S.absences = S.absences.filter(x => x.id !== id);
+  generatePlan(a.date, by);
+  logAudit(by, `Removed absence of ${nameOf(a.teacherId)} on ${a.date}`);
+}
+
+/* ---------- notifications & audit ---------- */
+function notify(userId, text, both) {
+  S.notifications.unshift({ id: uid('nf'), userId, en: (both && both.en) || text, hi: (both && both.hi) || text, at: nowStamp(), read: false });
+  if (S.notifications.length > 300) S.notifications.length = 300;
+}
+function notifyManagers(both) { S.staff.filter(s => isManager(s) && s.active).forEach(s => notify(s.id, '', both)); }
+function logAudit(by, text) {
+  S.audit.unshift({ id: uid('au'), at: nowStamp(), by, text });
+  if (S.audit.length > 500) S.audit.length = 500;
+}
+
+/* ---------- reports ---------- */
+function monthSubs(tid, ym) {
+  let n = 0;
+  for (const [dt, plan] of Object.entries(S.plans)) if (dt.startsWith(ym) && plan.status === 'published') n += Object.values(plan.items).filter(i => i.teacherId === tid).length;
+  return n;
+}
+function monthLeaveDays(tid, ym) { return new Set(S.absences.filter(a => a.teacherId === tid && a.date.startsWith(ym)).map(a => a.date)).size; }
+
+/* free teachers in a given day/period (used by the assistant) */
+function freeTeachers(d, p, date) {
+  return teachers().filter(tc => !teacherLessonAt(tc.id, d, p) && !(date && isAbsent(tc.id, date, p))).map(tc => tc.name);
+}
+
+/* "Seen" ticks are stored per teacher so teachers never edit the plan itself */
+const ackId = (date, key, tid) => `${date}|${key}|${tid}`;
+const isAcked = (date, key, tid) => !!(tid && S.acks[ackId(date, key, tid)]);
+
+/* ===== Live data: Supabase login, loading, saving and live updates ===== */
+const TABLES = ['staff', 'timetable', 'settings', 'absences', 'leaves', 'plans', 'requests', 'notices', 'notifications', 'audit', 'acks'];
+const TEACHER_WRITABLE = new Set(['leaves', 'requests', 'notifications', 'audit', 'acks']);
+const NO_DELETE = new Set(['notifications', 'audit']);
+let SB = null;                 // Supabase client
+const LAST = {};               // what the server has: table -> Map(id -> JSON text)
+let flushChain = Promise.resolve();
+let renderPending = false, renderTimer = null;
+const NET = { online: true, live: false, saving: false, error: '' };
+
+function emptyState() {
+  let lang = 'en';
+  try { lang = localStorage.getItem('mts-lang') || 'en'; } catch (e) { }
+  return {
+    lang, session: null, staff: [], tt: {}, classTeachers: {}, absences: [], leaves: [], plans: {}, requests: [],
+    notices: [], notifications: [], audit: [], acks: {},
+    settings: { subject: 30, classKnown: 20, classTeacher: 10, periodLoad: 5, weekSubs: 8, consecutive: 15, dailyCap: 2 },
+  };
+}
+function saveLang() { try { localStorage.setItem('mts-lang', S.lang); } catch (e) { } }
+
+/* ---------- local state <-> table rows ---------- */
+function tableToMap(t) {
+  switch (t) {
+    case 'staff': return new Map(S.staff.map(x => [x.id, x]));
+    case 'timetable': return new Map(Object.entries(S.tt));
+    case 'settings': return new Map([['main', { weights: S.settings, classTeachers: S.classTeachers }]]);
+    case 'plans': return new Map(Object.entries(S.plans));
+    case 'acks': return new Map(Object.entries(S.acks));
+    default: return new Map(S[t].map(x => [x.id, x]));
+  }
+}
+function applyRow(t, id, data) {
+  const del = data == null;
+  switch (t) {
+    case 'staff': { const i = S.staff.findIndex(x => x.id === id); if (del) { if (i >= 0) S.staff.splice(i, 1); } else if (i >= 0) S.staff[i] = data; else S.staff.push(data); sortStaff(); break; }
+    case 'timetable': if (del) delete S.tt[id]; else S.tt[id] = data; syncClasses(); break;
+    case 'settings': if (!del && id === 'main') { S.settings = { ...S.settings, ...(data.weights || {}) }; S.classTeachers = data.classTeachers || {}; } break;
+    case 'plans': if (del) delete S.plans[id]; else S.plans[id] = data; break;
+    case 'acks': if (del) delete S.acks[id]; else S.acks[id] = data; break;
+    default: {
+      const arr = S[t]; const i = arr.findIndex(x => x.id === id);
+      if (del) { if (i >= 0) arr.splice(i, 1); } else if (i >= 0) arr[i] = data; else arr.unshift(data);
+    }
+  }
+}
+function sortStaff() {
+  const rank = { admin: 0, coordinator: 1, teacher: 2 };
+  S.staff.sort((a, b) => (rank[a.role] ?? 3) - (rank[b.role] ?? 3) || a.name.localeCompare(b.name));
+}
+function syncClasses() {
+  const keys = Object.keys(S.tt).sort((a, b) => parseInt(a) - parseInt(b) || a.localeCompare(b));
+  if (keys.length) { CLASSES.length = 0; keys.forEach(k => CLASSES.push(k)); }
+}
+
+/* ---------- load everything this person may see ---------- */
+async function loadAll() {
+  const results = await Promise.all(TABLES.map(t => {
+    let q = SB.from(t).select('id,data');
+    if (t === 'notifications') q = q.order('updated_at', { ascending: false }).limit(200);
+    else if (t === 'audit') q = q.order('updated_at', { ascending: false }).limit(300);
+    else q = q.limit(5000);
+    return q;
+  }));
+  const fresh = emptyState();
+  fresh.lang = S.lang; fresh.session = S.session;
+  S = fresh;
+  results.forEach((res, k) => {
+    const t = TABLES[k];
+    if (res.error) throw res.error;
+    LAST[t] = new Map();
+    res.data.forEach(r => { LAST[t].set(r.id, JSON.stringify(r.data)); });
+    // newest first for lists that come ordered
+    const rows = (t === 'notifications' || t === 'audit') ? res.data.slice().reverse() : res.data;
+    rows.forEach(r => applyRow(t, r.id, r.data));
+  });
+  sortStaff(); syncClasses();
+}
+
+async function reloadTable(t) {
+  const { data, error } = await SB.from(t).select('id,data').limit(5000);
+  if (error) return;
+  const keep = t === 'notifications' || t === 'audit';
+  if (!keep) {
+    if (t === 'staff') S.staff = []; else if (t === 'timetable') S.tt = {}; else if (t === 'plans') S.plans = {}; else if (t === 'acks') S.acks = {}; else if (t !== 'settings') S[t] = [];
+  }
+  LAST[t] = new Map();
+  data.forEach(r => { LAST[t].set(r.id, JSON.stringify(r.data)); applyRow(t, r.id, r.data); });
+}
+
+/* ---------- save local changes ---------- */
+function queueFlush() { flushChain = flushChain.then(flushNow, flushNow); return flushChain; }
+async function flushNow() {
+  const u = me();
+  if (!u || !SB) return;
+  const mgr = isManager(u);
+  NET.saving = true; updateNetBadge();
+  let failed = '';
+  for (const t of TABLES) {
+    if (!mgr && !TEACHER_WRITABLE.has(t)) continue;
+    const cur = tableToMap(t), last = LAST[t] || (LAST[t] = new Map());
+    const inserts = [], updates = [], dels = [];
+    for (const [id, data] of cur) {
+      const js = JSON.stringify(data);
+      if (!last.has(id)) inserts.push({ id, data, js });
+      else if (last.get(id) !== js) updates.push({ id, data, js });
+    }
+    if (!NO_DELETE.has(t)) for (const id of last.keys()) if (!cur.has(id)) dels.push(id);
+    try {
+      if (inserts.length) {
+        const { error } = await SB.from(t).insert(inserts.map(r => ({ id: r.id, data: r.data })));
+        if (error) throw error;
+        inserts.forEach(r => last.set(r.id, r.js));
+      }
+      for (const r of updates) {
+        const { data, error } = await SB.from(t).update({ data: r.data }).eq('id', r.id).select('id');
+        if (error) throw error;
+        if (!data || !data.length) throw { code: '42501', message: 'not allowed' };
+        last.set(r.id, r.js);
+      }
+      if (dels.length) {
+        const { error } = await SB.from(t).delete().in('id', dels);
+        if (error) throw error;
+        dels.forEach(id => last.delete(id));
+      }
+    } catch (e) {
+      const denied = e && (e.code === '42501' || /row-level security|not allowed|permission/i.test(e.message || ''));
+      if (denied) { await reloadTable(t); failed = 'denied'; }
+      else failed = failed || 'network';
+    }
+  }
+  NET.saving = false;
+  NET.error = failed;
+  updateNetBadge();
+  if (failed === 'denied') { toast(L('That change is not allowed for your role — it was undone.', 'आपकी भूमिका में यह बदलाव अनुमत नहीं — वापस कर दिया गया।')); render(); }
+  else if (failed === 'network') toast(L('Could not save — check internet. Will retry automatically.', 'सहेज नहीं सका — इंटरनेट जाँचें। अपने-आप फिर कोशिश होगी।'));
+}
+setInterval(() => { if (NET.error === 'network' && me()) queueFlush(); }, 20000);
+window.addEventListener('online', () => { if (me()) queueFlush(); });
+
+/* ---------- live updates from other phones ---------- */
+let channel = null;
+function subscribeLive() {
+  if (channel) SB.removeChannel(channel);
+  channel = SB.channel('mts-live')
+    .on('postgres_changes', { event: '*', schema: 'public' }, payload => {
+      const t = payload.table;
+      if (!TABLES.includes(t)) return;
+      const last = LAST[t] || (LAST[t] = new Map());
+      if (payload.eventType === 'DELETE') {
+        const id = payload.old && payload.old.id; if (!id) return;
+        last.delete(id); applyRow(t, id, null);
+      } else {
+        const row = payload.new; if (!row || !row.id) return;
+        const js = JSON.stringify(row.data);
+        if (last.get(row.id) === js) return; // our own change coming back
+        last.set(row.id, js); applyRow(t, row.id, row.data);
+      }
+      scheduleRender();
+    })
+    .subscribe(status => { NET.live = status === 'SUBSCRIBED'; updateNetBadge(); });
+}
+
+/* re-draw after live changes, but never while someone is typing or in a dialog */
+function scheduleRender() {
+  clearTimeout(renderTimer);
+  renderTimer = setTimeout(() => {
+    const a = document.activeElement;
+    const typing = a && /INPUT|TEXTAREA|SELECT/.test(a.tagName);
+    if (document.getElementById('modal-root').innerHTML || typing) { renderPending = true; setTimeout(scheduleRender, 1500); return; }
+    renderPending = false; render();
+  }, 200);
+}
+
+function updateNetBadge() {
+  const el = document.getElementById('net');
+  if (!el) return;
+  el.className = 'net ' + (NET.error ? 'bad' : NET.saving ? 'busy' : NET.live ? 'ok' : 'busy');
+  el.textContent = NET.error ? L('Not saved — offline', 'सहेजा नहीं — ऑफ़लाइन') : NET.saving ? L('Saving…', 'सहेज रहा है…') : NET.live ? L('Live · all changes saved', 'लाइव · सब सहेजा गया') : L('Connecting…', 'जुड़ रहा है…');
+}
+
+/* ---------- login ---------- */
+async function ensureBrowserSession() {
+  const { data: { session } } = await SB.auth.getSession();
+  if (session) return true;
+  const { error } = await SB.auth.signInAnonymously();
+  return !error;
+}
+const LOGIN_ERRORS = {
+  unregistered: ['This number is not registered. Please contact the school office.', 'यह नंबर पंजीकृत नहीं है। कृपया स्कूल ऑफ़िस से संपर्क करें।'],
+  inactive: ['This account is deactivated. Please contact the school office.', 'यह अकाउंट निष्क्रिय है। कृपया स्कूल ऑफ़िस से संपर्क करें।'],
+  locked: ['Too many wrong tries. Please wait 15 minutes or ask the office to reset your PIN.', 'बहुत बार गलत प्रयास। 15 मिनट रुकें या ऑफ़िस से PIN रीसेट करवाएँ।'],
+  bad_pin: ['Wrong PIN. Try again.', 'गलत PIN। फिर कोशिश करें।'],
+  bad_code: ['Wrong activation code. Check with the school office.', 'गलत एक्टिवेशन कोड। स्कूल ऑफ़िस से पूछें।'],
+  bad_pin_format: ['PIN must be exactly 6 digits.', 'PIN ठीक 6 अंकों का होना चाहिए।'],
+  already_active: ['This number is already activated. Log in with your PIN.', 'यह नंबर पहले से सक्रिय है। अपने PIN से लॉगिन करें।'],
+  needs_activation: ['Please activate first with the code from the office.', 'पहले ऑफ़िस से मिले कोड से सक्रिय करें।'],
+  not_signed_in: ['Could not connect. Check internet and try again.', 'कनेक्ट नहीं हो सका। इंटरनेट जाँचकर फिर कोशिश करें।'],
+  network: ['Could not connect. Check internet and try again.', 'कनेक्ट नहीं हो सका। इंटरनेट जाँचकर फिर कोशिश करें।'],
+};
+const loginErr = k => { const m = LOGIN_ERRORS[k] || LOGIN_ERRORS.network; return L(m[0], m[1]); };
+
+async function enterApp(staffId) {
+  S.session = { userId: staffId };
+  showLoading(L('Loading school data…', 'स्कूल डेटा लोड हो रहा है…'));
+  try { await loadAll(); }
+  catch (e) { showFatal(L('Could not load data. Check internet and refresh the page.', 'डेटा लोड नहीं हुआ। इंटरनेट जाँचकर पेज रीफ़्रेश करें।')); return; }
+  if (!me()) { S.session = null; UI.loginStep = 'phone'; render(); return; }
+  UI.view = null; UI.date = todayISO();
+  subscribeLive();
+  render();
+}
+
+async function doLogout() {
+  try { await SB.rpc('logout'); } catch (e) { }
+  if (channel) { SB.removeChannel(channel); channel = null; }
+  const lang = S.lang;
+  S = emptyState(); S.lang = lang;
+  UI.loginStep = 'phone'; UI.loginPhone = ''; UI.loginError = ''; UI.chat = []; UI.view = null;
+  render();
+}
+
+function showLoading(msg) {
+  document.getElementById('app').innerHTML = `<div class="login-wrap"><div class="login-card"><img class="login-logo" src="${LOGO_SRC}" alt="MTS logo"><h1>${SCHOOL.name}</h1><p class="muted">${esc(msg)}</p><div class="spinner"></div></div></div>`;
+}
+function showFatal(msg) {
+  document.getElementById('app').innerHTML = `<div class="login-wrap"><div class="login-card"><img class="login-logo" src="${LOGO_SRC}" alt="MTS logo"><h1>${SCHOOL.name}</h1><div class="error">${esc(msg)}</div><button class="btn primary block" onclick="location.reload()">${L('Try again', 'फिर कोशिश करें')}</button></div></div>`;
+}
+
+async function boot() {
+  S = emptyState();
+  UI.date = todayISO();
+  UI.loginStep = 'phone';
+  const h = (location.hash || '').replace('#', '');
+  showLoading(L('Connecting…', 'जुड़ रहा है…'));
+  if (!window.supabase || !APP_CONFIG.url) { showFatal('App is not configured yet.'); return; }
+  SB = window.supabase.createClient(APP_CONFIG.url, APP_CONFIG.key, { auth: { persistSession: true, autoRefreshToken: true, storageKey: 'mts-auth' } });
+  const timer = setTimeout(() => showFatal(L('Could not connect. Check internet and refresh the page.', 'कनेक्ट नहीं हो सका। इंटरनेट जाँचकर पेज रीफ़्रेश करें।')), 20000);
+  try {
+    if (!(await ensureBrowserSession())) throw new Error('auth');
+    const { data: sid, error } = await SB.rpc('my_staff_id');
+    clearTimeout(timer);
+    if (error) throw error;
+    if (sid) { await enterApp(sid); if (h) { UI.view = h; render(); } }
+    else render();
+  } catch (e) {
+    clearTimeout(timer);
+    showFatal(L('Could not connect. Check internet and refresh the page.', 'कनेक्ट नहीं हो सका। इंटरनेट जाँचकर पेज रीफ़्रेश करें।'));
+  }
+}
+
+/* ===== Screens and interaction ===== */
+const UI = {
+  view: null, date: null, menuOpen: false,
+  ttMode: 'class', ttClass: '6A', ttTeacher: 't1',
+  reqTab: 'all', leaveTab: 'pending', reportMonth: null,
+  loginStep: 1, loginPhone: '', loginError: '',
+  chat: [], chatBusy: false, loginBusy: false, codes: null,
+};
+let SAMPLE = null; // Claude AI (only in the hosted version)
+
+const t = k => (I18N[S.lang] && I18N[S.lang][k]) || I18N.en[k] || k;
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const me = () => S.session && staffById(S.session.userId);
+const L = (en, hi) => (S.lang === 'hi' ? hi : en);
+const dayName = d => (S.lang === 'hi' ? DAYS_HI[d] : DAYS_LONG[d]);
+const statusChip = st => `<span class="chip st-${esc(st)}">${esc(t(st))}</span>`;
+const avatar = name => `<span class="avatar">${esc(name.split(' ').map(w => w[0]).slice(0, 2).join(''))}</span>`;
+
+function teacherOptions(selected, { includeEmpty = false, emptyLabel = '—' } = {}) {
+  return (includeEmpty ? `<option value="">${esc(emptyLabel)}</option>` : '') +
+    teachers().map(x => `<option value="${x.id}" ${x.id === selected ? 'selected' : ''}>${esc(x.name)}</option>`).join('');
+}
+function classOptions(selected) { return CLASSES.map(c => `<option ${c === selected ? 'selected' : ''}>${c}</option>`).join(''); }
+function subjectOptions(selected) { return Object.keys(SUBJECTS).map(s => `<option value="${s}" ${s === selected ? 'selected' : ''}>${esc(subjName(s))}</option>`).join(''); }
+function periodTime(p) { const x = PERIODS[p - 1]; return `${x.start}–${x.end}`; }
+
+/* ---------- modal & toast ---------- */
+function openModal(title, body, { wide = false } = {}) {
+  const root = document.getElementById('modal-root');
+  root.innerHTML = `<div class="modal-back" data-act="closeModalBack"><div class="modal ${wide ? 'wide' : ''}" role="dialog" aria-modal="true" aria-label="${esc(title)}">
+    <div class="modal-head"><h3>${esc(title)}</h3><button class="icon-btn" data-act="closeModal" aria-label="${esc(t('close'))}">✕</button></div>
+    <div class="modal-body">${body}</div></div></div>`;
+  const first = root.querySelector('input,select,textarea');
+  if (first) setTimeout(() => first.focus(), 30);
+}
+function closeModal() { document.getElementById('modal-root').innerHTML = ''; if (renderPending) { renderPending = false; render(); } }
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => el.classList.remove('show'), 2600);
+}
+function confirmBox(text, onYes, yesLabel) {
+  openModal(L('Please confirm', 'कृपया पुष्टि करें'), `<p>${esc(text)}</p><div class="row-end"><button class="btn" data-act="closeModal">${t('cancel')}</button><button class="btn danger" data-act="confirmYes">${esc(yesLabel || 'OK')}</button></div>`);
+  confirmBox._fn = onYes;
+}
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); toast(L('Copied', 'कॉपी हो गया')); }
+  catch (e) { openModal(L('Copy this text', 'यह टेक्स्ट कॉपी करें'), `<textarea class="copybox" rows="12" readonly>${esc(text)}</textarea>`, { wide: true }); }
+}
+
+/* ---------- navigation ---------- */
+function navItems(u) {
+  if (isManager(u)) return [
+    ['dashboard', '🏠'], ['subs', '🔁'], ['leave', '📝'], ['timetable', '📅'], ['requests', '📄'],
+    ['staff', '👥'], ['reports', '📊'], ['assistant', '✨'], ['notices', '📢'], ['audit', '🧾'], ['settings', '⚙️'],
+  ];
+  return [['myday', '🏠'], ['timetable', '📅'], ['leave', '📝'], ['requests', '📄'], ['notices', '📢']];
+}
+const VIEW_LABEL = { dashboard: 'dashboard', subs: 'substitutions', leave: 'leave', timetable: 'timetable', requests: 'requests', staff: 'staff', reports: 'reports', assistant: 'assistant', notices: 'notices', audit: 'audit', settings: 'settings', myday: 'myDay' };
+
+function go(view) { UI.view = view; UI.menuOpen = false; if (view === 'staff') UI.codes = null; try { history.replaceState(null, '', '#' + view); } catch (e) { } render(); window.scrollTo(0, 0); }
+
+/* ---------- render ---------- */
+function render() {
+  const app = document.getElementById('app');
+  document.documentElement.lang = S.lang === 'hi' ? 'hi' : 'en';
+  const u = me();
+  if (!u) { app.innerHTML = viewLogin(); return; }
+  const items = navItems(u);
+  if (!UI.view || !items.find(i => i[0] === UI.view)) UI.view = items[0][0];
+  const unread = S.notifications.filter(n => n.userId === u.id && !n.read).length;
+  app.innerHTML = `
+  <header class="topbar">
+    <button class="icon-btn menu-btn" data-act="toggleMenu" aria-label="Menu">☰</button>
+    <img class="logo" src="${LOGO_SRC}" alt="MTS logo">
+    <div class="brand"><strong>${SCHOOL.name}</strong><span>${SCHOOL.place}</span></div>
+    <div class="top-actions">
+      <button class="btn ghost small" data-act="toggleLang">${t('language')}</button>
+      <button class="icon-btn bell" data-act="openNotifications" aria-label="${t('notifications')}">🔔${unread ? `<b>${unread}</b>` : ''}</button>
+      <div class="me">${avatar(u.name)}<div><strong>${esc(u.name)}</strong><span>${esc(roleLabel(u.role))}</span></div></div>
+    </div>
+  </header>
+  <div class="layout">
+    <nav class="sidebar ${UI.menuOpen ? 'open' : ''}">
+      ${items.map(([v, ic]) => `<button class="nav ${UI.view === v ? 'active' : ''}" data-act="go" data-view="${v}"><span>${ic}</span>${esc(t(VIEW_LABEL[v]))}</button>`).join('')}
+      <button class="nav lang-mobile" data-act="toggleLang"><span>🌐</span>${t('language')}</button>
+      <button class="nav logout" data-act="logout"><span>🚪</span>${t('logout')}</button>
+      <div id="net" class="net busy"></div>
+    </nav>
+    <main class="content">${renderView(UI.view)}</main>
+  </div>`;
+  if (UI.view === 'assistant') { const log = document.querySelector('.chat-log'); if (log) log.scrollTop = log.scrollHeight; }
+  if (UI.view === 'staff' && UI.codes === null && !UI.codesLoading) refreshCodes();
+  updateNetBadge();
+}
+function roleLabel(r) { return { admin: L('Admin', 'एडमिन'), coordinator: L('Coordinator', 'कोऑर्डिनेटर'), teacher: L('Teacher', 'शिक्षक') }[r] || r; }
+
+function renderView(v) {
+  switch (v) {
+    case 'dashboard': return viewDashboard();
+    case 'subs': return viewSubs();
+    case 'leave': return viewLeave();
+    case 'timetable': return viewTimetable();
+    case 'requests': return viewRequests();
+    case 'staff': return viewStaff();
+    case 'reports': return viewReports();
+    case 'assistant': return viewAssistant();
+    case 'notices': return viewNotices();
+    case 'audit': return viewAudit();
+    case 'settings': return viewSettings();
+    case 'myday': return viewMyDay();
+  }
+  return '';
+}
+
+/* ---------- login ---------- */
+function viewLogin() {
+  const step = UI.loginStep || 'phone';
+  const busy = UI.loginBusy ? 'disabled' : '';
+  let body = '';
+  if (step === 'phone') body = `
+    <form data-form="loginPhone" class="stack">
+      <label>${t('mobile')}<div class="phone-in"><span>+91</span><input name="phone" inputmode="numeric" maxlength="10" placeholder="98XXXXXXXX" value="${esc(UI.loginPhone)}" required autocomplete="tel-national"></div></label>
+      ${UI.loginError ? `<div class="error">${esc(UI.loginError)}</div>` : ''}
+      <button class="btn primary block" type="submit" ${busy}>${UI.loginBusy ? L('Checking…', 'जाँच रहा है…') : L('Continue', 'आगे बढ़ें')}</button>
+    </form>`;
+  else if (step === 'pin') body = `
+    <form data-form="loginPin" class="stack">
+      <p>${L('Welcome back', 'फिर से स्वागत है')} · <strong>+91 ${esc(UI.loginPhone)}</strong></p>
+      <label>${L('Your 6-digit PIN', 'आपका 6 अंकों का PIN')}<input name="pin" type="password" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" required autocomplete="current-password"></label>
+      ${UI.loginError ? `<div class="error">${esc(UI.loginError)}</div>` : ''}
+      <button class="btn primary block" type="submit" ${busy}>${UI.loginBusy ? L('Logging in…', 'लॉगिन हो रहा है…') : L('Log in', 'लॉगिन करें')}</button>
+      <p class="hint">${L('Forgot your PIN? Ask the school office for a new activation code.', 'PIN भूल गए? स्कूल ऑफ़िस से नया एक्टिवेशन कोड लें।')}</p>
+      <button class="btn ghost block" type="button" data-act="loginBack">${L('Change number', 'नंबर बदलें')}</button>
+    </form>`;
+  else body = `
+    <form data-form="loginActivate" class="stack">
+      <p>${L('First time on this app', 'इस ऐप पर पहली बार')} · <strong>+91 ${esc(UI.loginPhone)}</strong></p>
+      <label>${L('Activation code from the school office', 'स्कूल ऑफ़िस से मिला एक्टिवेशन कोड')}<input name="code" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" required autocomplete="one-time-code"></label>
+      <label>${L('Choose a 6-digit PIN', '6 अंकों का PIN चुनें')}<input name="pin" type="password" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" required autocomplete="new-password"></label>
+      <label>${L('Type the PIN again', 'PIN फिर से लिखें')}<input name="pin2" type="password" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" required autocomplete="new-password"></label>
+      ${UI.loginError ? `<div class="error">${esc(UI.loginError)}</div>` : ''}
+      <button class="btn primary block" type="submit" ${busy}>${UI.loginBusy ? L('Activating…', 'सक्रिय हो रहा है…') : L('Activate & log in', 'सक्रिय करें और लॉगिन')}</button>
+      <button class="btn ghost block" type="button" data-act="loginBack">${L('Change number', 'नंबर बदलें')}</button>
+    </form>`;
+  return `<div class="login-wrap">
+    <div class="login-card">
+      <img class="login-logo" src="${LOGO_SRC}" alt="MTS logo">
+      <h1>${SCHOOL.name}</h1>
+      <p class="muted">${SCHOOL.place} · ${t('loginTitle')}</p>
+      ${body}
+      <button class="btn ghost small center" data-act="toggleLang">${t('language')}</button>
+    </div>
+  </div>`;
+}
+
+/* ---------- date bar ---------- */
+function dateBar(extra = '') {
+  return `<div class="datebar">
+    <button class="icon-btn" data-act="shiftDate" data-n="-1" aria-label="Previous day">‹</button>
+    <input type="date" value="${UI.date}" data-change="setDate">
+    <button class="icon-btn" data-act="shiftDate" data-n="1" aria-label="Next day">›</button>
+    <button class="btn small ghost" data-act="dateToday">${t('today')}</button>
+    <span class="dayname">${dayIdx(UI.date) >= 0 ? dayName(dayIdx(UI.date)) : L('Sunday', 'रविवार')}</span>
+    ${extra}
+  </div>`;
+}
+
+/* ---------- dashboard (admin / coordinator) ---------- */
+function viewDashboard() {
+  const date = UI.date;
+  const abs = absencesOn(date);
+  const gaps = computeGaps(date);
+  const plan = S.plans[date];
+  const unfilled = plan ? Object.values(plan.items).filter(i => !i.teacherId).length : gaps.length;
+  const pendingLv = S.leaves.filter(l => l.status === 'pending');
+  const openReq = S.requests.filter(r => ['requested', 'approved', 'in_progress', 'ready'].includes(r.status));
+  const newReq = S.requests.filter(r => r.status === 'requested');
+  return `
+  <div class="page-head"><h2>${t('dashboard')}</h2>${dateBar()}</div>
+  ${dayIdx(date) < 0 ? `<div class="banner">${t('noClasses')}</div>` : ''}
+  <div class="cards">
+    <div class="stat"><span>${t('absentToday')}</span><b>${new Set(abs.map(a => a.teacherId)).size}</b></div>
+    <div class="stat"><span>${t('toCover')}</span><b>${gaps.length}</b></div>
+    <div class="stat ${unfilled ? 'warn' : ''}"><span>${t('unfilled')}</span><b>${unfilled}</b></div>
+    <div class="stat"><span>${t('pendingLeave')}</span><b>${pendingLv.length}</b></div>
+    <div class="stat"><span>${t('openRequests')}</span><b>${openReq.length}</b></div>
+  </div>
+  <div class="grid2">
+    <section class="panel">
+      <div class="panel-head"><h3>${L('Absent on', 'अनुपस्थित —')} ${fmtDate(date)}</h3><button class="btn small primary" data-act="markAbsentDialog">+ ${t('markAbsent')}</button></div>
+      ${abs.length ? `<ul class="list">${abs.map(a => `<li><div>${avatar(nameOf(a.teacherId))}<div><strong>${esc(nameOf(a.teacherId))}</strong><small>${esc(absenceLabel(a))}${a.note ? ' · ' + esc(a.note) : ''}</small></div></div>
+        <button class="btn tiny ghost" data-act="removeAbsence" data-id="${a.id}">${L('Remove', 'हटाएँ')}</button></li>`).join('')}</ul>`
+        : `<p class="muted">${L('Everyone is present.', 'सभी उपस्थित हैं।')}</p>`}
+    </section>
+    <section class="panel">
+      <div class="panel-head"><h3>${L('Arrangement plan', 'अरेंजमेंट योजना')}</h3>${plan ? statusChip(plan.status) : ''}</div>
+      ${gaps.length ? `<p>${L(`${gaps.length} periods need a teacher. ${unfilled ? unfilled + ' not covered yet.' : 'All have a suggested substitute.'}`, `${gaps.length} पीरियड में शिक्षक चाहिए। ${unfilled ? unfilled + ' अभी खाली हैं।' : 'सभी के लिए शिक्षक सुझाए गए हैं।'}`)}</p>
+        ${plan && plan.changedAfterPublish ? `<div class="banner warn">${L('Plan changed after publishing — publish again.', 'प्रकाशन के बाद बदलाव हुआ — फिर से प्रकाशित करें।')}</div>` : ''}
+        <button class="btn primary" data-act="go" data-view="subs">${L('Review & publish', 'देखें और प्रकाशित करें')} →</button>`
+        : `<p class="muted">${L('No periods to cover.', 'कोई पीरियड खाली नहीं है।')}</p>`}
+    </section>
+    <section class="panel">
+      <div class="panel-head"><h3>${t('pendingLeave')}</h3><button class="btn small ghost" data-act="go" data-view="leave">${L('All', 'सभी')} →</button></div>
+      ${pendingLv.length ? `<ul class="list">${pendingLv.slice(0, 4).map(l => `<li><div>${avatar(nameOf(l.teacherId))}<div><strong>${esc(nameOf(l.teacherId))}</strong><small>${fmtDate(l.from)}${l.to !== l.from ? ' – ' + fmtDate(l.to) : ''} · ${esc(l.type)}</small></div></div>
+        <div class="btns"><button class="btn tiny ok" data-act="leaveDecide" data-id="${l.id}" data-ok="1">${t('approve')}</button><button class="btn tiny danger-ghost" data-act="leaveDecide" data-id="${l.id}" data-ok="0">${t('reject')}</button></div></li>`).join('')}</ul>`
+        : `<p class="muted">${L('Nothing waiting.', 'कुछ लंबित नहीं।')}</p>`}
+    </section>
+    <section class="panel">
+      <div class="panel-head"><h3>${L('New DPP & worksheet requests', 'नए DPP और वर्कशीट अनुरोध')}</h3><button class="btn small ghost" data-act="go" data-view="requests">${L('All', 'सभी')} →</button></div>
+      ${newReq.length ? `<ul class="list">${newReq.slice(0, 4).map(r => `<li><div><span class="kind ${r.kind}">${r.kind === 'dpp' ? 'DPP' : t('worksheet')}</span><div><strong>${esc(r.classId)} · ${esc(subjName(r.subject))}</strong><small>${esc(nameOf(r.teacherId))} · ${L('needed by', 'चाहिए')} ${fmtDate(r.neededBy)}</small></div></div></li>`).join('')}</ul>`
+        : `<p class="muted">${L('No new requests.', 'कोई नया अनुरोध नहीं।')}</p>`}
+    </section>
+  </div>`;
+}
+
+/* ---------- substitution plan ---------- */
+function whyText(item) {
+  if (!item.teacherId) return `<span class="bad">${L('Nobody free — merge classes or use library period', 'कोई खाली नहीं — कक्षाएँ मिलाएँ या पुस्तकालय पीरियड दें')}</span>`;
+  return esc(item.why.map(w => (S.lang === 'hi' ? w.hi : w.en) + ` (${w.pts > 0 ? '+' : ''}${w.pts})`).join(' · ')) + ` <b class="score">= ${item.score}</b>`;
+}
+function viewSubs() {
+  const date = UI.date;
+  const d = dayIdx(date);
+  const abs = absencesOn(date);
+  const plan = S.plans[date];
+  const gaps = computeGaps(date);
+  let body = '';
+  if (d < 0) body = `<div class="banner">${t('noClasses')}</div>`;
+  else if (!gaps.length) body = `<div class="empty">✅ ${L('No periods to cover on this day.', 'इस दिन कोई पीरियड खाली नहीं है।')}</div>`;
+  else {
+    const items = Object.values(plan.items).sort((a, b) => a.p - b.p || CLASSES.indexOf(a.cls) - CLASSES.indexOf(b.cls));
+    body = `
+    <div class="plan-status">${statusChip(plan.status)}
+      <span class="muted">${L('Updated', 'अपडेट')} ${fmtTime(plan.updatedAt)} · ${esc(nameOf(plan.updatedBy))}${plan.publishedAt ? ` · ${L('Published', 'प्रकाशित')} ${fmtTime(plan.publishedAt)}` : ''}</span>
+      ${plan.changedAfterPublish ? `<span class="chip st-rejected">${L('Changed — publish again', 'बदला गया — फिर प्रकाशित करें')}</span>` : ''}
+    </div>
+    <div class="table-wrap"><table class="subs">
+      <thead><tr><th>${t('period')}</th><th>${t('class')}</th><th>${t('subject')}</th><th>${L('Absent teacher', 'अनुपस्थित शिक्षक')}</th><th>${L('Substitute', 'अरेंजमेंट शिक्षक')}</th><th>${L('Why this teacher', 'क्यों यह शिक्षक')}</th><th>${t('seen')}</th></tr></thead>
+      <tbody>${items.map(i => {
+        const others = items.filter(o => o.key !== i.key && o.teacherId).map(o => ({ teacherId: o.teacherId, p: o.p }));
+        const ranked = rankCandidates(date, i, others);
+        const opts = ranked.map(r => `<option value="${r.id}" ${r.id === i.teacherId ? 'selected' : ''}>${esc(nameOf(r.id))} (${r.score})</option>`).join('');
+        return `<tr class="${i.teacherId ? '' : 'row-bad'}">
+          <td data-label="${esc(t('period'))}"><b>P${i.p}</b><small>${periodTime(i.p)}</small></td>
+          <td data-label="${esc(t('class'))}">${esc(i.cls)}</td><td data-label="${esc(t('subject'))}">${esc(subjName(i.subject))}</td><td data-label="${esc(L('Absent', 'अनुपस्थित'))}">${esc(nameOf(i.absentId))}</td>
+          <td data-label="${esc(L('Substitute', 'अरेंजमेंट'))}"><select data-change="setSub" data-key="${esc(i.key)}" aria-label="Substitute for ${esc(i.cls)} period ${i.p}"><option value="">— ${L('Not covered', 'खाली')} —</option>${opts}</select>${i.manual ? `<small class="muted">${L('changed by hand', 'हाथ से बदला')}</small>` : ''}</td>
+          <td class="why" data-label="${esc(L('Why', 'क्यों'))}">${whyText(i)}</td>
+          <td data-label="${esc(t('seen'))}">${plan.status === 'published' && i.teacherId ? (isAcked(date, i.key, i.teacherId) ? '<span class="ok-text">✓</span>' : `<span class="muted">${L('not yet', 'अभी नहीं')}</span>`) : '—'}</td></tr>`;
+      }).join('')}</tbody></table></div>
+    <div class="row-end">
+      <button class="btn ghost" data-act="copySheet">📋 ${t('copySheet')}</button>
+      <button class="btn ghost" data-act="printSheet">🖨️ ${t('print')}</button>
+      <button class="btn" data-act="replan">↻ ${t('regenerate')}</button>
+      <button class="btn primary" data-act="publishPlan">${plan.status === 'published' ? '✓ ' + t('published') : t('publish')}</button>
+    </div>
+    <details class="howto"><summary>${L('How the app picks a substitute', 'ऐप शिक्षक कैसे चुनता है')}</summary>
+      <p>${L('Only teachers who are present, free in that period and under the daily limit are considered. Each gets points:', 'केवल वही शिक्षक जो उपस्थित हैं, उस पीरियड में खाली हैं और दैनिक सीमा से कम हैं। अंक:')}</p>
+      <ul><li>${L('Same subject', 'वही विषय')} +${S.settings.subject}</li><li>${L('Already teaches the class', 'उस कक्षा को पढ़ाते हैं')} +${S.settings.classKnown}</li><li>${L('Class teacher', 'कक्षा-शिक्षक')} +${S.settings.classTeacher}</li>
+      <li>${L('Each period already today', 'आज के हर पीरियड पर')} −${S.settings.periodLoad}</li><li>${L('Each substitution this week', 'इस सप्ताह के हर अरेंजमेंट पर')} −${S.settings.weekSubs}</li><li>${L('3 periods in a row', 'लगातार 3 पीरियड')} −${S.settings.consecutive}</li>
+      <li>${L('Daily limit', 'दैनिक सीमा')}: ${S.settings.dailyCap} ${L('substitutions', 'अरेंजमेंट')}</li></ul></details>`;
+  }
+  return `
+  <div class="page-head"><h2>${t('substitutions')}</h2>${dateBar(`<button class="btn small primary" data-act="markAbsentDialog">+ ${t('markAbsent')}</button>`)}</div>
+  ${abs.length ? `<div class="absent-chips">${abs.map(a => `<span class="achip">${esc(nameOf(a.teacherId))} · ${esc(absenceLabel(a))}<button data-act="removeAbsence" data-id="${a.id}" aria-label="Remove">✕</button></span>`).join('')}</div>` : ''}
+  ${body}`;
+}
+
+function sheetText(date) {
+  const plan = S.plans[date];
+  if (!plan) return '';
+  const rows = Object.values(plan.items).sort((a, b) => a.p - b.p);
+  return `${SCHOOL.name}, ${SCHOOL.place}\nArrangement (substitution) sheet — ${fmtDate(date)}\n\n` +
+    rows.map(i => `P${i.p} (${periodTime(i.p)})  ${i.cls}  ${SUBJECTS[i.subject].en}  —  ${i.teacherId ? nameOf(i.teacherId) : 'NOT COVERED'}  (for ${nameOf(i.absentId)})`).join('\n');
+}
+
+/* ---------- teacher: my day ---------- */
+function viewMyDay() {
+  const u = me();
+  const date = UI.date;
+  const d = dayIdx(date);
+  const plan = S.plans[date];
+  const subs = plan && plan.status === 'published' ? Object.values(plan.items).filter(i => i.teacherId === u.id) : [];
+  const myAbs = S.absences.filter(a => a.teacherId === u.id && a.date === date);
+  let rows = '';
+  if (d >= 0) {
+    PERIODS.forEach(pp => {
+      const p = pp.n;
+      const l = teacherLessonAt(u.id, d, p);
+      const sub = subs.find(i => i.p === p);
+      const absent = isAbsent(u.id, date, p);
+      let cell;
+      if (absent) cell = `<div class="slot off">${l ? `<s>${esc(l.cls)} · ${esc(subjName(l.s))}</s> · ` : ''}${t('onLeave')}</div>`;
+      else if (sub) cell = `<div class="slot sub"><b>${t('substitution')}:</b> ${esc(sub.cls)} · ${esc(subjName(sub.subject))} <small>(${t('forTeacher')} ${esc(nameOf(sub.absentId))})</small>
+        ${isAcked(date, sub.key, u.id) ? `<span class="ok-text">✓ ${t('seen')}</span>` : `<button class="btn tiny primary" data-act="ackSub" data-key="${esc(sub.key)}">${t('markSeen')}</button>`}</div>`;
+      else if (l) cell = `<div class="slot"><b>${esc(l.cls)}</b> · ${esc(subjName(l.s))}</div>`;
+      else cell = `<div class="slot free">${t('free')}</div>`;
+      rows += `<li><div class="ptime"><b>P${p}</b><small>${periodTime(p)}</small></div>${cell}</li>`;
+      if (p === LUNCH.after) rows += `<li class="lunch"><div class="ptime"><small>${LUNCH.start}–${LUNCH.end}</small></div><div class="slot">🍱 ${t('lunch')}</div></li>`;
+    });
+  }
+  const pendingSubs = subs.filter(s => !isAcked(date, s.key, u.id)).length;
+  const myOpen = S.requests.filter(r => r.teacherId === u.id && !['delivered', 'rejected'].includes(r.status)).length;
+  const myLeave = S.leaves.filter(l => l.teacherId === u.id && l.status === 'pending').length;
+  return `
+  <div class="page-head"><h2>${L('Namaste', 'नमस्ते')}, ${esc(u.name.split(' ')[0])} 🙏</h2>${dateBar()}</div>
+  ${myAbs.length ? `<div class="banner">${t('onLeave')} — ${esc(myAbs.map(absenceLabel).join(', '))}</div>` : ''}
+  ${pendingSubs ? `<div class="banner warn">${L(`You have ${pendingSubs} arrangement period(s). Tap "Mark as seen" so the office knows.`, `आपके ${pendingSubs} अरेंजमेंट पीरियड हैं। "देख लिया" दबाएँ ताकि ऑफ़िस को पता चले।`)}</div>` : ''}
+  <div class="grid2">
+    <section class="panel"><div class="panel-head"><h3>${t('myDay')} · ${fmtDate(date)}</h3></div>
+      ${d < 0 ? `<p class="muted">${t('noClasses')}</p>` : `<ul class="day">${rows}</ul>`}
+    </section>
+    <section class="panel">
+      <div class="panel-head"><h3>${L('Quick actions', 'त्वरित कार्य')}</h3></div>
+      <div class="quick">
+        <button class="qa" data-act="leaveForm">📝<span>${t('applyLeave')}</span></button>
+        <button class="qa" data-act="newRequest" data-kind="dpp">🧮<span>${t('raiseDpp')}</span></button>
+        <button class="qa" data-act="newRequest" data-kind="worksheet">📄<span>${t('raiseWs')}</span></button>
+        <button class="qa" data-act="go" data-view="timetable">📅<span>${L('Class timetables', 'कक्षा समय-सारणी')}</span></button>
+      </div>
+      <ul class="list compact">
+        <li><span>${L('Periods this week', 'इस सप्ताह पीरियड')}</span><b>${weeklyLoad(u.id)}</b></li>
+        <li><span>${L('My open requests', 'मेरे खुले अनुरोध')}</span><b>${myOpen}</b></li>
+        <li><span>${L('Leave waiting for approval', 'स्वीकृति हेतु छुट्टी')}</span><b>${myLeave}</b></li>
+        ${S.classTeachers && Object.entries(S.classTeachers).find(([, v]) => v === u.id) ? `<li><span>${L('Class teacher of', 'कक्षा-शिक्षक')}</span><b>${Object.entries(S.classTeachers).filter(([, v]) => v === u.id).map(([k]) => k).join(', ')}</b></li>` : ''}
+      </ul>
+    </section>
+  </div>`;
+}
+
+/* ---------- leave ---------- */
+function leaveCard(l, manager) {
+  const u = me();
+  return `<div class="card">
+    <div class="card-top"><div>${avatar(nameOf(l.teacherId))}<div><strong>${esc(nameOf(l.teacherId))}</strong>
+      <small>${fmtDate(l.from)}${l.to !== l.from ? ' – ' + fmtDate(l.to) : ''} · ${esc(absenceLabel(l))} · ${esc(l.type)}</small></div></div>${statusChip(l.status)}</div>
+    <p class="desc">${esc(l.description)}</p>
+    ${l.remark ? `<p class="remark"><b>${t('remark')}:</b> ${esc(l.remark)} <small>— ${esc(nameOf(l.decidedBy))}</small></p>` : ''}
+    <div class="row-end">
+      ${manager && l.status === 'pending' ? `<button class="btn small danger-ghost" data-act="leaveDecide" data-id="${l.id}" data-ok="0">${t('reject')}</button><button class="btn small ok" data-act="leaveDecide" data-id="${l.id}" data-ok="1">${t('approve')}</button>` : ''}
+      ${!manager && l.teacherId === u.id && l.status === 'pending' ? `<button class="btn small ghost" data-act="cancelLeave" data-id="${l.id}">${L('Withdraw', 'वापस लें')}</button>` : ''}
+    </div></div>`;
+}
+function viewLeave() {
+  const u = me();
+  if (isManager(u)) {
+    const tab = UI.leaveTab;
+    const list = S.leaves.filter(l => tab === 'all' || l.status === tab).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    return `<div class="page-head"><h2>${t('leave')}</h2><button class="btn primary" data-act="markAbsentDialog">+ ${t('markAbsent')}</button></div>
+      <div class="tabs">${['pending', 'approved', 'rejected', 'all'].map(x => `<button class="tab ${tab === x ? 'active' : ''}" data-act="leaveTab" data-tab="${x}">${t(x)} (${x === 'all' ? S.leaves.length : S.leaves.filter(l => l.status === x).length})</button>`).join('')}</div>
+      ${list.length ? `<div class="cards-list">${list.map(l => leaveCard(l, true)).join('')}</div>` : `<div class="empty">${L('No leave requests here.', 'यहाँ कोई आवेदन नहीं।')}</div>`}`;
+  }
+  const mine = S.leaves.filter(l => l.teacherId === u.id).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  return `<div class="page-head"><h2>${t('leave')}</h2><button class="btn primary" data-act="leaveForm">+ ${t('applyLeave')}</button></div>
+    ${mine.length ? `<div class="cards-list">${mine.map(l => leaveCard(l, false)).join('')}</div>` : `<div class="empty">${L('You have not applied for leave yet.', 'आपने अभी तक छुट्टी के लिए आवेदन नहीं किया।')}</div>`}`;
+}
+function leaveFormHTML() {
+  const nd = (() => { let d = addDays(todayISO(), 1); while (dayIdx(d) < 0) d = addDays(d, 1); return d; })();
+  return `<form data-form="leave" class="stack">
+    <div class="two"><label>${t('from')}<input type="date" name="from" value="${nd}" required></label><label>${t('to')}<input type="date" name="to" value="${nd}" required></label></div>
+    <label>${t('duration')}<select name="scope" data-change="scopeToggle"><option value="full">${t('fullDay')}</option><option value="first">${t('firstHalf')}</option><option value="second">${t('secondHalf')}</option><option value="periods">${t('specific')}</option></select></label>
+    <div class="periods-pick hidden">${PERIODS.map(p => `<label class="pp"><input type="checkbox" name="periods" value="${p.n}">P${p.n}</label>`).join('')}</div>
+    <label>${t('type')}<select name="type"><option>Casual</option><option>Sick</option><option>Personal</option><option>Official duty</option><option>Emergency</option></select></label>
+    <label>${t('description')} *<textarea name="description" rows="4" required placeholder="${esc(L('Reason, and any handover notes for the substitute (e.g. "Chapter 5 test for 9A, papers in staff-room cupboard")', 'कारण, और अरेंजमेंट शिक्षक के लिए नोट (जैसे "9A का अध्याय 5 टेस्ट, पेपर स्टाफ़-रूम अलमारी में")'))}"></textarea></label>
+    <div class="row-end"><button type="button" class="btn" data-act="closeModal">${t('cancel')}</button><button class="btn primary" type="submit">${t('apply')}</button></div></form>`;
+}
+function markAbsentHTML() {
+  return `<form data-form="absent" class="stack">
+    <label>${t('teacher')}<select name="tid" required>${teacherOptions('', { includeEmpty: true, emptyLabel: L('Choose teacher', 'शिक्षक चुनें') })}</select></label>
+    <label>${t('date')}<input type="date" name="date" value="${UI.date}" required></label>
+    <label>${t('duration')}<select name="scope" data-change="scopeToggle"><option value="full">${t('fullDay')}</option><option value="first">${t('firstHalf')}</option><option value="second">${t('secondHalf')}</option><option value="periods">${t('specific')}</option></select></label>
+    <div class="periods-pick hidden">${PERIODS.map(p => `<label class="pp"><input type="checkbox" name="periods" value="${p.n}">P${p.n}</label>`).join('')}</div>
+    <label>${L('Note', 'नोट')}<input name="note" placeholder="${esc(L('e.g. Called in sick at 7:15', 'जैसे 7:15 बजे बीमार होने की सूचना'))}"></label>
+    <p class="hint">${L('The app will immediately draft substitutes for this teacher\'s periods.', 'ऐप तुरंत इस शिक्षक के पीरियड के लिए अरेंजमेंट बनाएगा।')}</p>
+    <div class="row-end"><button type="button" class="btn" data-act="closeModal">${t('cancel')}</button><button class="btn primary" type="submit">${t('markAbsent')}</button></div></form>`;
+}
+
+/* ---------- timetable ---------- */
+function viewTimetable() {
+  const u = me();
+  const manager = isManager(u);
+  if (!manager && UI.ttMode === 'teacher' && !UI._ttInit) { UI.ttTeacher = u.id; }
+  UI._ttInit = true;
+  const today = dayIdx(todayISO());
+  const mode = UI.ttMode;
+  let head = `<tr><th>${t('period')}</th>${DAYS.map((d, i) => `<th class="${i === today ? 'today' : ''}">${S.lang === 'hi' ? DAYS_HI[i].slice(0, 3) : d}</th>`).join('')}</tr>`;
+  let rows = '';
+  PERIODS.forEach(pp => {
+    const p = pp.n;
+    rows += `<tr><th><b>P${p}</b><small>${periodTime(p)}</small></th>` + DAYS.map((_, d) => {
+      if (mode === 'class') {
+        const l = lessonAt(UI.ttClass, d, p);
+        return `<td class="${d === today ? 'today' : ''} subj-${l.s} ${manager ? 'editable' : ''}" ${manager ? `data-act="editCell" data-d="${d}" data-p="${p}"` : ''}><b>${esc(subjName(l.s))}</b><small>${esc(nameOf(l.t))}</small></td>`;
+      }
+      const l = teacherLessonAt(UI.ttTeacher, d, p);
+      return l ? `<td class="${d === today ? 'today' : ''} subj-${l.s}"><b>${esc(l.cls)}</b><small>${esc(subjName(l.s))}</small></td>` : `<td class="${d === today ? 'today' : ''} freecell">${t('free')}</td>`;
+    }).join('') + '</tr>';
+    if (p === LUNCH.after) rows += `<tr class="lunchrow"><th><small>${LUNCH.start}–${LUNCH.end}</small></th><td colspan="${DAYS.length}">🍱 ${t('lunch')}</td></tr>`;
+  });
+  const ct = mode === 'class' ? S.classTeachers[UI.ttClass] : null;
+  return `<div class="page-head"><h2>${t('timetable')}</h2>
+    <div class="tt-controls">
+      <div class="seg"><button class="${mode === 'class' ? 'active' : ''}" data-act="ttMode" data-mode="class">${t('class')}</button><button class="${mode === 'teacher' ? 'active' : ''}" data-act="ttMode" data-mode="teacher">${t('teacher')}</button></div>
+      ${mode === 'class' ? `<select data-change="ttClass" aria-label="Class">${classOptions(UI.ttClass)}</select>` : `<select data-change="ttTeacher" aria-label="Teacher">${teacherOptions(UI.ttTeacher)}</select>`}
+    </div></div>
+    <p class="muted">${mode === 'class' ? `${L('Class teacher', 'कक्षा-शिक्षक')}: <b>${esc(nameOf(ct))}</b>` : `${L('Periods per week', 'प्रति सप्ताह पीरियड')}: <b>${weeklyLoad(UI.ttTeacher)}</b>`}
+    ${manager && mode === 'class' ? ` · ${L('Tap any period to change it. Clashes are blocked.', 'बदलने के लिए किसी पीरियड पर टैप करें। टकराव रोका जाता है।')}` : ''}</p>
+    <div class="table-wrap"><table class="tt">${head}${rows}</table></div>`;
+}
+function editCellHTML(d, p) {
+  const l = lessonAt(UI.ttClass, d, p);
+  return `<form data-form="cell" class="stack" data-d="${d}" data-p="${p}">
+    <p><b>${esc(UI.ttClass)}</b> · ${dayName(d)} · P${p} (${periodTime(p)})</p>
+    <label>${t('subject')}<select name="s">${subjectOptions(l.s)}</select></label>
+    <label>${t('teacher')}<select name="t">${teacherOptions(l.t)}</select></label>
+    <div class="error hidden" id="cellErr"></div>
+    <div class="row-end"><button type="button" class="btn" data-act="closeModal">${t('cancel')}</button><button class="btn primary" type="submit">${t('save')}</button></div></form>`;
+}
+
+/* ---------- DPP & worksheet requests ---------- */
+function reqCard(r) {
+  const u = me();
+  const manager = isManager(u);
+  const owner = r.teacherId === u.id;
+  const title = r.kind === 'dpp' ? `${esc(r.chapter)}${r.topic ? ' — ' + esc(r.topic) : ''}` : `${esc(r.wsType)} ${L('worksheet', 'वर्कशीट')}`;
+  const facts = r.kind === 'dpp'
+    ? [`${r.numQ} ${L('questions', 'प्रश्न')}`, r.difficulty, r.qtypes, `${r.copies} ${L('copies', 'प्रतियाँ')}`]
+    : [r.pageSize, r.color, `${r.copies} ${L('copies', 'प्रतियाँ')}`];
+  let actions = '';
+  if (manager) {
+    if (r.status === 'requested') actions += `<button class="btn small danger-ghost" data-act="reqReject" data-id="${r.id}">${t('reject')}</button><button class="btn small ok" data-act="reqApprove" data-id="${r.id}">${t('approve')}</button>`;
+    if (r.status === 'approved') actions += `<button class="btn small" data-act="reqStatus" data-id="${r.id}" data-st="in_progress">${L('Start work', 'काम शुरू')}</button>`;
+    if (r.status === 'in_progress') actions += `<button class="btn small" data-act="reqStatus" data-id="${r.id}" data-st="ready">${L('Mark ready', 'तैयार')}</button>`;
+    if (r.status === 'ready') actions += `<button class="btn small ok" data-act="reqStatus" data-id="${r.id}" data-st="delivered">${L('Mark delivered', 'पहुँचा दिया')}</button>`;
+  }
+  if (owner && r.status === 'requested') actions += `<button class="btn small ghost" data-act="reqCancel" data-id="${r.id}">${L('Withdraw', 'वापस लें')}</button>`;
+  if ((manager || owner) && r.status !== 'rejected') actions += `<button class="btn small ai" data-act="aiDraft" data-id="${r.id}">✨ ${r.draft ? L('View draft', 'ड्राफ़्ट देखें') : t('aiDraft')}</button>`;
+  const late = r.neededBy < todayISO() && !['delivered', 'rejected'].includes(r.status);
+  return `<div class="card">
+    <div class="card-top"><div><span class="kind ${r.kind}">${r.kind === 'dpp' ? 'DPP' : t('worksheet')}</span><div><strong>${esc(r.classId)} · ${esc(subjName(r.subject))}</strong><small>${title}</small></div></div>${statusChip(r.status)}</div>
+    <p class="desc">${esc(r.description || '')}</p>
+    <div class="facts">${facts.filter(Boolean).map(f => `<span>${esc(f)}</span>`).join('')}<span class="${late ? 'bad' : ''}">${L('Needed by', 'चाहिए')} ${fmtDate(r.neededBy)}${late ? ' · ' + L('overdue', 'देर') : ''}</span></div>
+    <div class="meta">${L('By', 'द्वारा')} ${esc(nameOf(r.teacherId))}${r.assignee ? ` · ${L('Assigned to', 'ज़िम्मेदार')} ${esc(nameOf(r.assignee))}` : ''}</div>
+    ${r.remark ? `<p class="remark"><b>${t('remark')}:</b> ${esc(r.remark)}</p>` : ''}
+    <details class="hist"><summary>${L('History', 'इतिहास')} (${r.history.length})</summary><ul>${r.history.map(h => `<li>${fmtTime(h.at)} — ${esc(nameOf(h.by))}: ${esc(h.text)}</li>`).join('')}</ul></details>
+    ${actions ? `<div class="row-end">${actions}</div>` : ''}</div>`;
+}
+function viewRequests() {
+  const u = me();
+  const manager = isManager(u);
+  const tab = UI.reqTab;
+  let list = S.requests.filter(r => manager || r.teacherId === u.id);
+  if (tab === 'dpp' || tab === 'worksheet') list = list.filter(r => r.kind === tab);
+  list = list.slice().sort((a, b) => (a.status === 'delivered') - (b.status === 'delivered') || a.neededBy.localeCompare(b.neededBy));
+  return `<div class="page-head"><h2>${t('requests')}</h2>
+    <div class="btns"><button class="btn primary" data-act="newRequest" data-kind="dpp">+ DPP</button><button class="btn primary" data-act="newRequest" data-kind="worksheet">+ ${t('worksheet')}</button></div></div>
+    <div class="tabs">${[['all', t('all')], ['dpp', 'DPP'], ['worksheet', t('worksheet')]].map(([k, lb]) => `<button class="tab ${tab === k ? 'active' : ''}" data-act="reqTab" data-tab="${k}">${esc(lb)}</button>`).join('')}</div>
+    ${list.length ? `<div class="cards-list">${list.map(reqCard).join('')}</div>` : `<div class="empty">${L('No requests yet.', 'अभी कोई अनुरोध नहीं।')}</div>`}`;
+}
+function requestFormHTML(kind) {
+  const u = me();
+  const nd = addDays(todayISO(), 2);
+  const myClasses = [...new Set(CLASSES.filter(c => teachesClass(u.id, c)))];
+  const defClass = myClasses[0] || '6A';
+  const defSubj = u.subjects[0] || 'ENG';
+  const common = `<div class="two"><label>${t('class')}<select name="classId">${classOptions(defClass)}</select></label><label>${t('subject')}<select name="subject">${subjectOptions(defSubj)}</select></label></div>`;
+  if (kind === 'dpp') return `<form data-form="request" data-kind="dpp" class="stack">${common}
+    <label>${L('Chapter', 'अध्याय')} *<input name="chapter" required placeholder="${esc(L('e.g. Chapter 3 — Pair of Linear Equations', 'जैसे अध्याय 3 — रैखिक समीकरण युग्म'))}"></label>
+    <label>${L('Topic', 'टॉपिक')}<input name="topic" placeholder="${esc(L('e.g. Elimination method', 'जैसे विलोपन विधि'))}"></label>
+    <div class="three"><label>${L('Questions', 'प्रश्न')}<input type="number" name="numQ" min="1" max="100" value="15"></label>
+      <label>${L('Difficulty', 'कठिनाई')}<select name="difficulty"><option>Easy</option><option selected>Mixed</option><option>Medium</option><option>Hard</option></select></label>
+      <label>${L('Copies', 'प्रतियाँ')}<input type="number" name="copies" min="1" value="40"></label></div>
+    <label>${L('Question types', 'प्रश्न प्रकार')}<input name="qtypes" value="MCQ, Short answer"></label>
+    <label>${L('Needed by', 'कब तक चाहिए')}<input type="date" name="neededBy" value="${nd}" required></label>
+    <label>${L('Notes', 'नोट')}<textarea name="description" rows="3" placeholder="${esc(L('e.g. focus on last test\'s weak areas', 'जैसे पिछले टेस्ट की कमज़ोरियों पर ध्यान'))}"></textarea></label>
+    <div class="row-end"><button type="button" class="btn" data-act="closeModal">${t('cancel')}</button><button class="btn primary" type="submit">${L('Raise request', 'अनुरोध भेजें')}</button></div></form>`;
+  return `<form data-form="request" data-kind="worksheet" class="stack">${common}
+    <label>${L('Worksheet type', 'वर्कशीट प्रकार')}<select name="wsType"><option>Classwork</option><option>Homework</option><option>Revision</option><option>Activity</option><option>Holiday homework</option><option>Remedial</option></select></label>
+    <label>${t('description')} *<textarea name="description" rows="5" required placeholder="${esc(L('What should the worksheet contain and why? e.g. "Class 4 EVS, 10 picture-based questions on water sources, for slow learners, single A4 page"', 'वर्कशीट में क्या होना चाहिए और क्यों? जैसे "कक्षा 4 EVS, जल स्रोतों पर 10 चित्र-आधारित प्रश्न, धीमे सीखने वालों के लिए, एक A4 पेज"'))}"></textarea></label>
+    <div class="three"><label>${L('Copies', 'प्रतियाँ')}<input type="number" name="copies" min="1" value="40"></label>
+      <label>${L('Page size', 'पेज साइज़')}<select name="pageSize"><option>A4</option><option>A5</option><option>Legal</option></select></label>
+      <label>${L('Print', 'प्रिंट')}<select name="color"><option>Black & white</option><option>Colour</option></select></label></div>
+    <label>${L('Needed by', 'कब तक चाहिए')}<input type="date" name="neededBy" value="${nd}" required></label>
+    <div class="row-end"><button type="button" class="btn" data-act="closeModal">${t('cancel')}</button><button class="btn primary" type="submit">${L('Raise request', 'अनुरोध भेजें')}</button></div></form>`;
+}
+
+/* ---------- staff ---------- */
+function viewStaff() {
+  const rows = S.staff.map(s => {
+    const ctOf = Object.entries(S.classTeachers).filter(([, v]) => v === s.id).map(([k]) => k).join(', ');
+    return `<tr class="${s.active ? '' : 'inactive'}"><td>${avatar(s.name)} <b>${esc(s.name)}</b></td><td>${esc(roleLabel(s.role))}</td>
+      <td>${esc(s.subjects.map(subjName).join(', ') || '—')}</td><td>+91 ${esc(s.phone)}</td><td>${esc(ctOf || '—')}</td>
+      <td>${s.role === 'teacher' ? weeklyLoad(s.id) : '—'}</td><td>${loginCell(s)}</td><td>${s.active ? `<span class="chip st-approved">${L('Active', 'सक्रिय')}</span>` : `<span class="chip st-rejected">${L('Inactive', 'निष्क्रिय')}</span>`}</td>
+      <td><button class="btn tiny ghost" data-act="editStaff" data-id="${s.id}">${L('Edit', 'बदलें')}</button></td></tr>`;
+  }).join('');
+  return `<div class="page-head"><h2>${t('staff')}</h2><button class="btn primary" data-act="editStaff" data-id="">+ ${L('Add staff', 'स्टाफ़ जोड़ें')}</button></div>
+    <p class="muted">${L('Only numbers listed here can log in. Give each person their activation code once; they then set their own PIN. Deactivate someone to remove access immediately.', 'केवल यहाँ दर्ज नंबर ही लॉगिन कर सकते हैं। हर व्यक्ति को एक बार एक्टिवेशन कोड दें; फिर वे अपना PIN बनाएँगे। निष्क्रिय करते ही पहुँच बंद हो जाती है।')}</p>
+    <div class="table-wrap"><table class="data"><thead><tr><th>${L('Name', 'नाम')}</th><th>${L('Role', 'भूमिका')}</th><th>${L('Subjects', 'विषय')}</th><th>${t('mobile')}</th><th>${L('Class teacher', 'कक्षा-शिक्षक')}</th><th>${L('Periods/week', 'पीरियड/सप्ताह')}</th><th>${L('App login', 'ऐप लॉगिन')}</th><th>${t('status')}</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+function loginCell(s) {
+  if (UI.codes === null) return `<span class="muted">…</span>`;
+  const c = UI.codes[s.id];
+  if (!c) return '—';
+  const reset = `<button class="btn tiny ghost" data-act="resetPin" data-id="${s.id}">${L('New code', 'नया कोड')}</button>`;
+  if (c.activated) return `<span class="ok-text">✓ ${L('Activated', 'सक्रिय')}</span> ${s.id === me().id ? '' : reset}`;
+  return `<span class="code">${esc(c.code || '—')}</span> <button class="btn tiny ghost" data-act="shareCode" data-id="${s.id}">${L('Share', 'भेजें')}</button>`;
+}
+async function refreshCodes() {
+  UI.codesLoading = true;
+  const { data, error } = await SB.rpc('staff_codes');
+  UI.codesLoading = false;
+  if (error) { UI.codes = {}; return; }
+  UI.codes = {};
+  (data || []).forEach(r => (UI.codes[r.staff_id] = { code: r.code, activated: r.activated }));
+  if (UI.view === 'staff' && !document.getElementById('modal-root').innerHTML) render();
+}
+function staffFormHTML(id) {
+  const s = id ? staffById(id) : { name: '', phone: '', role: 'teacher', subjects: [], active: true };
+  return `<form data-form="staff" data-id="${esc(id || '')}" class="stack">
+    <label>${L('Full name', 'पूरा नाम')} *<input name="name" required value="${esc(s.name)}"></label>
+    <label>${t('mobile')} *<div class="phone-in"><span>+91</span><input name="phone" inputmode="numeric" maxlength="10" pattern="[6-9][0-9]{9}" required value="${esc(s.phone)}"></div></label>
+    <label>${L('Role', 'भूमिका')}<select name="role">${['teacher', 'coordinator', 'admin'].map(r => `<option value="${r}" ${s.role === r ? 'selected' : ''}>${esc(roleLabel(r))}</option>`).join('')}</select></label>
+    <fieldset><legend>${L('Subjects', 'विषय')}</legend><div class="checks">${Object.keys(SUBJECTS).map(k => `<label class="pp"><input type="checkbox" name="subjects" value="${k}" ${s.subjects.includes(k) ? 'checked' : ''}>${esc(subjName(k))}</label>`).join('')}</div></fieldset>
+    <label class="inline"><input type="checkbox" name="active" ${s.active ? 'checked' : ''}> ${L('Active (can log in)', 'सक्रिय (लॉगिन कर सकते हैं)')}</label>
+    <div class="error hidden" id="staffErr"></div>
+    <div class="row-end"><button type="button" class="btn" data-act="closeModal">${t('cancel')}</button><button class="btn primary" type="submit">${t('save')}</button></div></form>`;
+}
+
+/* ---------- reports ---------- */
+function viewReports() {
+  const ym = UI.reportMonth || todayISO().slice(0, 7);
+  const data = teachers().map(tc => ({ id: tc.id, name: tc.name, load: weeklyLoad(tc.id), subs: monthSubs(tc.id, ym), leave: monthLeaveDays(tc.id, ym) }));
+  const maxSubs = Math.max(1, ...data.map(d => d.subs));
+  const maxLoad = Math.max(1, ...data.map(d => d.load));
+  const subsVals = data.map(d => d.subs);
+  const spread = Math.max(...subsVals) - Math.min(...subsVals);
+  const req = { dpp: S.requests.filter(r => r.kind === 'dpp'), worksheet: S.requests.filter(r => r.kind === 'worksheet') };
+  const sts = ['requested', 'approved', 'in_progress', 'ready', 'delivered', 'rejected'];
+  return `<div class="page-head"><h2>${t('reports')}</h2><div class="btns"><input type="month" value="${ym}" data-change="reportMonth" aria-label="Month"><button class="btn ghost" data-act="copyReport">📋 ${L('Copy as CSV', 'CSV कॉपी करें')}</button></div></div>
+    <div class="cards">
+      <div class="stat"><span>${L('Substitutions published', 'प्रकाशित अरेंजमेंट')}</span><b>${subsVals.reduce((a, b) => a + b, 0)}</b></div>
+      <div class="stat ${spread > 3 ? 'warn' : ''}"><span>${L('Fairness gap (most − least)', 'असमानता (अधिकतम − न्यूनतम)')}</span><b>${spread}</b></div>
+      <div class="stat"><span>${L('Leave days taken', 'छुट्टी के दिन')}</span><b>${data.reduce((a, b) => a + b.leave, 0)}</b></div>
+    </div>
+    <section class="panel"><h3>${L('Teacher workload and substitutions', 'शिक्षक कार्यभार और अरेंजमेंट')}</h3>
+      <div class="table-wrap"><table class="data bars"><thead><tr><th>${t('teacher')}</th><th>${L('Periods / week', 'पीरियड / सप्ताह')}</th><th>${L('Substitutions this month', 'इस माह अरेंजमेंट')}</th><th>${L('Leave days', 'छुट्टी दिन')}</th></tr></thead>
+      <tbody>${data.sort((a, b) => b.subs - a.subs || b.load - a.load).map(d => `<tr><td>${esc(d.name)}</td>
+        <td><div class="bar"><i style="width:${(d.load / maxLoad) * 100}%"></i><span>${d.load}</span></div></td>
+        <td><div class="bar sub"><i style="width:${(d.subs / maxSubs) * 100}%"></i><span>${d.subs}</span></div></td>
+        <td>${d.leave}</td></tr>`).join('')}</tbody></table></div>
+      <p class="muted">${L('Fairness target: keep the gap between the most- and least-loaded teacher within 3 substitutions a month.', 'लक्ष्य: सबसे ज़्यादा और सबसे कम अरेंजमेंट वाले शिक्षक का अंतर महीने में 3 से कम रहे।')}</p>
+    </section>
+    <section class="panel"><h3>${L('DPP and worksheet requests', 'DPP और वर्कशीट अनुरोध')}</h3>
+      <div class="table-wrap"><table class="data"><thead><tr><th></th>${sts.map(s => `<th>${t(s)}</th>`).join('')}<th>${L('Total', 'कुल')}</th></tr></thead>
+      <tbody>${['dpp', 'worksheet'].map(k => `<tr><td><b>${k === 'dpp' ? 'DPP' : t('worksheet')}</b></td>${sts.map(s => `<td>${req[k].filter(r => r.status === s).length}</td>`).join('')}<td><b>${req[k].length}</b></td></tr>`).join('')}</tbody></table></div>
+    </section>`;
+}
+
+/* ---------- AI assistant ---------- */
+function viewAssistant() {
+  const suggestions = S.lang === 'hi'
+    ? ['आज पीरियड 5 में कौन खाली है?', 'इस महीने सबसे ज़्यादा अरेंजमेंट किसके?', 'आज कौन अनुपस्थित है?', 'Rajesh Kumar का आज का शेड्यूल']
+    : ['Who is free in period 5 today?', 'Who did the most substitutions this month?', 'Who is absent today?', "Show Rajesh Kumar's schedule today"];
+  return `<div class="page-head"><h2>${t('assistant')}</h2><span class="chip ${SAMPLE ? 'st-approved' : 'st-requested'}">${SAMPLE ? L('Claude AI connected', 'Claude AI जुड़ा है') : L('Answers from school data', 'स्कूल डेटा से उत्तर')}</span></div>
+    <section class="panel chat">
+      <div class="chat-log">${UI.chat.length ? UI.chat.map(m => `<div class="msg ${m.role}">${m.role === 'assistant' ? '<span class="ai-badge">✨</span>' : ''}<div>${esc(m.text).replace(/\n/g, '<br>')}</div></div>`).join('') :
+        `<div class="empty small">${L('Ask anything about the timetable, absences, substitutions or pending work — in Hindi or English.', 'समय-सारणी, अनुपस्थिति, अरेंजमेंट या लंबित काम के बारे में कुछ भी पूछें — हिंदी या अंग्रेज़ी में।')}</div>`}
+        ${UI.chatBusy ? `<div class="msg assistant"><span class="ai-badge">✨</span><div class="typing" id="liveAnswer">…</div></div>` : ''}</div>
+      <div class="suggest">${suggestions.map(s => `<button class="chip-btn" data-act="askSuggest" data-q="${esc(s)}">${esc(s)}</button>`).join('')}</div>
+      <form data-form="chat" class="chat-in"><input name="q" placeholder="${esc(L('Type your question…', 'अपना प्रश्न लिखें…'))}" autocomplete="off" ${UI.chatBusy ? 'disabled' : ''}><button class="btn primary" ${UI.chatBusy ? 'disabled' : ''}>${t('ask')}</button></form>
+      <p class="hint">${L('The assistant only reads data. It never changes the timetable or approves anything.', 'सहायक केवल डेटा पढ़ता है। यह कुछ भी बदलता या स्वीकृत नहीं करता।')}</p>
+    </section>`;
+}
+
+/* ---------- notices, audit, settings ---------- */
+function viewNotices() {
+  const u = me();
+  return `<div class="page-head"><h2>${t('notices')}</h2>${isManager(u) ? `<button class="btn primary" data-act="newNotice">+ ${L('Post notice', 'सूचना जारी करें')}</button>` : ''}</div>
+    ${S.notices.length ? `<div class="cards-list">${S.notices.map(n => `<div class="card"><div class="card-top"><div><strong>${esc(n.title)}</strong></div><small class="muted">${fmtTime(n.at)} · ${esc(nameOf(n.by))}</small></div><p class="desc">${esc(n.body)}</p>
+      ${isManager(u) ? `<div class="row-end"><button class="btn tiny ghost" data-act="delNotice" data-id="${n.id}">${L('Remove', 'हटाएँ')}</button></div>` : ''}</div>`).join('')}</div>` : `<div class="empty">${L('No notices.', 'कोई सूचना नहीं।')}</div>`}`;
+}
+function viewAudit() {
+  return `<div class="page-head"><h2>${t('audit')}</h2></div>
+    <p class="muted">${L('Every change: who did what, and when.', 'हर बदलाव: किसने क्या किया, और कब।')}</p>
+    <section class="panel"><ul class="audit">${S.audit.slice(0, 200).map(a => `<li><small>${fmtTime(a.at)}</small><b>${esc(nameOf(a.by))}</b><span>${esc(a.text)}</span></li>`).join('')}</ul></section>`;
+}
+function viewSettings() {
+  const w = S.settings;
+  const f = (k, label) => `<label>${esc(label)}<input type="number" name="${k}" value="${w[k]}" min="0" max="100"></label>`;
+  return `<div class="page-head"><h2>${t('settings')}</h2></div>
+    <section class="panel"><h3>${L('Substitution rules', 'अरेंजमेंट नियम')}</h3>
+      <form data-form="settings" class="stack">
+        <div class="three">${f('subject', L('Same subject (+)', 'वही विषय (+)'))}${f('classKnown', L('Already teaches class (+)', 'कक्षा को पढ़ाते हैं (+)'))}${f('classTeacher', L('Class teacher (+)', 'कक्षा-शिक्षक (+)'))}</div>
+        <div class="three">${f('periodLoad', L('Per period today (−)', 'आज प्रति पीरियड (−)'))}${f('weekSubs', L('Per substitution this week (−)', 'इस सप्ताह प्रति अरेंजमेंट (−)'))}${f('consecutive', L('3 in a row (−)', 'लगातार 3 (−)'))}</div>
+        <div class="three">${f('dailyCap', L('Max substitutions per teacher per day', 'प्रति शिक्षक प्रति दिन अधिकतम अरेंजमेंट'))}</div>
+        <div class="row-end"><button class="btn primary">${t('save')}</button></div>
+      </form></section>
+    <section class="panel"><h3>${L('About', 'जानकारी')}</h3>
+      <p>${SCHOOL.name}, ${SCHOOL.place} — ${L('Smart Timetable & Substitution App, live version 1.', 'स्मार्ट टाइमटेबल और अरेंजमेंट ऐप, लाइव संस्करण 1।')}</p>
+      <p class="muted">${L('Data is stored securely online and shared live between all staff phones.', 'डेटा सुरक्षित रूप से ऑनलाइन रखा जाता है और सभी स्टाफ़ फ़ोन पर लाइव दिखता है।')}</p></section>`;
+}
+
+/* ===== Buttons, forms, AI and start-up ===== */
+function commit() { render(); queueFlush(); }
+
+const ACTIONS = {
+  go: el => go(el.dataset.view),
+  toggleMenu: () => { UI.menuOpen = !UI.menuOpen; render(); },
+  toggleLang: () => { S.lang = S.lang === 'en' ? 'hi' : 'en'; saveLang(); render(); },
+  logout: () => confirmBox(L('Log out of the app on this phone?', 'इस फ़ोन पर ऐप से लॉग आउट करें?'), () => doLogout(), t('logout')),
+  closeModal: () => closeModal(),
+  closeModalBack: (el, ev) => { if (ev.target === el) closeModal(); },
+  confirmYes: () => { const fn = confirmBox._fn; closeModal(); if (fn) fn(); },
+
+  loginBack: () => { UI.loginStep = 'phone'; UI.loginError = ''; render(); },
+
+  shiftDate: el => { UI.date = addDays(UI.date, Number(el.dataset.n)); render(); },
+  dateToday: () => { UI.date = todayISO(); render(); },
+
+  markAbsentDialog: () => openModal(t('markAbsent'), markAbsentHTML()),
+  removeAbsence: el => {
+    const a = S.absences.find(x => x.id === el.dataset.id);
+    if (!a) return;
+    confirmBox(L(`Remove absence of ${nameOf(a.teacherId)} on ${fmtDate(a.date)}? Their periods will go back to them.`, `${fmtDate(a.date)} को ${nameOf(a.teacherId)} की अनुपस्थिति हटाएँ?`),
+      () => { removeAbsence(a.id, me().id); commit(); toast(L('Absence removed, plan updated', 'अनुपस्थिति हटाई, योजना अपडेट')); }, L('Remove', 'हटाएँ'));
+  },
+  replan: () => { generatePlan(UI.date, me().id); logAudit(me().id, `Re-planned substitutions for ${UI.date}`); commit(); toast(L('Plan refreshed', 'योजना फिर से बनी')); },
+  publishPlan: () => {
+    const plan = S.plans[UI.date];
+    if (!plan) return;
+    const unfilled = Object.values(plan.items).filter(i => !i.teacherId).length;
+    const doIt = () => { publishPlan(UI.date, me().id); commit(); toast(L('Published — substitutes notified', 'प्रकाशित — शिक्षकों को सूचना भेजी गई')); };
+    if (unfilled) confirmBox(L(`${unfilled} period(s) are still not covered. Publish anyway?`, `${unfilled} पीरियड अभी खाली हैं। फिर भी प्रकाशित करें?`), doIt, t('publish'));
+    else doIt();
+  },
+  copySheet: () => copyText(sheetText(UI.date)),
+  printSheet: () => {
+    const w = document.getElementById('print-root');
+    w.innerHTML = `<pre>${esc(sheetText(UI.date))}</pre>`;
+    try { window.print(); } catch (e) { toast(L('Printing is not available here — use Copy sheet', 'यहाँ प्रिंट उपलब्ध नहीं — शीट कॉपी करें')); }
+  },
+
+  leaveForm: () => openModal(t('applyLeave'), leaveFormHTML()),
+  leaveTab: el => { UI.leaveTab = el.dataset.tab; render(); },
+  cancelLeave: el => {
+    confirmBox(L('Withdraw this leave request?', 'यह आवेदन वापस लें?'), () => {
+      S.leaves = S.leaves.filter(l => l.id !== el.dataset.id); logAudit(me().id, 'Withdrew a leave request'); commit();
+    }, L('Withdraw', 'वापस लें'));
+  },
+  leaveDecide: el => {
+    const id = el.dataset.id, ok = el.dataset.ok === '1';
+    const lv = S.leaves.find(l => l.id === id);
+    openModal(ok ? t('approve') : t('reject'), `<form data-form="leaveDecision" data-id="${id}" data-ok="${ok ? 1 : 0}" class="stack">
+      <p><b>${esc(nameOf(lv.teacherId))}</b> · ${fmtDate(lv.from)}${lv.to !== lv.from ? ' – ' + fmtDate(lv.to) : ''} · ${esc(absenceLabel(lv))}</p>
+      <p class="desc">${esc(lv.description)}</p>
+      <label>${t('remark')} ${ok ? `(${L('optional', 'वैकल्पिक')})` : '*'}<textarea name="remark" rows="2" ${ok ? '' : 'required'}></textarea></label>
+      ${ok ? `<p class="hint">${L('On approval the app drafts substitutes for every affected period.', 'स्वीकृति पर ऐप हर प्रभावित पीरियड के लिए अरेंजमेंट बनाएगा।')}</p>` : ''}
+      <div class="row-end"><button type="button" class="btn" data-act="closeModal">${t('cancel')}</button><button class="btn ${ok ? 'ok' : 'danger'}" type="submit">${ok ? t('approve') : t('reject')}</button></div></form>`);
+  },
+
+  ackSub: el => {
+    const plan = S.plans[UI.date];
+    if (!plan || !plan.items[el.dataset.key]) return;
+    S.acks[ackId(UI.date, el.dataset.key, me().id)] = { teacherId: me().id, date: UI.date, key: el.dataset.key, at: nowStamp() };
+    logAudit(me().id, `Saw arrangement ${el.dataset.key.replace('|', ' P')} on ${UI.date}`);
+    commit(); toast(L('Thank you — office informed', 'धन्यवाद — ऑफ़िस को सूचना मिल गई'));
+  },
+
+  ttMode: el => { UI.ttMode = el.dataset.mode; if (UI.ttMode === 'teacher' && !isManager(me())) UI.ttTeacher = me().id; render(); },
+  editCell: el => openModal(L('Change period', 'पीरियड बदलें'), editCellHTML(Number(el.dataset.d), Number(el.dataset.p))),
+
+  reqTab: el => { UI.reqTab = el.dataset.tab; render(); },
+  newRequest: el => openModal(el.dataset.kind === 'dpp' ? t('raiseDpp') : t('raiseWs'), requestFormHTML(el.dataset.kind), { wide: true }),
+  reqApprove: el => {
+    const r = S.requests.find(x => x.id === el.dataset.id);
+    openModal(t('approve'), `<form data-form="reqApprove" data-id="${r.id}" class="stack">
+      <p><b>${r.kind === 'dpp' ? 'DPP' : t('worksheet')}</b> · ${esc(r.classId)} · ${esc(subjName(r.subject))} · ${esc(nameOf(r.teacherId))}</p>
+      <label>${L('Assign to (who prepares it)', 'किसे सौंपें (कौन तैयार करेगा)')}<select name="assignee">${teacherOptions(r.teacherId)}${S.staff.filter(s => isManager(s)).map(s => `<option value="${s.id}">${esc(s.name)} (${esc(roleLabel(s.role))})</option>`).join('')}</select></label>
+      <label>${t('remark')}<input name="remark" placeholder="${esc(L('e.g. Print from office by Thursday', 'जैसे गुरुवार तक ऑफ़िस से प्रिंट'))}"></label>
+      <div class="row-end"><button type="button" class="btn" data-act="closeModal">${t('cancel')}</button><button class="btn ok" type="submit">${t('approve')}</button></div></form>`);
+  },
+  reqReject: el => {
+    openModal(t('reject'), `<form data-form="reqReject" data-id="${el.dataset.id}" class="stack">
+      <label>${L('Reason', 'कारण')} *<textarea name="remark" rows="2" required></textarea></label>
+      <div class="row-end"><button type="button" class="btn" data-act="closeModal">${t('cancel')}</button><button class="btn danger" type="submit">${t('reject')}</button></div></form>`);
+  },
+  reqStatus: el => {
+    const r = S.requests.find(x => x.id === el.dataset.id);
+    r.status = el.dataset.st;
+    r.history.push({ at: nowStamp(), by: me().id, text: `Status → ${I18N.en[r.status]}` });
+    notify(r.teacherId, '', { en: `Your ${r.kind === 'dpp' ? 'DPP' : 'worksheet'} request (${r.classId} ${SUBJECTS[r.subject].en}) is now: ${I18N.en[r.status]}`, hi: `आपका ${r.kind === 'dpp' ? 'DPP' : 'वर्कशीट'} अनुरोध (${r.classId}) अब: ${I18N.hi[r.status]}` });
+    logAudit(me().id, `${r.kind.toUpperCase()} request ${r.classId} ${r.subject} → ${r.status}`);
+    commit();
+  },
+  reqCancel: el => {
+    confirmBox(L('Withdraw this request?', 'यह अनुरोध वापस लें?'), () => { S.requests = S.requests.filter(r => r.id !== el.dataset.id); logAudit(me().id, 'Withdrew a request'); commit(); }, L('Withdraw', 'वापस लें'));
+  },
+  aiDraft: el => openDraft(el.dataset.id),
+  aiGenerate: el => generateDraft(el.dataset.id),
+  copyDraft: el => { const ta = document.getElementById('draftText'); copyText(ta ? ta.value : ''); },
+  saveDraft: el => {
+    const r = S.requests.find(x => x.id === el.dataset.id); const ta = document.getElementById('draftText');
+    if (r && ta) { r.draft = ta.value; r.history.push({ at: nowStamp(), by: me().id, text: 'Draft saved' }); toast(L('Draft saved', 'ड्राफ़्ट सहेजा')); closeModal(); commit(); }
+  },
+
+  editStaff: el => openModal(el.dataset.id ? L('Edit staff', 'स्टाफ़ बदलें') : L('Add staff', 'स्टाफ़ जोड़ें'), staffFormHTML(el.dataset.id)),
+  copyReport: () => {
+    const ym = UI.reportMonth || todayISO().slice(0, 7);
+    const lines = ['Teacher,Periods per week,Substitutions this month,Leave days'];
+    teachers().forEach(tc => lines.push(`"${tc.name}",${weeklyLoad(tc.id)},${monthSubs(tc.id, ym)},${monthLeaveDays(tc.id, ym)}`));
+    copyText(lines.join('\n'));
+  },
+
+  askSuggest: el => askAssistant(el.dataset.q),
+  newNotice: () => openModal(L('Post notice', 'सूचना जारी करें'), `<form data-form="notice" class="stack"><label>${L('Title', 'शीर्षक')} *<input name="title" required></label><label>${L('Message', 'संदेश')} *<textarea name="body" rows="4" required></textarea></label>
+    <div class="row-end"><button type="button" class="btn" data-act="closeModal">${t('cancel')}</button><button class="btn primary">${L('Post', 'जारी करें')}</button></div></form>`),
+  delNotice: el => { S.notices = S.notices.filter(n => n.id !== el.dataset.id); commit(); },
+  resetPin: el => {
+    const s = staffById(el.dataset.id);
+    confirmBox(L(`Give ${s.name} a new activation code? Their current PIN stops working and they are logged out.`, `${s.name} को नया एक्टिवेशन कोड दें? उनका मौजूदा PIN बंद हो जाएगा।`), async () => {
+      const { data, error } = await SB.rpc('reset_pin', { p_staff_id: s.id });
+      if (error) { toast(L('Could not reset — check internet', 'रीसेट नहीं हुआ — इंटरनेट जाँचें')); return; }
+      logAudit(me().id, `Issued new activation code for ${s.name}`); queueFlush();
+      await refreshCodes();
+      showCode(s, data);
+    }, L('New code', 'नया कोड'));
+  },
+  shareCode: el => { const s = staffById(el.dataset.id); const c = UI.codes && UI.codes[s.id]; if (c && c.code) showCode(s, c.code); },
+  copyCodeMsg: el => copyText(el.dataset.msg),
+
+  openNotifications: () => {
+    const u = me();
+    const mine = S.notifications.filter(n => n.userId === u.id).slice(0, 40);
+    openModal(t('notifications'), mine.length ? `<ul class="notif">${mine.map(n => `<li class="${n.read ? '' : 'unread'}"><span>${esc(S.lang === 'hi' ? n.hi : n.en)}</span><small>${fmtTime(n.at)}</small></li>`).join('')}</ul>
+      <p class="hint">${L('In the live app these also arrive as WhatsApp messages.', 'असली ऐप में ये WhatsApp पर भी आएँगी।')}</p>` : `<p class="muted">${L('No notifications.', 'कोई सूचना नहीं।')}</p>`);
+    mine.forEach(n => (n.read = true));
+    queueFlush();
+    const b = document.querySelector('.bell b'); if (b) b.remove();
+  },
+};
+
+const CHANGES = {
+  setDate: el => { if (el.value) { UI.date = el.value; render(); } },
+  setSub: el => { setSubstitute(UI.date, el.dataset.key, el.value || null, me().id); commit(); },
+  scopeToggle: el => { const pick = el.closest('form').querySelector('.periods-pick'); if (pick) pick.classList.toggle('hidden', el.value !== 'periods'); },
+  ttClass: el => { UI.ttClass = el.value; render(); },
+  ttTeacher: el => { UI.ttTeacher = el.value; render(); },
+  reportMonth: el => { UI.reportMonth = el.value; render(); },
+};
+
+const FORMS = {
+  loginPhone: async (fd) => {
+    const phone = String(fd.get('phone') || '').replace(/\D/g, '').slice(-10);
+    UI.loginPhone = phone; UI.loginError = '';
+    if (!/^[6-9]\d{9}$/.test(phone)) { UI.loginError = L('Enter a valid 10-digit mobile number.', '10 अंकों का सही मोबाइल नंबर डालें।'); render(); return; }
+    UI.loginBusy = true; render();
+    try {
+      await ensureBrowserSession();
+      const { data, error } = await SB.rpc('staff_status', { p_phone: phone });
+      if (error) throw error;
+      if (data === 'ready') UI.loginStep = 'pin';
+      else if (data === 'needs_activation') UI.loginStep = 'activate';
+      else UI.loginError = loginErr(data);
+    } catch (e) { UI.loginError = loginErr('network'); }
+    UI.loginBusy = false; render();
+  },
+  loginPin: async (fd) => {
+    UI.loginBusy = true; UI.loginError = ''; render();
+    try {
+      await ensureBrowserSession();
+      const { data, error } = await SB.rpc('login', { p_phone: UI.loginPhone, p_pin: String(fd.get('pin')) });
+      if (error) throw error;
+      if (String(data).startsWith('ERR:')) { UI.loginError = loginErr(String(data).slice(4)); UI.loginBusy = false; render(); return; }
+      UI.loginBusy = false;
+      await enterApp(data);
+      logAudit(data, 'Logged in'); queueFlush();
+    } catch (e) { UI.loginBusy = false; UI.loginError = loginErr('network'); render(); }
+  },
+  loginActivate: async (fd) => {
+    const pin = String(fd.get('pin')), pin2 = String(fd.get('pin2'));
+    if (pin !== pin2) { UI.loginError = L('The two PINs do not match.', 'दोनों PIN मेल नहीं खाते।'); render(); return; }
+    if (/^(\d)\1{5}$/.test(pin) || pin === '123456' || pin === '654321') { UI.loginError = L('Choose a PIN that is harder to guess.', 'ऐसा PIN चुनें जिसे अंदाज़ा लगाना मुश्किल हो।'); render(); return; }
+    UI.loginBusy = true; UI.loginError = ''; render();
+    try {
+      await ensureBrowserSession();
+      const { data, error } = await SB.rpc('activate', { p_phone: UI.loginPhone, p_code: String(fd.get('code')).trim(), p_pin: pin });
+      if (error) throw error;
+      if (String(data).startsWith('ERR:')) { UI.loginError = loginErr(String(data).slice(4)); UI.loginBusy = false; render(); return; }
+      UI.loginBusy = false;
+      await enterApp(data);
+      logAudit(data, 'Activated app login'); queueFlush();
+      toast(L('Welcome! Remember your PIN.', 'स्वागत है! अपना PIN याद रखें।'));
+    } catch (e) { UI.loginBusy = false; UI.loginError = loginErr('network'); render(); }
+  },
+  leave: (fd) => {
+    const u = me();
+    const from = fd.get('from'), to = fd.get('to');
+    if (to < from) { toast(L('"To" date is before "From" date', '"तक" तारीख़ "से" से पहले है')); return; }
+    const scope = fd.get('scope');
+    const periods = fd.getAll('periods').map(Number);
+    if (scope === 'periods' && !periods.length) { toast(L('Choose at least one period', 'कम से कम एक पीरियड चुनें')); return; }
+    const lv = { id: uid('lv'), teacherId: u.id, from, to, scope, periods, type: fd.get('type'), description: String(fd.get('description')).trim(), status: 'pending', remark: '', createdAt: nowStamp() };
+    S.leaves.push(lv);
+    notifyManagers({ en: `${u.name} applied for ${lv.type.toLowerCase()} leave (${fmtDate(from)}${to !== from ? ' – ' + fmtDate(to) : ''})`, hi: `${u.name} ने छुट्टी के लिए आवेदन किया (${fmtDate(from)}${to !== from ? ' – ' + fmtDate(to) : ''})` });
+    logAudit(u.id, `Applied for leave ${from} to ${to}`);
+    closeModal(); commit(); toast(L('Leave request sent', 'छुट्टी आवेदन भेजा गया'));
+  },
+  leaveDecision: (fd, form) => {
+    decideLeave(form.dataset.id, form.dataset.ok === '1', String(fd.get('remark') || '').trim(), me().id);
+    closeModal(); commit();
+    toast(form.dataset.ok === '1' ? L('Approved — substitutes drafted', 'स्वीकृत — अरेंजमेंट तैयार') : L('Rejected — teacher informed', 'अस्वीकृत — शिक्षक को सूचना'));
+  },
+  absent: (fd) => {
+    const tid = fd.get('tid'); const date = fd.get('date'); const scope = fd.get('scope'); const periods = fd.getAll('periods').map(Number);
+    if (!tid) { toast(L('Choose a teacher', 'शिक्षक चुनें')); return; }
+    if (dayIdx(date) < 0) { toast(L('That date is a Sunday', 'वह तारीख़ रविवार है')); return; }
+    if (scope === 'periods' && !periods.length) { toast(L('Choose at least one period', 'कम से कम एक पीरियड चुनें')); return; }
+    addAbsence(tid, date, scope, periods, String(fd.get('note') || ''), me().id);
+    UI.date = date; closeModal(); UI.view = 'subs'; commit();
+    toast(L('Marked absent — substitutes drafted', 'अनुपस्थित दर्ज — अरेंजमेंट तैयार'));
+  },
+  cell: (fd, form) => {
+    const d = Number(form.dataset.d), p = Number(form.dataset.p);
+    const s = fd.get('s'), tid = fd.get('t');
+    const clash = CLASSES.find(c => c !== UI.ttClass && lessonAt(c, d, p).t === tid);
+    if (clash) { const e = document.getElementById('cellErr'); e.textContent = L(`${nameOf(tid)} already teaches ${clash} in this period.`, `${nameOf(tid)} इस पीरियड में पहले से ${clash} में हैं।`); e.classList.remove('hidden'); return; }
+    const old = lessonAt(UI.ttClass, d, p);
+    S.tt[UI.ttClass][d][p - 1] = { s, t: tid };
+    logAudit(me().id, `Timetable ${UI.ttClass} ${DAYS[d]} P${p}: ${old.s}/${nameOf(old.t)} → ${s}/${nameOf(tid)}`);
+    if (old.t !== tid) [old.t, tid].forEach(x => notify(x, '', { en: `Timetable changed: ${UI.ttClass} ${DAYS[d]} P${p} is now ${SUBJECTS[s].en} with ${nameOf(tid)}`, hi: `समय-सारणी बदली: ${UI.ttClass} ${DAYS_HI[d]} P${p} अब ${SUBJECTS[s].hi} — ${nameOf(tid)}` }));
+    // refresh any upcoming plans for this weekday
+    Object.keys(S.plans).forEach(dt => { if (dt >= todayISO() && dayIdx(dt) === d) generatePlan(dt, me().id); });
+    closeModal(); commit(); toast(L('Saved', 'सहेजा गया'));
+  },
+  request: (fd, form) => {
+    const u = me();
+    const kind = form.dataset.kind;
+    const r = { id: uid('rq'), kind, teacherId: u.id, classId: fd.get('classId'), subject: fd.get('subject'), copies: Number(fd.get('copies') || 0),
+      neededBy: fd.get('neededBy'), description: String(fd.get('description') || '').trim(), status: 'requested', assignee: '', remark: '', draft: '',
+      createdAt: nowStamp(), history: [{ at: nowStamp(), by: u.id, text: 'Request raised' }] };
+    if (kind === 'dpp') Object.assign(r, { chapter: String(fd.get('chapter')).trim(), topic: String(fd.get('topic') || '').trim(), numQ: Number(fd.get('numQ') || 10), difficulty: fd.get('difficulty'), qtypes: fd.get('qtypes') });
+    else Object.assign(r, { wsType: fd.get('wsType'), pageSize: fd.get('pageSize'), color: fd.get('color') });
+    if (kind === 'worksheet' && r.description.length < 10) { toast(L('Please describe the worksheet in a little more detail', 'कृपया वर्कशीट का थोड़ा और विवरण दें')); return; }
+    S.requests.push(r);
+    notifyManagers({ en: `New ${kind === 'dpp' ? 'DPP' : 'worksheet'} request from ${u.name}: ${r.classId} ${SUBJECTS[r.subject].en}`, hi: `${u.name} का नया ${kind === 'dpp' ? 'DPP' : 'वर्कशीट'} अनुरोध: ${r.classId} ${SUBJECTS[r.subject].hi}` });
+    logAudit(u.id, `Raised ${kind} request for ${r.classId} ${r.subject}`);
+    closeModal(); UI.view = 'requests'; commit(); toast(L('Request sent for approval', 'अनुरोध स्वीकृति हेतु भेजा गया'));
+  },
+  reqApprove: (fd, form) => {
+    const r = S.requests.find(x => x.id === form.dataset.id);
+    r.status = 'approved'; r.assignee = fd.get('assignee'); r.remark = String(fd.get('remark') || '').trim();
+    r.history.push({ at: nowStamp(), by: me().id, text: `Approved, assigned to ${nameOf(r.assignee)}${r.remark ? ' — ' + r.remark : ''}` });
+    notify(r.teacherId, '', { en: `Your ${r.kind === 'dpp' ? 'DPP' : 'worksheet'} request (${r.classId}) was approved`, hi: `आपका ${r.kind === 'dpp' ? 'DPP' : 'वर्कशीट'} अनुरोध (${r.classId}) स्वीकृत हुआ` });
+    if (r.assignee !== r.teacherId) notify(r.assignee, '', { en: `You have been assigned a ${r.kind === 'dpp' ? 'DPP' : 'worksheet'}: ${r.classId} ${SUBJECTS[r.subject].en}, needed by ${fmtDate(r.neededBy)}`, hi: `आपको ${r.kind === 'dpp' ? 'DPP' : 'वर्कशीट'} सौंपी गई: ${r.classId}, ${fmtDate(r.neededBy)} तक` });
+    logAudit(me().id, `Approved ${r.kind} request ${r.classId} ${r.subject}`);
+    closeModal(); commit();
+  },
+  reqReject: (fd, form) => {
+    const r = S.requests.find(x => x.id === form.dataset.id);
+    r.status = 'rejected'; r.remark = String(fd.get('remark')).trim();
+    r.history.push({ at: nowStamp(), by: me().id, text: `Rejected — ${r.remark}` });
+    notify(r.teacherId, '', { en: `Your ${r.kind === 'dpp' ? 'DPP' : 'worksheet'} request (${r.classId}) was rejected: ${r.remark}`, hi: `आपका अनुरोध (${r.classId}) अस्वीकृत: ${r.remark}` });
+    logAudit(me().id, `Rejected ${r.kind} request ${r.classId} ${r.subject}`);
+    closeModal(); commit();
+  },
+  staff: (fd, form) => {
+    const id = form.dataset.id;
+    const phone = String(fd.get('phone')).replace(/\D/g, '');
+    const dup = S.staff.find(s => s.phone === phone && s.id !== id);
+    const err = document.getElementById('staffErr');
+    if (dup) { err.textContent = L(`This number already belongs to ${dup.name}.`, `यह नंबर पहले से ${dup.name} का है।`); err.classList.remove('hidden'); return; }
+    const data = { name: String(fd.get('name')).trim(), phone, role: fd.get('role'), subjects: fd.getAll('subjects'), active: fd.get('active') === 'on' };
+    if (id) {
+      const s = staffById(id);
+      if (s.id === me().id && (!data.active || !isManager(data))) { err.textContent = L('You cannot remove your own admin access.', 'आप अपनी एडमिन पहुँच नहीं हटा सकते।'); err.classList.remove('hidden'); return; }
+      Object.assign(s, data); logAudit(me().id, `Updated staff ${s.name}`);
+    } else {
+      const s = { id: uid('t'), ...data }; S.staff.push(s); sortStaff(); logAudit(me().id, `Added staff ${s.name}`);
+      closeModal(); commit();
+      queueFlush().then(async () => { await refreshCodes(); const c = UI.codes && UI.codes[s.id]; if (c && c.code) showCode(s, c.code); });
+      return;
+    }
+    closeModal(); commit(); toast(L('Saved', 'सहेजा गया'));
+  },
+  settings: (fd) => {
+    Object.keys(S.settings).forEach(k => { const v = Number(fd.get(k)); if (!Number.isNaN(v)) S.settings[k] = Math.max(0, Math.min(100, v)); });
+    if (S.settings.dailyCap < 1) S.settings.dailyCap = 1;
+    logAudit(me().id, 'Changed substitution rules');
+    Object.keys(S.plans).forEach(dt => { if (dt >= todayISO() && S.plans[dt].status !== 'published') generatePlan(dt, me().id); });
+    commit(); toast(L('Rules saved — draft plans updated', 'नियम सहेजे — ड्राफ़्ट योजनाएँ अपडेट'));
+  },
+  notice: (fd) => {
+    S.notices.unshift({ id: uid('nt'), by: me().id, at: nowStamp(), title: String(fd.get('title')).trim(), body: String(fd.get('body')).trim() });
+    S.staff.filter(s => s.active && s.id !== me().id).forEach(s => notify(s.id, '', { en: `New notice: ${fd.get('title')}`, hi: `नई सूचना: ${fd.get('title')}` }));
+    logAudit(me().id, `Posted notice "${fd.get('title')}"`);
+    closeModal(); commit();
+  },
+  chat: (fd, form) => { const q = String(fd.get('q') || '').trim(); if (q) askAssistant(q); },
+};
+
+/* ---------- DPP / worksheet drafting ---------- */
+function openDraft(id) {
+  const r = S.requests.find(x => x.id === id);
+  openModal(L('Draft', 'ड्राफ़्ट') + ` — ${r.kind === 'dpp' ? 'DPP' : t('worksheet')} ${r.classId} ${subjName(r.subject)}`, `
+    <p class="hint">${SAMPLE ? L('Claude writes a first draft. The teacher must check it before printing.', 'Claude पहला ड्राफ़्ट लिखता है। प्रिंट से पहले शिक्षक जाँचें।') : L('Creates a ready-to-fill sheet in MTS format. Type the questions in, then save or copy.', 'MTS प्रारूप में भरने योग्य शीट बनाता है। प्रश्न लिखें, फिर सहेजें या कॉपी करें।')}</p>
+    <textarea id="draftText" class="draft" rows="16">${esc(r.draft || '')}</textarea>
+    <div class="row-end"><button class="btn ai" data-act="aiGenerate" data-id="${r.id}" id="genBtn">✨ ${r.draft ? L('Start again', 'फिर से शुरू') : (SAMPLE ? t('aiDraft') : L('Make template', 'टेम्पलेट बनाएँ'))}</button>
+      <button class="btn ghost" data-act="copyDraft">📋 ${L('Copy', 'कॉपी')}</button><button class="btn primary" data-act="saveDraft" data-id="${r.id}">${t('save')}</button></div>`, { wide: true });
+}
+function draftPrompt(r) {
+  const head = `You are helping a teacher at ${SCHOOL.name}, ${SCHOOL.place} (CBSE-style school, India).`;
+  if (r.kind === 'dpp') return `${head}
+Write a Daily Practice Problem (DPP) sheet.
+Class: ${r.classId}. Subject: ${SUBJECTS[r.subject].en}. Chapter: ${r.chapter}. Topic: ${r.topic || '(whole chapter)'}.
+Number of questions: ${r.numQ}. Difficulty: ${r.difficulty}. Question types: ${r.qtypes}.
+Teacher's notes: ${r.description || 'none'}.
+Format as plain text, ready to print: a header line "${SCHOOL.name} — DPP", then Class, Subject, Chapter, Date: ____ , Name: ____ , Roll No: ____.
+Number the questions. For MCQs give four options (a)–(d). After the questions add an "Answer key" section with short answers.
+Keep the language level right for the class. Do not add any commentary before or after the sheet.`;
+  return `${head}
+Write a printable worksheet.
+Class: ${r.classId}. Subject: ${SUBJECTS[r.subject].en}. Worksheet type: ${r.wsType}. Page: ${r.pageSize}, ${r.color}.
+What the teacher wants: ${r.description}
+Format as plain text, ready to print: a header line "${SCHOOL.name} — Worksheet", then Class, Subject, Date: ____ , Name: ____ , Roll No: ____.
+Use clear numbered sections and short instructions a student of this class can follow. Where a picture or drawing is needed, write [Picture: …] describing it.
+Fit it to one ${r.pageSize} page if possible. Add a brief "Teacher's answer key" at the end if the activity has answers. No commentary before or after.`;
+}
+function templateDraft(r) {
+  const top = `${SCHOOL.name}, ${SCHOOL.place}\n${r.kind === 'dpp' ? 'DAILY PRACTICE PROBLEMS (DPP)' : (r.wsType || '').toUpperCase() + ' WORKSHEET'}\nClass: ${r.classId}    Subject: ${SUBJECTS[r.subject].en}    Date: ________\nName: ______________________    Roll No: ______\n`;
+  if (r.kind === 'dpp') {
+    let s = `${top}Chapter: ${r.chapter}${r.topic ? '  |  Topic: ' + r.topic : ''}\nDifficulty: ${r.difficulty}   |   Types: ${r.qtypes}\n\n`;
+    for (let i = 1; i <= Math.min(r.numQ, 50); i++) s += `Q${i}. ______________________________________________\n${/MCQ/i.test(r.qtypes) && i <= Math.ceil(r.numQ / 2) ? '   (a) ________   (b) ________   (c) ________   (d) ________\n' : ''}\n`;
+    return s + `\nAnswer key\n${Array.from({ length: Math.min(r.numQ, 50) }, (_, i) => `Q${i + 1}: ____`).join('   ')}\n`;
+  }
+  return `${top}\nTeacher's brief: ${r.description}\n\nSection A — ______________________\n1. ____________________________\n2. ____________________________\n3. ____________________________\n\nSection B — ______________________\n4. ____________________________\n5. ____________________________\n\n[Picture: ______________________]\n\nTeacher's answer key: ______________________\n`;
+}
+async function generateDraft(id) {
+  const r = S.requests.find(x => x.id === id);
+  const ta = document.getElementById('draftText');
+  const btn = document.getElementById('genBtn');
+  if (!SAMPLE) { ta.value = templateDraft(r); toast(L('Template added — fill in the questions', 'टेम्पलेट जोड़ा — प्रश्न भरें')); return; }
+  btn.disabled = true; btn.textContent = L('Writing…', 'लिख रहा है…');
+  try {
+    const res = await SAMPLE(draftPrompt(r), { onText: ({ text }) => { if (ta) ta.value = text; }, modelTier: 'default' });
+    ta.value = res.text;
+    r.history.push({ at: nowStamp(), by: me().id, text: 'AI draft written' });
+  } catch (e) {
+    if (e && e.code === 'not_granted') { SAMPLE = null; ta.value = templateDraft(r); toast(L('AI not allowed here — template added instead', 'यहाँ AI की अनुमति नहीं — टेम्पलेट जोड़ा')); }
+    else toast(L('AI could not write the draft. Try again in a minute.', 'AI ड्राफ़्ट नहीं लिख सका। थोड़ी देर में फिर कोशिश करें।'));
+  } finally { if (btn) { btn.disabled = false; btn.textContent = '✨ ' + L('Write again', 'फिर से लिखें'); } }
+}
+
+/* ---------- assistant ---------- */
+const DAY_WORDS = [
+  [0, /\b(mon|monday|somvar|सोमवार)/i], [1, /\b(tue|tuesday|mangalvar|mangal|मंगलवार)/i], [2, /\b(wed|wednesday|budhvar|budh|बुधवार)/i],
+  [3, /\b(thu|thursday|guruvar|brihaspati|गुरुवार)/i], [4, /\b(fri|friday|shukravar|shukra|शुक्रवार)/i], [5, /\b(sat|saturday|shanivar|shani|शनिवार)/i],
+];
+function parseDay(q) {
+  for (const [d, re] of DAY_WORDS) if (re.test(q)) { let dt = todayISO(); for (let i = 0; i < 7 && dayIdx(dt) !== d; i++) dt = addDays(dt, 1); return { d, date: dt }; }
+  if (/tomorrow|kal|कल/i.test(q)) { const dt = addDays(todayISO(), 1); return { d: dayIdx(dt), date: dt }; }
+  return { d: dayIdx(todayISO()), date: todayISO() };
+}
+function localAnswer(q) {
+  const hi = S.lang === 'hi';
+  const { d, date } = parseDay(q);
+  const pm = q.match(/(?:period|p|पीरियड|घंटी)\s*-?\s*(\d)/i) || q.match(/\b([1-8])(?:st|nd|rd|th)?\s*(?:period|पीरियड)/i);
+  const nameHit = S.staff.find(s => q.toLowerCase().includes(s.name.toLowerCase()) || q.toLowerCase().includes(s.name.split(' ')[0].toLowerCase()));
+  if (/free|khali|खाली|फ्री/i.test(q)) {
+    if (d < 0) return hi ? 'उस दिन रविवार है, स्कूल बंद।' : 'That day is a Sunday — no school.';
+    const periods = pm ? [Number(pm[1])] : PERIODS.map(p => p.n);
+    return periods.map(p => `P${p} (${periodTime(p)}), ${dayName(d)}: ${freeTeachers(d, p, date).join(', ') || (hi ? 'कोई नहीं' : 'nobody')}`).join('\n');
+  }
+  if (/most|sabse|zyada|ज़्यादा|ज्यादा|fair/i.test(q)) {
+    const ym = todayISO().slice(0, 7);
+    const list = teachers().map(tc => [tc.name, monthSubs(tc.id, ym)]).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    return (hi ? 'इस महीने सबसे ज़्यादा प्रकाशित अरेंजमेंट:\n' : 'Most published substitutions this month:\n') + list.map(([n, c], i) => `${i + 1}. ${n} — ${c}`).join('\n');
+  }
+  if (/absent|leave|chutti|छुट्टी|अनुपस्थित|nahi aaye|नहीं आए/i.test(q) && !/pending|lambit|लंबित/i.test(q)) {
+    const abs = absencesOn(date);
+    return abs.length ? `${fmtDate(date)}:\n` + abs.map(a => `• ${nameOf(a.teacherId)} — ${absenceLabel(a)}`).join('\n') : (hi ? `${fmtDate(date)} को कोई अनुपस्थित नहीं।` : `Nobody is absent on ${fmtDate(date)}.`);
+  }
+  if (/pending|lambit|लंबित|waiting/i.test(q)) {
+    const lv = S.leaves.filter(l => l.status === 'pending').length; const rq = S.requests.filter(r => r.status === 'requested').length;
+    return hi ? `लंबित: ${lv} छुट्टी आवेदन, ${rq} नए DPP/वर्कशीट अनुरोध।` : `Waiting: ${lv} leave request(s) and ${rq} new DPP/worksheet request(s).`;
+  }
+  if (nameHit && nameHit.role === 'teacher') {
+    if (d < 0) return hi ? 'उस दिन रविवार है।' : 'That day is a Sunday.';
+    const plan = S.plans[date];
+    return `${nameHit.name} — ${dayName(d)}:\n` + PERIODS.map(p => {
+      const l = teacherLessonAt(nameHit.id, d, p.n);
+      const s = plan && Object.values(plan.items).find(i => i.teacherId === nameHit.id && i.p === p.n);
+      return `P${p.n}: ${isAbsent(nameHit.id, date, p.n) ? (hi ? 'छुट्टी' : 'on leave') : s ? `${hi ? 'अरेंजमेंट' : 'substitution'} ${s.cls} ${subjName(s.subject)}` : l ? `${l.cls} ${subjName(l.s)}` : t('free')}`;
+    }).join('\n');
+  }
+  return hi ? 'मैं ये बता सकता हूँ: किसी पीरियड में कौन खाली है, आज कौन अनुपस्थित है, सबसे ज़्यादा अरेंजमेंट किसके, किसी शिक्षक का शेड्यूल, और लंबित काम।'
+    : 'I can tell you: who is free in a period, who is absent, who has done the most substitutions, any teacher\'s schedule, and what is pending.';
+}
+const AI_TOOLS = [
+  { name: 'free_teachers', description: 'Teachers with no class and not absent in a period. day = Mon..Sat or omit for the given date; period 1-8; date YYYY-MM-DD optional.',
+    inputSchema: { type: 'object', properties: { date: { type: 'string' }, day: { type: 'string' }, period: { type: 'integer' } }, required: ['period'] },
+    execute: ({ date, day, period }) => { let d = date ? dayIdx(date) : day ? DAYS.findIndex(x => day.toLowerCase().startsWith(x.toLowerCase())) : dayIdx(todayISO()); if (d < 0) return { error: 'Sunday or unknown day' }; return { day: DAYS[d], period, free: freeTeachers(d, period, date || null) }; } },
+  { name: 'teacher_schedule', description: 'One teacher\'s periods on a date (YYYY-MM-DD), including substitutions and leave.',
+    inputSchema: { type: 'object', properties: { name: { type: 'string' }, date: { type: 'string' } }, required: ['name'] },
+    execute: ({ name, date }) => { const s = S.staff.find(x => x.name.toLowerCase().includes(String(name).toLowerCase())); if (!s) return { error: 'no such teacher' }; const dt = date || todayISO(); const d = dayIdx(dt); if (d < 0) return { error: 'Sunday' };
+      const plan = S.plans[dt]; return { teacher: s.name, date: dt, periods: PERIODS.map(p => { const l = teacherLessonAt(s.id, d, p.n); const sub = plan && Object.values(plan.items).find(i => i.teacherId === s.id && i.p === p.n); return { period: p.n, time: periodTime(p.n), lesson: isAbsent(s.id, dt, p.n) ? 'on leave' : sub ? `substitution ${sub.cls} ${SUBJECTS[sub.subject].en}` : l ? `${l.cls} ${SUBJECTS[l.s].en}` : 'free' }; }) }; } },
+  { name: 'absences', description: 'Who is absent on a date (YYYY-MM-DD) and the substitution plan status.',
+    inputSchema: { type: 'object', properties: { date: { type: 'string' } } },
+    execute: ({ date }) => { const dt = date || todayISO(); const plan = S.plans[dt]; return { date: dt, absent: absencesOn(dt).map(a => ({ teacher: nameOf(a.teacherId), scope: a.scope, periods: scopePeriods(a.scope, a.periods), note: a.note })), plan: plan ? { status: plan.status, periods: Object.values(plan.items).map(i => ({ period: i.p, class: i.cls, subject: SUBJECTS[i.subject].en, absent: nameOf(i.absentId), substitute: i.teacherId ? nameOf(i.teacherId) : null })) } : null }; } },
+  { name: 'substitution_stats', description: 'Published substitutions, weekly periods and leave days per teacher for a month (YYYY-MM).',
+    inputSchema: { type: 'object', properties: { month: { type: 'string' } } },
+    execute: ({ month }) => { const ym = month || todayISO().slice(0, 7); return { month: ym, teachers: teachers().map(tc => ({ name: tc.name, subjects: tc.subjects.map(s => SUBJECTS[s].en), periodsPerWeek: weeklyLoad(tc.id), substitutions: monthSubs(tc.id, ym), leaveDays: monthLeaveDays(tc.id, ym) })) }; } },
+  { name: 'pending_work', description: 'Leave requests waiting for a decision and open DPP/worksheet requests.',
+    inputSchema: { type: 'object', properties: {} },
+    execute: () => ({ leave: S.leaves.filter(l => l.status === 'pending').map(l => ({ teacher: nameOf(l.teacherId), from: l.from, to: l.to, type: l.type, description: l.description })),
+      requests: S.requests.filter(r => !['delivered', 'rejected'].includes(r.status)).map(r => ({ kind: r.kind, class: r.classId, subject: SUBJECTS[r.subject].en, status: r.status, neededBy: r.neededBy, by: nameOf(r.teacherId) })) }) },
+  { name: 'class_timetable', description: 'A class\'s periods on a weekday (Mon..Sat). Classes: ' + CLASSES.join(', '),
+    inputSchema: { type: 'object', properties: { class: { type: 'string' }, day: { type: 'string' } }, required: ['class'] },
+    execute: (inp) => { const c = String(inp.class).toUpperCase().replace(/\s/g, ''); if (!S.tt[c]) return { error: 'no such class' }; const d = inp.day ? DAYS.findIndex(x => inp.day.toLowerCase().startsWith(x.toLowerCase())) : dayIdx(todayISO()); if (d < 0) return { error: 'Sunday or unknown day' };
+      return { class: c, day: DAYS[d], periods: PERIODS.map(p => ({ period: p.n, time: periodTime(p.n), subject: SUBJECTS[lessonAt(c, d, p.n).s].en, teacher: nameOf(lessonAt(c, d, p.n).t) })) }; } },
+];
+async function askAssistant(q) {
+  if (UI.chatBusy) return;
+  UI.chat.push({ role: 'user', text: q });
+  if (!SAMPLE) { UI.chat.push({ role: 'assistant', text: localAnswer(q) }); render(); return; }
+  UI.chatBusy = true; render();
+  const intro = `You are the assistant inside the staff app of ${SCHOOL.name}, ${SCHOOL.place}. Today is ${todayISO()} (${dayIdx(todayISO()) >= 0 ? DAYS_LONG[dayIdx(todayISO())] : 'Sunday'}).
+The school works Monday–Saturday, 8 periods a day: ${PERIODS.map(p => `P${p.n} ${p.start}-${p.end}`).join(', ')}, lunch ${LUNCH.start}-${LUNCH.end}.
+The user is ${me().name} (${me().role}). Use the tools for every fact about timetables, absences, substitutions, leave or requests; never guess.
+You can only read data. If asked to change something, say which screen to use (Substitutions, Leave, Timetable, DPP & Worksheets).
+Answer briefly in the language the user writes in (Hindi, English or Hinglish). Plain text, short lists, no markdown headings.`;
+  const msgs = UI.chat.map((m, i) => ({ role: m.role, content: i === 0 ? `${intro}\n\nQuestion: ${m.text}` : m.text }));
+  try {
+    const res = await SAMPLE(msgs, { tools: AI_TOOLS, cache: false, onText: ({ text }) => { const el = document.getElementById('liveAnswer'); if (el) el.textContent = text; } });
+    UI.chat.push({ role: 'assistant', text: res.text || '…' });
+  } catch (e) {
+    if (e && e.code === 'not_granted') SAMPLE = null;
+    UI.chat.push({ role: 'assistant', text: localAnswer(q) });
+  }
+  UI.chatBusy = false; render();
+}
+
+/* ---------- wiring ---------- */
+document.addEventListener('click', ev => {
+  const el = ev.target.closest('[data-act]');
+  if (!el) return;
+  // the dark backdrop closes the dialog only when the backdrop itself is clicked
+  if (el.dataset.act === 'closeModalBack' && ev.target !== el) return;
+  const fn = ACTIONS[el.dataset.act];
+  if (fn) { ev.preventDefault(); fn(el, ev); }
+});
+document.addEventListener('change', ev => {
+  const el = ev.target.closest('[data-change]');
+  if (el && CHANGES[el.dataset.change]) CHANGES[el.dataset.change](el, ev);
+});
+document.addEventListener('submit', ev => {
+  const form = ev.target.closest('form[data-form]');
+  if (!form) return;
+  ev.preventDefault();
+  const fn = FORMS[form.dataset.form];
+  if (fn) fn(new FormData(form), form);
+});
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape') closeModal(); });
+
+function showCode(s, code) {
+  const link = APP_CONFIG.siteUrl || location.href.split('#')[0];
+  const msg = `${SCHOOL.name} staff app\n${L('Open', 'खोलें')}: ${link}\n${L('Mobile', 'मोबाइल')}: ${s.phone}\n${L('Activation code', 'एक्टिवेशन कोड')}: ${code}\n${L('Enter your mobile number and this code, then choose your own 6-digit PIN.', 'अपना मोबाइल नंबर और यह कोड डालें, फिर अपना 6 अंकों का PIN चुनें।')}`;
+  openModal(L('Activation code', 'एक्टिवेशन कोड'), `<p><b>${esc(s.name)}</b> · +91 ${esc(s.phone)}</p>
+    <div class="bigcode">${esc(code)}</div>
+    <p class="hint">${L('Give this code to the staff member (in person or on WhatsApp). It works once.', 'यह कोड स्टाफ़ सदस्य को दें (सामने या WhatsApp पर)। यह एक बार काम करता है।')}</p>
+    <textarea class="copybox" rows="5" readonly>${esc(msg)}</textarea>
+    <div class="row-end"><a class="btn ghost" href="https://wa.me/91${esc(s.phone)}?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">WhatsApp</a><button class="btn primary" data-act="copyCodeMsg" data-msg="${esc(msg)}">📋 ${L('Copy message', 'संदेश कॉपी करें')}</button></div>`);
+}
+
+boot();
+
+</script>
+</body>
+</html>
