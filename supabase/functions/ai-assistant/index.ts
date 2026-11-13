@@ -21,11 +21,19 @@ function publishableKey(): string {
   return Deno.env.get('SUPABASE_ANON_KEY') ?? '';
 }
 
+// The key is normally the ANTHROPIC_API_KEY secret; accept a Claude key saved under any other name too.
+function claudeKey(): string | undefined {
+  const named = Deno.env.get('ANTHROPIC_API_KEY');
+  if (named) return named.trim();
+  const found = Object.values(Deno.env.toObject()).find(v => typeof v === 'string' && v.trim().startsWith('sk-ant-'));
+  return found?.trim();
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
   if (req.method !== 'POST') return json({ error: 'method' }, 405);
   try {
-    const apiKey = Deno.env.get('ANTHROPIC_API_KEY');
+    const apiKey = claudeKey();
     if (!apiKey) return json({ error: 'not_configured' }, 503);
 
     // who is calling? (the database checks their session)

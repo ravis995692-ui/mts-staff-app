@@ -1599,6 +1599,7 @@ function viewAssistant() {
   const chip = AI.status === 'on' ? `<span class="chip st-approved">✨ Claude AI${mgr && AI.used ? ` · ${AI.used}/${AI.limit} ${L('today', 'आज')}` : ''}</span>`
     : AI.status === 'off' ? `<span class="chip st-requested">${L('AI not set up — built-in answers', 'AI सेट नहीं — अंतर्निहित उत्तर')}</span>`
     : AI.status === 'limit' ? `<span class="chip st-rejected">${L('Daily AI limit reached', 'दैनिक AI सीमा पूरी')}</span>`
+    : AI.status === 'credit' ? `<span class="chip st-rejected">${L('Claude account needs credit', 'Claude अकाउंट में क्रेडिट चाहिए')}</span>`
     : `<span class="chip">✨ Claude AI</span>`;
   return `<div class="page-head"><h2>${t('assistant')}</h2><div class="btns">${chip}${UI.chat.length ? `<button class="btn small ghost" data-act="newChat">${L('New chat', 'नई बातचीत')}</button>` : ''}</div></div>
     <section class="panel chat">
@@ -2065,6 +2066,7 @@ async function callAI(payload) {
   try { info = await error.context.json(); } catch (e) { }
   if (info.error === 'not_configured') AI.status = 'off';
   else if (info.error === 'limit') AI.status = 'limit';
+  else if (info.error === 'ai_error' && /credit|billing/i.test(info.detail || '')) AI.status = 'credit';
   const err = new Error(info.error || 'network'); err.info = info; throw err;
 }
 
@@ -2324,7 +2326,8 @@ async function askAssistant(q) {
     // undo the unfinished turn so the conversation stays valid
     while (AI.convo.length && !(AI.convo[AI.convo.length - 1].role === 'user' && AI.convo[AI.convo.length - 1].content === q)) AI.convo.pop();
     AI.convo.pop();
-    const why = AI.status === 'limit' ? L('You have reached today\'s AI limit. It resets at midnight.', 'आज की AI सीमा पूरी हो गई। आधी रात को फिर शुरू होगी।')
+    const why = AI.status === 'credit' ? L('The school\'s Claude account has no credit left. The Admin needs to add credit at console.anthropic.com (Plans & Billing). Built-in answer:', 'स्कूल के Claude अकाउंट में क्रेडिट नहीं है। एडमिन console.anthropic.com (Plans & Billing) पर क्रेडिट जोड़ें। अंतर्निहित उत्तर:')
+      : AI.status === 'limit' ? L('You have reached today\'s AI limit. It resets at midnight.', 'आज की AI सीमा पूरी हो गई। आधी रात को फिर शुरू होगी।')
       : AI.status === 'off' ? L('AI is not set up yet (the Admin needs to add the Claude API key). Here is a built-in answer:', 'AI अभी सेट नहीं है (एडमिन को Claude API key जोड़नी है)। अंतर्निहित उत्तर:')
       : L('Could not reach the AI just now. Built-in answer:', 'अभी AI से जुड़ नहीं सका। अंतर्निहित उत्तर:');
     UI.chat.push({ role: 'assistant', text: why + (AI.status === 'limit' ? '' : '\n\n' + localAnswer(q)), local: true });
@@ -2346,7 +2349,7 @@ async function generateDraft(id) {
     toast(L('Draft ready — please check before printing', 'ड्राफ़्ट तैयार — प्रिंट से पहले जाँचें'));
   } catch (e) {
     ta.value = ta.value || templateDraft(r);
-    toast(AI.status === 'limit' ? L('Daily AI limit reached — template added', 'दैनिक AI सीमा पूरी — टेम्पलेट जोड़ा') : AI.status === 'off' ? L('AI not set up — template added', 'AI सेट नहीं — टेम्पलेट जोड़ा') : L('AI could not write it — try again', 'AI नहीं लिख सका — फिर कोशिश करें'));
+    toast(AI.status === 'credit' ? L('Claude account has no credit — template added', 'Claude अकाउंट में क्रेडिट नहीं — टेम्पलेट जोड़ा') : AI.status === 'limit' ? L('Daily AI limit reached — template added', 'दैनिक AI सीमा पूरी — टेम्पलेट जोड़ा') : AI.status === 'off' ? L('AI not set up — template added', 'AI सेट नहीं — टेम्पलेट जोड़ा') : L('AI could not write it — try again', 'AI नहीं लिख सका — फिर कोशिश करें'));
   } finally { btn.disabled = false; btn.textContent = '✨ ' + L('Write again', 'फिर से लिखें'); }
 }
 
