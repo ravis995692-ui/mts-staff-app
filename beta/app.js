@@ -1019,6 +1019,7 @@ function viewSubs() {
           <td class="why" data-label="${esc(L('Why', 'क्यों'))}">${whyText(i)}</td>
           <td data-label="${esc(t('seen'))}">${plan.status === 'published' && i.teacherId ? (isAcked(date, i.key, i.teacherId) ? '<span class="ok-text">✓</span>' : `<span class="muted">${L('not yet', 'अभी नहीं')}</span>`) : '—'}</td></tr>`;
       }).join('')}</tbody></table></div>
+    ${waPanelHTML(date, plan)}
     <div class="row-end">
       <button class="btn ghost" data-act="copySheet">📋 ${t('copySheet')}</button>
       <button class="btn ghost" data-act="printSheet">🖨️ ${t('print')}</button>
@@ -2748,6 +2749,54 @@ Object.assign(ACTIONS, {
       S.config.holidays = { days, by: me().id, at: nowStamp() };
       logAudit(me().id, `Removed holiday "${name}" ${from}${to !== from ? ' to ' + to : ''}`); commit(); toast(L('Holiday removed', 'अवकाश हटाया गया'));
     }, L('Remove', 'हटाएँ'));
+  },
+});
+
+
+/* =================================================================
+   14. ONE-TAP WHATSAPP TO SUBSTITUTES
+   ================================================================= */
+const waPhone = s => { const d = String((s && s.phone) || '').replace(/\D/g, '').slice(-10); return /^[6-9]\d{9}$/.test(d) ? '91' + d : ''; };
+function waItemsFor(plan, tid) { return Object.values(plan.items).filter(i => i.teacherId === tid).sort((a, b) => a.p - b.p); }
+const waSig = list => list.map(i => `${i.p}|${i.cls}|${i.subject}|${i.absentId}`).join(';');
+function waMessage(date, tid, list) {
+  const lines = list.map(i => `• P${i.p} (${periodTime(i.p)}) — ${i.cls} — ${SUBJECTS[i.subject] ? SUBJECTS[i.subject].en : i.subject} (for ${nameOf(i.absentId)})`);
+  return `🔁 *Arrangement — ${fmtDate(date)}*\n${nameOf(tid)}, please take:\n${lines.join('\n')}\n\nकृपया ऊपर दिए पीरियड लें और MTS Staff App में "देख लिया" दबाएँ।\n— Office, ${SCHOOL.name}`;
+}
+function waPanelHTML(date, plan) {
+  if (!plan || !plan.items) return '';
+  const tids = [...new Set(Object.values(plan.items).map(i => i.teacherId).filter(Boolean))].sort((a, b) => Math.min(...waItemsFor(plan, a).map(i => i.p)) - Math.min(...waItemsFor(plan, b).map(i => i.p)));
+  if (!tids.length) return '';
+  const sent = plan.wa || {};
+  const rows = tids.map(tid => {
+    const list = waItemsFor(plan, tid); const s = staffById(tid); const ph = waPhone(s);
+    const st = sent[tid]; const fresh = st && st.sig === waSig(list);
+    return `<li><div><div><strong>${esc(nameOf(tid))}</strong><small>${list.map(i => `P${i.p} ${esc(i.cls)}`).join(', ')}${st ? ` · ${fresh ? '✓ ' + L('sent', 'भेजा') + ' ' + new Date(st.at).toTimeString().slice(0, 5) : '<span class="warn-text">' + L('changed since sent', 'भेजने के बाद बदला') + '</span>'}` : ''}</small></div></div>
+      ${ph ? `<button class="btn small ${fresh ? 'ghost' : 'wa'}" data-act="waSend" data-tid="${tid}">${fresh ? L('Send again', 'फिर भेजें') : '📲 WhatsApp'}</button>` : `<button class="btn small ghost" data-act="go" data-view="staff">${L('Add mobile no.', 'मोबाइल जोड़ें')}</button>`}</li>`;
+  }).join('');
+  const done = tids.filter(tid => sent[tid] && sent[tid].sig === waSig(waItemsFor(plan, tid))).length;
+  return `<section class="panel wa-panel"><div class="panel-head"><h3>📲 ${L('Tell substitutes on WhatsApp', 'अरेंजमेंट शिक्षकों को WhatsApp करें')} <small class="muted">${done}/${tids.length} ${L('sent', 'भेजे')}</small></h3>
+    <button class="btn small ghost" data-act="waGroup">👥 ${L('Send whole sheet to a group', 'पूरी शीट ग्रुप में भेजें')}</button></div>
+    ${plan.status !== 'published' ? `<p class="hint warn-text">${L('Tip: publish the plan first, so teachers also see it in the app.', 'सुझाव: पहले प्लान प्रकाशित करें, ताकि शिक्षक ऐप में भी देख सकें।')}</p>` : ''}
+    <p class="hint">${L('Each button opens WhatsApp with the message already written for that teacher — just press send.', 'हर बटन उस शिक्षक के लिए लिखा संदेश WhatsApp में खोलता है — बस भेजें दबाएँ।')}</p>
+    <ul class="list">${rows}</ul></section>`;
+}
+Object.assign(ACTIONS, {
+  waSend: el => {
+    const date = UI.date; const plan = S.plans[date]; const tid = el.dataset.tid;
+    if (!plan) return;
+    const list = waItemsFor(plan, tid); const ph = waPhone(staffById(tid));
+    if (!list.length || !ph) return;
+    window.open(`https://wa.me/${ph}?text=${encodeURIComponent(waMessage(date, tid, list))}`, '_blank');
+    plan.wa = { ...(plan.wa || {}), [tid]: { at: nowStamp(), sig: waSig(list), by: me().id } };
+    logAudit(me().id, `WhatsApp arrangement message opened for ${nameOf(tid)} (${date})`);
+    commit();
+  },
+  waGroup: () => {
+    const date = UI.date; const plan = S.plans[date]; if (!plan) return;
+    const rows = Object.values(plan.items).sort((a, b) => a.p - b.p || CLASSES.indexOf(a.cls) - CLASSES.indexOf(b.cls));
+    const txt = `🔁 *Arrangement sheet — ${fmtDate(date)}*\n${rows.map(i => `P${i.p} ${i.cls} ${SUBJECTS[i.subject] ? SUBJECTS[i.subject].en : i.subject} — *${i.teacherId ? nameOf(i.teacherId) : 'NOT COVERED'}* (for ${nameOf(i.absentId)})`).join('\n')}\n— Office, ${SCHOOL.name}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`, '_blank');
   },
 });
 
