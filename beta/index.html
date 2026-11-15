@@ -498,6 +498,7 @@ ul.plain { list-style: none; padding: 0; margin: 6px 0; } ul.plain li { padding:
       for (;;) { var x = await rd.read(); if (x.done) break; chunks.push(x.value); got += x.value.length; if (label && total) show(Math.min(99, Math.round(got / total * 100)) + '%'); }
     } else { chunks.push(new Uint8Array(await r.arrayBuffer())); }
     var buf = new Blob(chunks);
+    if (window.caches) caches.open('mts-shell-v3').then(function (c) { return c.put(new URL(url.split('?')[0], location.href).href, new Response(buf, { headers: { 'content-type': 'application/gzip' } })); }).catch(function () { });
     var head = new Uint8Array(await buf.slice(0, 2).arrayBuffer());
     if (head[0] === 0x1f && head[1] === 0x8b) return await new Response(buf.stream().pipeThrough(new DecompressionStream('gzip'))).text();
     return await buf.text();
