@@ -1,19 +1,23 @@
-/* MTS Staff App — keeps the app's own files on the phone so it opens without internet.
-   School data is never cached here: it comes from the database, or from the copy the app keeps itself. */
-const CACHE = 'mts-shell-v2-1';
-const SHELL = ['./', 'index.html', '../supabase.js', 'manifest.webmanifest', '../icon-192.png', '../icon-512.png'];
+/* MTS Staff App — keeps the app's own files on the phone so it opens instantly, even on slow internet.
+   Opens from the saved copy at once and quietly fetches the newest version for next time.
+   School data is never cached here: it always comes from the database. */
+const CACHE = 'mts-shell-v3';
+const SHELL = ['./', 'index.html', 'app.js.gz', 'supabase.js.gz', 'manifest.webmanifest', '../icon-192.png', '../icon-512.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', e => {
   const req = e.request;
-  if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) return;
-  const isPage = req.mode === 'navigate' || /index\.html$|\/$/.test(new URL(req.url).pathname);
-  if (isPage) {
-    // newest page when online, saved page when offline
-    e.respondWith(fetch(req).then(res => { const copy = res.clone(); caches.open(CACHE).then(c => c.put('index.html', copy)); return res; }).catch(() => caches.match('index.html')));
-    return;
-  }
-  e.respondWith(caches.match(req).then(hit => hit || fetch(req).then(res => { if (res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); } return res; })));
+  if (req.method !== 'GET') return;
+  const url = new URL(req.url);
+  if (url.origin !== self.location.origin) return;
+  const isPage = req.mode === 'navigate';
+  const key = isPage ? new URL('./', self.registration.scope).href : url.origin + url.pathname; // one saved copy per file
+  e.respondWith(caches.open(CACHE).then(async cache => {
+    const hit = await cache.match(key, { ignoreSearch: true });
+    const fresh = fetch(req, { cache: 'no-cache' }).then(res => { if (res && res.ok) cache.put(key, res.clone()); return res; });
+    if (hit) { e.waitUntil(fresh.catch(() => { })); return hit; }
+    return fresh.catch(() => cache.match(new URL('./', self.registration.scope).href));
+  }));
 });
 self.addEventListener('notificationclick', e => {
   e.notification.close();
