@@ -475,6 +475,8 @@ ul.plain { list-style: none; padding: 0; margin: 6px 0; } ul.plain li { padding:
   .two-col { grid-template-columns: 1fr; }
 }
 
+.cal-ev.hol { background: var(--violet-soft); color: var(--violet); }
+
 </style>
 </head>
 <body>
@@ -693,7 +695,10 @@ const todayISO = () => toISO(new Date());
 const parseISO = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
 const addDays = (iso, n) => { const d = parseISO(iso); d.setDate(d.getDate() + n); return toISO(d); };
 /* 0 = Monday … 5 = Saturday, -1 = Sunday */
-const dayIdx = iso => { const g = parseISO(iso).getDay(); return g === 0 ? -1 : g - 1; };
+const holidayName = iso => { try { const h = (S && S.config && S.config.holidays && S.config.holidays.days) || {}; return h[iso] || null; } catch (e) { return null; } };
+const dayIdx = iso => { const g = parseISO(iso).getDay(); return g === 0 || holidayName(iso) ? -1 : g - 1; };
+const closedName = iso => (holidayName(iso) ? '🎉 ' + holidayName(iso) : L('Sunday', 'रविवार'));
+const noSchoolMsg = iso => (holidayName(iso) ? L(`No school — holiday: ${holidayName(iso)}`, `स्कूल बंद — अवकाश: ${holidayName(iso)}`) : t('noClasses'));
 const weekStart = iso => { const d = parseISO(iso); const g = d.getDay(); const back = g === 0 ? 6 : g - 1; d.setDate(d.getDate() - back); return toISO(d); };
 const nowStamp = () => new Date().toISOString();
 const fmtDate = iso => {
@@ -1396,7 +1401,7 @@ function dateBar(extra = '') {
     <input type="date" value="${UI.date}" data-change="setDate">
     <button class="icon-btn" data-act="shiftDate" data-n="1" aria-label="Next day">›</button>
     <button class="btn small ghost" data-act="dateToday">${t('today')}</button>
-    <span class="dayname">${dayIdx(UI.date) >= 0 ? dayName(dayIdx(UI.date)) : L('Sunday', 'रविवार')}</span>
+    <span class="dayname">${dayIdx(UI.date) >= 0 ? dayName(dayIdx(UI.date)) : esc(closedName(UI.date))}</span>
     ${extra}
   </div>`;
 }
@@ -1413,7 +1418,7 @@ function viewDashboard() {
   const newReq = S.requests.filter(r => r.status === 'requested');
   return `
   <div class="page-head"><h2>${t('dashboard')}</h2>${dateBar()}</div>
-  ${dayIdx(date) < 0 ? `<div class="banner">${t('noClasses')}</div>` : ''}
+  ${dayIdx(date) < 0 ? `<div class="banner">${esc(noSchoolMsg(date))}</div>` : ''}
   ${startCardHTML()}
   <form data-form="quickAsk" class="quickask"><span>⚡</span><input name="q" placeholder="${esc(L('Ask anything — e.g. who is free in period 5?', 'कुछ भी पूछें — जैसे पीरियड 5 में कौन खाली है?'))}" autocomplete="off"><button type="button" class="icon-btn mic" data-act="voice" aria-label="${esc(L('Ask by voice', 'बोलकर पूछें'))}">🎤</button><button class="btn primary">${t('ask')}</button></form>
   <div class="cards">
@@ -1480,7 +1485,7 @@ function viewSubs() {
   const plan = S.plans[date];
   const gaps = computeGaps(date);
   let body = '';
-  if (d < 0) body = `<div class="banner">${t('noClasses')}</div>`;
+  if (d < 0) body = `<div class="banner">${esc(noSchoolMsg(date))}</div>`;
   else if (!gaps.length) body = `<div class="empty">✅ ${L('No periods to cover on this day.', 'इस दिन कोई पीरियड खाली नहीं है।')}</div>`;
   else {
     const items = Object.values(plan.items).sort((a, b) => a.p - b.p || CLASSES.indexOf(a.cls) - CLASSES.indexOf(b.cls));
@@ -1564,7 +1569,7 @@ function viewMyDay() {
   <div class="grid2">${checkCardHTML() ? `<div>${checkCardHTML()}</div>` : ''}${myDayExtrasHTML(date)}</div>
   <div class="grid2">
     <section class="panel"><div class="panel-head"><h3>${t('myDay')} · ${fmtDate(date)}</h3></div>
-      ${d < 0 ? `<p class="muted">${t('noClasses')}</p>` : `<ul class="day">${rows}</ul>`}
+      ${d < 0 ? `<p class="muted">${esc(noSchoolMsg(date))}</p>` : `<ul class="day">${rows}</ul>`}
     </section>
     <section class="panel">
       <div class="panel-head"><h3>${L('Quick actions', 'त्वरित कार्य')}</h3></div>
@@ -2081,7 +2086,7 @@ const FORMS = {
   absent: (fd) => {
     const tid = fd.get('tid'); const date = fd.get('date'); const scope = fd.get('scope'); const periods = fd.getAll('periods').map(Number);
     if (!tid) { toast(L('Choose a teacher', 'शिक्षक चुनें')); return; }
-    if (dayIdx(date) < 0) { toast(L('That date is a Sunday', 'वह तारीख़ रविवार है')); return; }
+    if (dayIdx(date) < 0) { toast(L('That date is a Sunday or a school holiday', 'वह तारीख़ रविवार या अवकाश है')); return; }
     if (scope === 'periods' && !periods.length) { toast(L('Choose at least one period', 'कम से कम एक पीरियड चुनें')); return; }
     addAbsence(tid, date, scope, periods, String(fd.get('note') || ''), me().id);
     UI.date = date; closeModal(); UI.view = 'subs'; commit();
@@ -2268,6 +2273,7 @@ const CHECK_ERRORS = {
   too_late: ['Check-in time is over for today. Please contact the office.', 'आज चेक-इन का समय खत्म हो गया। ऑफ़िस से संपर्क करें।'],
   too_early_out: ['Check-out is not open yet.', 'चेक-आउट अभी शुरू नहीं हुआ।'],
   no_school: ['No school today.', 'आज स्कूल बंद है।'],
+  holiday: ['Today is a school holiday — no check-in needed.', 'आज विद्यालय अवकाश है — चेक-इन की ज़रूरत नहीं।'],
   too_many: ['Too many attempts today. Please contact the office.', 'आज बहुत ज़्यादा कोशिशें हुईं। ऑफ़िस से संपर्क करें।'],
   not_signed_in: ['Please log in again.', 'फिर से लॉग इन करें।'],
   bad_device: ['This browser cannot keep a device id. Turn off private browsing.', 'यह ब्राउज़र डिवाइस आईडी नहीं रख सकता। प्राइवेट ब्राउज़िंग बंद करें।'],
@@ -2313,7 +2319,7 @@ function checkCardHTML() {
   const st = attStatus(u.id, date);
   const m = V2.checkMsg;
   let body = '';
-  if (dayIdx(date) < 0) body = `<p class="muted">${t('noClasses')}</p>`;
+  if (dayIdx(date) < 0) body = `<p class="muted">${esc(noSchoolMsg(date))}</p>`;
   else if (st === 'leave') body = `<p>${attChip('leave')}</p>`;
   else {
     const inDone = a && a.in, outDone = a && a.out;
@@ -2400,7 +2406,7 @@ function monthRegisterHTML(ym) {
   const sym = { present: 'P', late: 'L', absent: 'A', leave: 'LV', review: '?', holiday: '', not_in: '', rejected: 'A' };
   const missingOld = ym < addDays(todayISO(), -70).slice(0, 7);
   return `${missingOld && !V2.loadedMonths?.[ym] ? `<div class="banner">${L('Loading older records…', 'पुराने रिकॉर्ड लोड हो रहे हैं…')}</div>` : ''}
-    <section class="panel"><div class="table-wrap"><table class="data register"><thead><tr><th>${L('Staff', 'स्टाफ़')}</th>${days.map(d => `<th class="${dayIdx(d) < 0 ? 'sun' : ''}">${Number(d.slice(8))}</th>`).join('')}<th>P</th><th>L</th><th>A</th><th>LV</th></tr></thead>
+    <section class="panel"><div class="table-wrap"><table class="data register"><thead><tr><th>${L('Staff', 'स्टाफ़')}</th>${days.map(d => `<th class="${dayIdx(d) < 0 ? 'sun' : ''}" title="${esc(holidayName(d) || '')}">${Number(d.slice(8))}${holidayName(d) ? '🎉' : ''}</th>`).join('')}<th>P</th><th>L</th><th>A</th><th>LV</th></tr></thead>
     <tbody>${people.map(p => { const s = monthStats(p.id, ym); return `<tr><td><b>${esc(p.name)}</b></td>${days.map(d => { const st = d > todayISO() ? '' : attStatus(p.id, d); return `<td class="r-${st}">${sym[st] || ''}</td>`; }).join('')}<td>${s.present}</td><td>${s.late}</td><td>${s.absent}</td><td>${s.leave}</td></tr>`; }).join('')}</tbody></table></div>
     <p class="hint">P = ${attLabel('present')} · L = ${attLabel('late')} · A = ${attLabel('absent')} · LV = ${attLabel('leave')} · ? = ${attLabel('review')}</p>
     <div class="row-end"><button class="btn primary" data-act="exportSalary">💼 ${L('Salary sheet', 'वेतन शीट')}</button><button class="btn ghost" data-act="exportAttendance">⬇️ ${L('Download Excel', 'Excel डाउनलोड')}</button><button class="btn ghost" data-act="printAttendance">🖨️ ${L('Print / PDF', 'प्रिंट / PDF')}</button></div></section>`;
@@ -2480,7 +2486,7 @@ function leaveCalendarHTML() {
     const iso = `${ym}-${pad(d)}`;
     const on = S.leaves.filter(l => l.status !== 'rejected' && l.from <= iso && l.to >= iso && dayIdx(iso) >= 0);
     const abs = S.absences.filter(a => a.date === iso && !on.some(l => l.teacherId === a.teacherId));
-    cells.push(`<div class="cal-cell ${dayIdx(iso) < 0 ? 'sun' : ''} ${iso === todayISO() ? 'today' : ''}"><b>${d}</b>
+    cells.push(`<div class="cal-cell ${dayIdx(iso) < 0 ? 'sun' : ''} ${iso === todayISO() ? 'today' : ''}"><b>${d}</b>${holidayName(iso) ? `<span class="cal-ev hol" title="${esc(holidayName(iso))}">🎉 ${esc(holidayName(iso))}</span>` : ''}
       ${on.map(l => `<span class="cal-ev ${l.status}" title="${esc(nameOf(l.teacherId) + ' · ' + l.type)}">${esc(nameOf(l.teacherId).split(' ')[0])}</span>`).join('')}
       ${abs.map(a => `<span class="cal-ev abs" title="${esc(nameOf(a.teacherId))}">${esc(nameOf(a.teacherId).split(' ')[0])}</span>`).join('')}</div>`);
   }
@@ -2489,7 +2495,7 @@ function leaveCalendarHTML() {
   return `<section class="panel"><div class="panel-head"><h3>${first.toLocaleDateString(S.lang === 'hi' ? 'hi-IN' : 'en-IN', { month: 'long', year: 'numeric' })}</h3>
     <div class="btns"><button class="btn small ghost" data-act="leaveCal" data-ym="${prev}">‹</button><button class="btn small ghost" data-act="leaveCal" data-ym="${todayISO().slice(0, 7)}">${L('This month', 'यह माह')}</button><button class="btn small ghost" data-act="leaveCal" data-ym="${next}">›</button></div></div>
     <div class="cal">${(S.lang === 'hi' ? ['सोम', 'मंगल', 'बुध', 'गुरु', 'शुक्र', 'शनि', 'रवि'] : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']).map(d => `<div class="cal-h">${d}</div>`).join('')}${cells.join('')}</div>
-    <p class="hint"><span class="cal-ev approved">${t('approved')}</span> <span class="cal-ev pending">${t('pending')}</span> <span class="cal-ev abs">${L('Marked absent', 'अनुपस्थित चिह्नित')}</span></p></section>`;
+    <p class="hint"><span class="cal-ev approved">${t('approved')}</span> <span class="cal-ev pending">${t('pending')}</span> <span class="cal-ev abs">${L('Marked absent', 'अनुपस्थित चिह्नित')}</span> <span class="cal-ev hol">🎉 ${L('School holiday', 'विद्यालय अवकाश')}</span></p></section>`;
 }
 function leaveBalancesTableHTML() {
   const pol = leavePolicy(); const yr = leaveYear();
@@ -2883,7 +2889,7 @@ function swapCheck(cls, a, b) {
    ================================================================= */
 function settingsV2HTML() {
   const c = campusCfg(), pol = leavePolicy();
-  return `<section class="panel"><h3>✅ ${L('Attendance timings', 'हाज़िरी का समय')}</h3>
+  return holidaysPanelHTML() + `<section class="panel"><h3>✅ ${L('Attendance timings', 'हाज़िरी का समय')}</h3>
     ${S.v2Missing ? `<div class="banner bad">${checkErr('setup')}</div>` : ''}
     <form data-form="attTimes" class="stack">
       <div class="three"><label>${L('Check-in opens', 'चेक-इन शुरू')}<input type="time" name="open" value="${c.open}"></label><label>${L('Late after', 'इसके बाद देर')}<input type="time" name="late" value="${c.late}"></label><label>${L('Check-in closes', 'चेक-इन बंद')}<input type="time" name="close" value="${c.close}"></label></div>
@@ -3063,10 +3069,10 @@ function salaryRow(p, ym) {
   const [y, m] = ym.split('-').map(Number);
   const daysInMonth = new Date(y, m, 0).getDate();
   const lm = leaveDayMap(p.id, ym);
-  const r = { daysInMonth, sundays: 0, working: 0, counted: 0, present: 0, late: 0, duty: 0, paidLeave: 0, unpaidLeave: 0, absent: 0, pending: 0, before: 0, notes: [] };
+  const r = { daysInMonth, sundays: 0, holidays: 0, working: 0, counted: 0, present: 0, late: 0, duty: 0, paidLeave: 0, unpaidLeave: 0, absent: 0, pending: 0, before: 0, notes: [] };
   for (let d = 1; d <= daysInMonth; d++) {
     const iso = `${ym}-${pad(d)}`;
-    if (dayIdx(iso) < 0) { r.sundays++; continue; }
+    if (dayIdx(iso) < 0) { if (holidayName(iso)) r.holidays++; else r.sundays++; continue; }
     r.working++;
     if (iso > todayISO()) continue;
     r.counted++;
@@ -3099,21 +3105,21 @@ const salaryPeople = () => S.staff.filter(s => s.active && s.role !== 'admin').s
 function salarySheets(ym) {
   const rules = salaryRules();
   const monthDone = ym < todayISO().slice(0, 7);
-  const head = [L('S.No.', 'क्र.'), L('Staff', 'स्टाफ़'), L('Role', 'पद'), L('Days in month', 'माह के दिन'), L('Sundays', 'रविवार'), L('Working days', 'कार्य दिवस'),
+  const head = [L('S.No.', 'क्र.'), L('Staff', 'स्टाफ़'), L('Role', 'पद'), L('Days in month', 'माह के दिन'), L('Sundays', 'रविवार'), L('Holidays', 'अवकाश'), L('Working days', 'कार्य दिवस'),
     L('Present (on time)', 'उपस्थित (समय पर)'), L('Late', 'देर से'), L('Official duty', 'विद्यालय कार्य'), L('Paid leave', 'सवेतन छुट्टी'), L('Absent', 'अनुपस्थित'), L('Unpaid leave', 'अवैतनिक छुट्टी'),
     L(`Late cut (${rules.lateCount} late = ${rules.lateCut} day)`, `देर कटौती (${rules.lateCount} देर = ${rules.lateCut} दिन)`), L('Total days cut (LWP)', 'कुल कटौती दिन (LWP)'), L('Payable days', 'देय दिन'), L('Remarks', 'टिप्पणी')];
   const rows = [head];
   const people = salaryPeople();
   people.forEach((p, i) => {
     const r = salaryRow(p, ym);
-    rows.push([i + 1, p.name, roleLabel(p.role), r.daysInMonth, r.sundays, r.working, r.present, r.late, r.duty, r.paidLeave, r.absent, r.unpaidLeave, r.lateCut, r.lwp, r.payableFull, r.notes.join('; ')]);
+    rows.push([i + 1, p.name, roleLabel(p.role), r.daysInMonth, r.sundays, r.holidays, r.working, r.present, r.late, r.duty, r.paidLeave, r.absent, r.unpaidLeave, r.lateCut, r.lwp, r.payableFull, r.notes.join('; ')]);
   });
   // day-by-day detail, so every number above can be checked
   const [y, m] = ym.split('-').map(Number);
   const last = new Date(y, m, 0).getDate();
   const days = Array.from({ length: last }, (_, i) => `${ym}-${pad(i + 1)}`);
   const code = (p, d, lm) => {
-    if (dayIdx(d) < 0) return 'S';
+    if (dayIdx(d) < 0) return holidayName(d) ? 'H' : 'S';
     if (d > todayISO()) return '';
     const st = attStatus(p.id, d); const lv = lm[d];
     if (st === 'present') return lv ? 'P/½L' : 'P';
@@ -3127,12 +3133,12 @@ function salarySheets(ym) {
   const grid = [[L('Staff', 'स्टाफ़'), ...days.map(d => Number(d.slice(8)))]];
   people.forEach(p => { const lm = leaveDayMap(p.id, ym); grid.push([p.name, ...days.map(d => code(p, d, lm))]); });
   const key = [[L('Code', 'कोड'), L('Meaning', 'अर्थ')], ['P', attLabel('present')], ['L', attLabel('late')], ['OD', L('Official duty (paid)', 'विद्यालय कार्य (सवेतन)')], ['PL', L('Paid leave', 'सवेतन छुट्टी')], ['UL', L('Unpaid leave (allowance used up)', 'अवैतनिक छुट्टी (सीमा पूरी)')],
-    ['A', L('Absent (no approved leave)', 'अनुपस्थित (स्वीकृत छुट्टी नहीं)')], ['½L', L('Half-day leave on that day', 'उस दिन आधे दिन की छुट्टी')], ['?', L('Check-in waiting for approval', 'चेक-इन स्वीकृति बाकी')], ['-', L('Before attendance started (counted present)', 'हाज़िरी शुरू होने से पहले (उपस्थित गिना)')], ['S', L('Sunday', 'रविवार')],
+    ['A', L('Absent (no approved leave)', 'अनुपस्थित (स्वीकृत छुट्टी नहीं)')], ['½L', L('Half-day leave on that day', 'उस दिन आधे दिन की छुट्टी')], ['?', L('Check-in waiting for approval', 'चेक-इन स्वीकृति बाकी')], ['-', L('Before attendance started (counted present)', 'हाज़िरी शुरू होने से पहले (उपस्थित गिना)')], ['S', L('Sunday', 'रविवार')], ['H', L('School holiday (paid)', 'विद्यालय अवकाश (सवेतन)')],
     ['', ''], [L('Rule', 'नियम'), L(`Payable days = days in month − absent − unpaid leave − late cut. Every ${rules.lateCount} late marks cut ${rules.lateCut} day. Leave is paid until the yearly allowance for its type is used up.`, `देय दिन = माह के दिन − अनुपस्थित − अवैतनिक छुट्टी − देर कटौती। हर ${rules.lateCount} देर पर ${rules.lateCut} दिन कटौती। छुट्टी तब तक सवेतन है जब तक उस प्रकार की वार्षिक सीमा बची है।`)],
     [L('Status', 'स्थिति'), monthDone ? L('Month complete', 'माह पूरा') : L(`Counted up to ${fmtDate(todayISO())}. Days after today are treated as present.`, `${fmtDate(todayISO())} तक गिना गया। आज के बाद के दिन उपस्थित माने गए।`)]];
-  return [{ name: L('Salary days', 'वेतन दिवस'), rows, widths: [6, 26, 14, 9, 9, 9, 10, 7, 9, 9, 9, 10, 14, 12, 10, 40] },
+  return [{ name: L('Salary days', 'वेतन दिवस'), rows, widths: [6, 26, 14, 9, 9, 9, 9, 10, 7, 9, 9, 9, 10, 14, 12, 10, 40] },
     { name: L('Day by day', 'दिनवार'), rows: grid, widths: [26, ...days.map(() => 5)] },
-    { name: L('Key', 'संकेत'), rows: key, widths: [10, 90] }];
+    { name: L('Key', 'संकेत'), rows: key.concat([['', ''], [L('Holidays this month', 'इस माह अवकाश'), '']], days.filter(holidayName).map(d => [d, holidayName(d)])), widths: [14, 90] }];
 }
 function salaryPanelHTML(ym) {
   if (S.v2Missing) return '';
@@ -3156,6 +3162,80 @@ Object.assign(FORMS, {
     const pendingAs = fd.get('pendingAs') === 'absent' ? 'absent' : 'present';
     S.config.salaryRules = { lateCount, lateCut, pendingAs };
     logAudit(me().id, `Salary rules: ${lateCount} late = ${lateCut} day cut`); commit(); toast(L('Saved', 'सहेजा गया'));
+  },
+});
+
+
+/* =================================================================
+   13. SCHOOL HOLIDAYS (whole school closed; Sundays are already closed)
+   ================================================================= */
+const holidayDays = () => ((S.config && S.config.holidays && S.config.holidays.days) || {});
+/* group consecutive days with the same name into one line: "20–22 Nov · Chhath Puja" */
+function holidayGroups() {
+  const list = Object.entries(holidayDays()).sort(([a], [b]) => a.localeCompare(b));
+  const out = [];
+  list.forEach(([d, name]) => {
+    const g = out[out.length - 1];
+    if (g && g.name === name) {
+      let x = addDays(g.to, 1); while (x < d && parseISO(x).getDay() === 0) x = addDays(x, 1);
+      if (x === d) { g.to = d; g.days.push(d); return; }
+    }
+    out.push({ from: d, to: d, name, days: [d] });
+  });
+  return out;
+}
+function holidaysPanelHTML() {
+  const groups = holidayGroups();
+  const today = todayISO();
+  const upcoming = groups.filter(g => g.to >= today), past = groups.filter(g => g.to < today);
+  const line = g => `<li><div><div><strong>${esc(g.name)}</strong><small>${fmtDate(g.from)}${g.to !== g.from ? ' – ' + fmtDate(g.to) : ''} · ${g.days.length} ${L(g.days.length === 1 ? 'day' : 'days', 'दिन')}</small></div></div><button class="btn tiny danger-ghost" data-act="holidayDel" data-from="${g.from}" data-to="${g.to}" data-name="${esc(g.name)}">${L('Remove', 'हटाएँ')}</button></li>`;
+  return `<section class="panel"><h3>🎉 ${L('School holidays', 'विद्यालय अवकाश')}</h3>
+    <p class="hint">${L('Declare a holiday for the whole school. It counts like a Sunday: no classes or substitutions, check-in is closed, it is not counted as anyone\'s leave, and it is paid in the salary sheet.', 'पूरे विद्यालय के लिए अवकाश घोषित करें। यह रविवार की तरह गिना जाता है: कोई कक्षा या अरेंजमेंट नहीं, चेक-इन बंद, किसी की छुट्टी में नहीं गिना जाता, और वेतन शीट में सवेतन।')}</p>
+    <form data-form="holidayAdd" class="stack">
+      <div class="three"><label>${L('Holiday name', 'अवकाश का नाम')} *<input name="name" required maxlength="60" placeholder="${esc(L('e.g. Chhath Puja', 'जैसे छठ पूजा'))}" list="holNames"><datalist id="holNames">${['Republic Day', 'Holi', 'Eid-ul-Fitr', 'Ram Navami', 'Independence Day', 'Raksha Bandhan', 'Janmashtami', 'Gandhi Jayanti', 'Durga Puja', 'Dussehra', 'Diwali', 'Chhath Puja', 'Christmas', 'Winter break', 'Summer vacation'].map(n => `<option>${n}</option>`).join('')}</datalist></label>
+        <label>${t('from')} *<input type="date" name="from" required value="${today}"></label>
+        <label>${t('to')} <small class="muted">(${L('leave empty for one day', 'एक दिन हो तो खाली छोड़ें')})</small><input type="date" name="to"></label></div>
+      <label class="inline"><input type="checkbox" name="tell" checked> ${L('Tell all staff in the app', 'सभी स्टाफ़ को ऐप में सूचना भेजें')}</label>
+      <div class="row-end"><button class="btn primary">+ ${L('Declare holiday', 'अवकाश घोषित करें')}</button></div></form>
+    ${upcoming.length ? `<h4>${L('Coming up', 'आने वाले')}</h4><ul class="list">${upcoming.map(line).join('')}</ul>` : `<p class="muted">${L('No holidays declared yet.', 'अभी कोई अवकाश घोषित नहीं।')}</p>`}
+    ${past.length ? `<details><summary class="muted">${L('Past holidays', 'बीते अवकाश')} (${past.length})</summary><ul class="list">${past.slice().reverse().map(line).join('')}</ul></details>` : ''}
+  </section>`;
+}
+Object.assign(FORMS, {
+  holidayAdd: fd => {
+    const name = String(fd.get('name') || '').trim().slice(0, 60);
+    const from = fd.get('from'); const to = fd.get('to') || from;
+    if (!name || !from) return;
+    if (to < from) { toast(L('The end date is before the start date.', 'अंतिम तारीख़ शुरू से पहले है।')); return; }
+    const all = []; let d = from; let guard = 0;
+    while (d <= to && guard++ < 120) { if (parseISO(d).getDay() !== 0) all.push(d); d = addDays(d, 1); }
+    if (!all.length) { toast(L('Those dates are all Sundays — they are already closed.', 'ये सभी रविवार हैं — पहले से बंद।')); return; }
+    const taken = all.filter(x => holidayDays()[x]);
+    const go = () => {
+      const days = { ...holidayDays() }; all.forEach(x => { days[x] = name; });
+      S.config.holidays = { days, by: me().id, at: nowStamp() };
+      // drop draft substitution plans for those days
+      all.forEach(x => { if (S.plans[x] && S.plans[x].status !== 'published') delete S.plans[x]; });
+      const when = all.length === 1 ? fmtDate(all[0]) : `${fmtDate(all[0])} – ${fmtDate(all[all.length - 1])}`;
+      if (fd.get('tell') === 'on') S.staff.filter(s => s.active && s.id !== me().id).forEach(s => notify(s.id, '', { en: `🎉 School holiday: ${name} — ${when}. No classes.`, hi: `🎉 विद्यालय अवकाश: ${name} — ${when}। कक्षाएँ नहीं होंगी।` }));
+      const onLeave = S.leaves.filter(l => l.status !== 'rejected' && all.some(x => x >= l.from && x <= l.to)).length;
+      logAudit(me().id, `Declared holiday "${name}" ${all[0]}${all.length > 1 ? ' to ' + all[all.length - 1] : ''} (${all.length} day(s))`);
+      commit();
+      toast(L(`Holiday declared: ${all.length} day(s)`, `अवकाश घोषित: ${all.length} दिन`) + (onLeave ? ' · ' + L(`${onLeave} leave request(s) now count fewer days`, `${onLeave} छुट्टी आवेदन में अब कम दिन गिने जाएँगे`) : ''));
+    };
+    if (taken.length) confirmBox(L(`${taken.length} of these days already have a holiday. Replace the name with "${name}"?`, `इनमें से ${taken.length} दिन पहले से अवकाश हैं। नाम "${name}" से बदलें?`), go, L('Replace', 'बदलें'));
+    else go();
+  },
+});
+Object.assign(ACTIONS, {
+  holidayDel: el => {
+    const { from, to, name } = el.dataset;
+    confirmBox(L(`Remove the holiday "${name}" (${fmtDate(from)}${to !== from ? ' – ' + fmtDate(to) : ''})? Those days become school days again.`, `अवकाश "${name}" (${fmtDate(from)}${to !== from ? ' – ' + fmtDate(to) : ''}) हटाएँ? ये दिन फिर स्कूल के दिन होंगे।`), () => {
+      const days = { ...holidayDays() };
+      Object.keys(days).forEach(d => { if (d >= from && d <= to && days[d] === name) delete days[d]; });
+      S.config.holidays = { days, by: me().id, at: nowStamp() };
+      logAudit(me().id, `Removed holiday "${name}" ${from}${to !== from ? ' to ' + to : ''}`); commit(); toast(L('Holiday removed', 'अवकाश हटाया गया'));
+    }, L('Remove', 'हटाएँ'));
   },
 });
 
@@ -3898,7 +3978,7 @@ function entRange(lower) {
 /* ---------- answers ---------- */
 function briefing(dt) {
   const u = me(), d = dayIdx(dt), lines = [];
-  if (d < 0) return L(`**${fmtDate(dt)}** is a Sunday — no school.`, `**${fmtDate(dt)}** रविवार है — स्कूल बंद।`);
+  if (d < 0) return L(`**${fmtDate(dt)}** is ${holidayName(dt) ? 'a holiday (' + holidayName(dt) + ')' : 'a Sunday'} — no school.`, `**${fmtDate(dt)}** ${holidayName(dt) ? 'अवकाश (' + holidayName(dt) + ')' : 'रविवार'} है — स्कूल बंद।`);
   if (!isManager(u)) {
     const duties = PERIODS.map(p => dutyAt(u.id, dt, p.n));
     const subs = duties.filter(x => x.k === 'sub').length, cls = duties.filter(x => x.k === 'class').length;
@@ -3933,7 +4013,7 @@ function scheduleAnswer(p, r, week) {
     return `**${p.name}** — ${L('weekly timetable', 'साप्ताहिक समय-सारणी')} (${weeklyLoad(p.id)} ${L('periods', 'पीरियड')})\n\n` + tbl(head, rows);
   }
   const dt = r.from;
-  if (dayIdx(dt) < 0) return L(`${fmtDate(dt)} is a Sunday — no school.`, `${fmtDate(dt)} रविवार है — स्कूल बंद।`);
+  if (dayIdx(dt) < 0) return L(`${fmtDate(dt)} is ${holidayName(dt) ? 'a holiday (' + holidayName(dt) + ')' : 'a Sunday'} — no school.`, `${fmtDate(dt)} ${holidayName(dt) ? 'अवकाश (' + holidayName(dt) + ')' : 'रविवार'} है — स्कूल बंद।`);
   const rows = PERIODS.map(pp => [`P${pp.n}`, periodTime(pp.n), dutyAt(p.id, dt, pp.n).text]);
   const n = rows.filter(x => x[2] !== t('free')).length;
   return `**${p.name}** — ${fmtDate(dt)} (${n} ${L('busy periods', 'व्यस्त पीरियड')})\n\n` + tbl([t('period'), L('Time', 'समय'), L('Duty', 'कार्य')], rows);
@@ -3946,7 +4026,7 @@ function classAnswer(cls, r, week) {
     return `**${cls}** — ${L('weekly timetable', 'साप्ताहिक समय-सारणी')}${ct}\n\n` + tbl(head, rows);
   }
   const dt = r.from, d = dayIdx(dt);
-  if (d < 0) return L(`${fmtDate(dt)} is a Sunday — no school.`, `${fmtDate(dt)} रविवार है — स्कूल बंद।`);
+  if (d < 0) return L(`${fmtDate(dt)} is ${holidayName(dt) ? 'a holiday (' + holidayName(dt) + ')' : 'a Sunday'} — no school.`, `${fmtDate(dt)} ${holidayName(dt) ? 'अवकाश (' + holidayName(dt) + ')' : 'रविवार'} है — स्कूल बंद।`);
   const plan = S.plans[dt];
   const rows = PERIODS.map(pp => {
     const l = lessonAt(cls, d, pp.n); if (!l) return [`P${pp.n}`, periodTime(pp.n), '—', '—'];
@@ -4093,14 +4173,14 @@ function runIntent(intent, e) {
       if (dt < today && has(/\bkal\b|कल/)) dt = addDays(today, 1);
       const scope = has(/first half|pehli pali|morning|subah|पहली पाली/) ? 'first' : has(/second half|doosri pali|dusri pali|after lunch|afternoon|दूसरी पाली/) ? 'second' : 'full';
       const res = tool('preview_substitution', { teacher: person.id, date: dt, scope });
-      if (res.note) return { text: L(`${fmtDate(dt)} is a Sunday — no school.`, `${fmtDate(dt)} रविवार है।`) };
+      if (res.note) return { text: L(`${fmtDate(dt)} is ${holidayName(dt) ? 'a holiday (' + holidayName(dt) + ')' : 'a Sunday'} — no school.`, `${fmtDate(dt)} ${holidayName(dt) ? 'अवकाश (' + holidayName(dt) + ')' : 'रविवार'} है।`) };
       if (!res.periodsToCover.length) return { text: L(`**${person.name}** has no classes in that time on ${fmtDate(dt)}, so nothing needs cover.`, `${fmtDate(dt)} को उस समय **${person.name}** की कोई कक्षा नहीं, इसलिए अरेंजमेंट नहीं चाहिए।`) };
       const rows = res.periodsToCover.map(g => [`P${g.period}`, g.class, g.subject, g.suggestions[0] ? `**${g.suggestions[0].teacher}** (${g.suggestions[0].score})` : L('nobody free', 'कोई खाली नहीं'), g.suggestions.slice(1).map(s => s.teacher).join(', ') || '—']);
       return { text: L(`If **${person.name}** is absent on **${fmtDate(dt)}**${scope !== 'full' ? ` (${scope} half)` : ''}, **${rows.length}** period(s) need cover. This is only a preview — nothing was changed.`, `अगर **${person.name}** **${fmtDate(dt)}** को न आएँ, तो **${rows.length}** पीरियड भरने होंगे। यह केवल अनुमान है — कुछ बदला नहीं गया।`) + '\n\n' + tbl([t('period'), t('class'), t('subject'), L('Best substitute', 'सबसे उपयुक्त'), L('Other options', 'अन्य विकल्प')], rows) + '\n\n' + L('To do it for real, use **Mark absent** on the Substitutions screen.', 'असल में करने के लिए अरेंजमेंट स्क्रीन पर **अनुपस्थित दर्ज करें** दबाएँ।') };
     }
     case 'free': {
       const dt = R.from, d = dayIdx(dt);
-      if (d < 0) return { text: L(`${fmtDate(dt)} is a Sunday — no school.`, `${fmtDate(dt)} रविवार है — स्कूल बंद।`) };
+      if (d < 0) return { text: L(`${fmtDate(dt)} is ${holidayName(dt) ? 'a holiday (' + holidayName(dt) + ')' : 'a Sunday'} — no school.`, `${fmtDate(dt)} ${holidayName(dt) ? 'अवकाश (' + holidayName(dt) + ')' : 'रविवार'} है — स्कूल बंद।`) };
       if (e.now && !period) return { text: L(`No period is running right now (${nowHM()}).`, `अभी (${nowHM()}) कोई पीरियड नहीं चल रहा।`), chips: [L('Who is free in period 5?', 'पीरियड 5 में कौन खाली है?')] };
       if (person && person.role === 'teacher' && !(e.selfRef && has(/who|kaun|कौन/))) {
         if (period) { const du = dutyAt(person.id, dt, period); return { text: du.k === 'free' ? L(`✅ Yes — **${person.name}** is free in **P${period}** on ${fmtDate(dt)}.`, `✅ हाँ — **${person.name}** ${fmtDate(dt)} को **P${period}** में खाली हैं।`) : L(`❌ No — in **P${period}** on ${fmtDate(dt)}, **${person.name}** has: ${du.text}.`, `❌ नहीं — ${fmtDate(dt)} को **P${period}** में **${person.name}**: ${du.text}।`) }; }
