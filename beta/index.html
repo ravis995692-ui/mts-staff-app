@@ -478,6 +478,12 @@ ul.plain { list-style: none; padding: 0; margin: 6px 0; } ul.plain li { padding:
 .cal-ev.hol { background: var(--violet-soft); color: var(--violet); }
 .btn.wa { background: #25d366; border-color: #25d366; color: #fff; }
 .wa-panel .list li { align-items: center; }
+/* readable table headings: very dark text on a light background, in both themes */
+thead th, table.tt thead th, table.tt tr:first-child th { color: #0d0e22; font-weight: 700; }
+table.tt thead th.today, table.tt tr:first-child th.today { color: var(--navy); }
+html[data-theme="dark"] thead th, html[data-theme="dark"] table.tt thead th, html[data-theme="dark"] table.tt tr:first-child th { background: #dfe2f5; color: #05060f; }
+html[data-theme="dark"] table.tt thead th.today, html[data-theme="dark"] table.tt tr:first-child th.today { background: #ffe58a; color: #05060f; }
+html[data-theme="dark"] table.tt td.today { background: #2b2a14; }
 
 </style>
 </head>
@@ -489,7 +495,7 @@ ul.plain { list-style: none; padding: 0; margin: 6px 0; } ul.plain li { padding:
 <script>
 /* Loads the app code in compressed form (about 4 times smaller to download). */
 (function () {
-  var V = '990ff92d';
+  var V = '481d5722';
   function show(t) { var e = document.getElementById('boot-pc'); if (e) e.textContent = t; }
   async function getText(url, label) {
     var r = await fetch(url);
