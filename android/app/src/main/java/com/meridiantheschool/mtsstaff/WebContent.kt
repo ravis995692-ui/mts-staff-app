@@ -65,7 +65,17 @@ object WebContent {
             val f = File(dir, rel)
             if (f.isFile) return f.inputStream()
         }
-        return try { appContext.assets.open("web/$rel") } catch (e: IOException) { null }
+        return openAsset(rel)
+    }
+
+    // The Android build unpacks *.gz assets and stores them without ".gz" (app.js.gz -> app.js).
+    // The web page's loader accepts both packed and plain code, so serve whichever is there.
+    private fun openAsset(rel: String): InputStream? {
+        try { return appContext.assets.open("web/$rel") } catch (_: IOException) { }
+        if (rel.endsWith(".gz")) {
+            try { return appContext.assets.open("web/${rel.removeSuffix(".gz")}") } catch (_: IOException) { }
+        }
+        return null
     }
 
     /** Called by the WebView for every request; answers our own files from the phone. */
