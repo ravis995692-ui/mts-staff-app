@@ -1,0 +1,87 @@
+name: Android APK
+
+# Builds the MTS Staff Android app (android/ folder) and publishes the APK
+# on the repository's Releases page under the tag "android-latest".
+on:
+  push:
+    branches: [android-app, main]
+    paths: ['android/**', '.github/workflows/android.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      # Optional: sign the APK in the build. Add these repository secrets to enable it:
+      # MTS_KEYSTORE_BASE64 (the .jks file, base64), MTS_KEYSTORE_PASSWORD, MTS_KEY_ALIAS, MTS_KEY_PASSWORD
+      - name: Signing key
+        env:
+          KS: ${{ secrets.MTS_KEYSTORE_BASE64 }}
+          KS_PASS: ${{ secrets.MTS_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.MTS_KEY_ALIAS }}
+          KEY_PASS: ${{ secrets.MTS_KEY_PASSWORD }}
+        run: |
+          if [ -n "$KS" ]; then
+            echo "$KS" | base64 -d > android/release.jks
+            {
+              echo "MTS_KEYSTORE_FILE=release.jks"
+              echo "MTS_KEYSTORE_PASSWORD=$KS_PASS"
+              echo "MTS_KEY_ALIAS=$KEY_ALIAS"
+              echo "MTS_KEY_PASSWORD=$KEY_PASS"
+            } >> "$GITHUB_ENV"
+            echo "Release APK will be signed."
+          else
+            echo "No signing secrets: building an unsigned release APK."
+          fi
+
+      - name: Build release APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          set -o pipefail
+          ./gradlew assembleRelease --stacktrace --no-daemon 2>&1 | tee build.log
+
+      - name: Report build errors
+        if: failure()
+        run: |
+          msg=$(grep -E "^e: |error:|ERROR:|What went wrong|Could not|> " android/build.log | grep -v "^> Task" | head -40 | cut -c1-300)
+          msg=$(printf '%s' "$msg" | sed ':a;N;$!ba;s/%/%25/g;s/\r//g;s/\n/%0A/g')
+          echo "::error title=Gradle build failed::$msg"
+
+      - name: Collect APK
+        run: |
+          mkdir -p dist
+          ver=$(grep -oP 'versionName = "\K[^"]+' android/app/build.gradle.kts)
+          for f in android/app/build/outputs/apk/release/*.apk; do
+            case "$f" in
+              *unsigned*) cp "$f" "dist/MTS-Staff-$ver-unsigned.apk" ;;
+              *) cp "$f" "dist/MTS-Staff-$ver.apk" ;;
+            esac
+          done
+          ls -l dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mts-staff-apk
+          path: dist/*.apk
+
+      - name: Publish on Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete android-latest --yes --cleanup-tag || true
+          gh release create android-latest dist/*.apk --prerelease --target "$GITHUB_SHA" \
+            --title "MTS Staff Android app (latest build)" \
+            --notes "Built from ${GITHUB_SHA::7} on ${GITHUB_REF_NAME}."

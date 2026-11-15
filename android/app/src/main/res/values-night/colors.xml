@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="page_bg">#FF14152B</color>
+    <color name="ink">#FFECEDFB</color>
+    <color name="ink_2">#FFB9BBD3</color>
+    <color name="system_bar">@color/navy_dark</color>
+</resources>

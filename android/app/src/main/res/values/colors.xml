@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="navy">#FF2F3192</color>
+    <color name="navy_dark">#FF14152B</color>
+    <color name="red">#FFE01F27</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="page_bg">#FFF5F6FB</color>
+    <color name="ink">#FF1B1D2E</color>
+    <color name="ink_2">#FF4A4D63</color>
+    <color name="system_bar">@color/navy</color>
+</resources>

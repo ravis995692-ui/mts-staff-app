@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MTS Staff</string>
+    <string name="offline_title">No internet connection</string>
+    <string name="offline_body">The staff app could not be opened. Check mobile data or Wi-Fi and try again.</string>
+    <string name="retry">Try again</string>
+    <string name="saved_to_downloads">Saved in Downloads: %1$s</string>
+    <string name="save_failed">Could not save the file</string>
+    <string name="share_with">Share with</string>
+    <string name="no_app_for_link">No app found to open this link</string>
+    <string name="copied">Copied</string>
+    <string name="notif_channel_name">Reminders and arrangements</string>
+    <string name="notif_channel_desc">Period reminders, new arrangements and notices</string>
+    <string name="mic_needed">Allow the microphone to ask questions by voice</string>
+    <string name="voice_unavailable">Voice input needs the Google app on this phone</string>
+    <string name="notif_blocked">Notifications are blocked. Turn them on in Settings.</string>
+    <string name="print_job">MTS Staff App</string>
+</resources>

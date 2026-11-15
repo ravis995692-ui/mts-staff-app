@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MTS Staff</string>
+    <string name="offline_title">इंटरनेट कनेक्शन नहीं है</string>
+    <string name="offline_body">स्टाफ़ ऐप नहीं खुल सका। मोबाइल डेटा या Wi-Fi जाँचें और फिर कोशिश करें।</string>
+    <string name="retry">फिर कोशिश करें</string>
+    <string name="saved_to_downloads">Downloads में सहेजा गया: %1$s</string>
+    <string name="save_failed">फ़ाइल सहेजी नहीं जा सकी</string>
+    <string name="share_with">इससे भेजें</string>
+    <string name="no_app_for_link">यह लिंक खोलने के लिए कोई ऐप नहीं मिला</string>
+    <string name="copied">कॉपी हो गया</string>
+    <string name="notif_channel_name">रिमाइंडर और अरेंजमेंट</string>
+    <string name="notif_channel_desc">पीरियड रिमाइंडर, नए अरेंजमेंट और सूचनाएँ</string>
+    <string name="mic_needed">आवाज़ से पूछने के लिए माइक्रोफ़ोन की अनुमति दें</string>
+    <string name="voice_unavailable">आवाज़ से पूछने के लिए फ़ोन में Google ऐप ज़रूरी है</string>
+    <string name="notif_blocked">सूचनाएँ बंद हैं। Settings में चालू करें।</string>
+    <string name="print_job">MTS Staff App</string>
+</resources>
