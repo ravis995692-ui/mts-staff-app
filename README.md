@@ -13,11 +13,16 @@ Staff app for **Meridian The School, Gopalganj, Bihar**: timetable, teacher leav
 ## Install on a phone
 Open the link in Chrome, then tap **⋮ → Add to Home screen**.
 
-## AI assistant
-Admin, Coordinator and teachers can ask questions about school data in Hindi or English. It uses Claude through the
-`ai-assistant` Supabase Edge Function (code in `supabase/functions/`). The Claude API key is stored only as the
-`ANTHROPIC_API_KEY` secret in Supabase, never in this repository. Daily limit: 500 AI calls per Admin/Coordinator,
-120 per teacher. Teachers' answers only use data the database lets them see.
+## Timetable Builder
+Admin and Coordinator set, for each class, how many periods each subject gets and who teaches it. The app then builds a
+clash-free weekly timetable (for all classes, or one class while keeping the others), shows a preview, and applies it
+only when confirmed. Classes and subjects can be added.
+
+## Smart Assistant
+A built-in assistant answers questions about school data in English, Hindi and Hinglish (absences, free teachers,
+schedules, substitutions, leave, DPP/worksheet requests, workload, what-if cover planning, timetable checks).
+It runs entirely inside the app: no outside AI service is used and nothing leaves the school's database.
+The `supabase/functions/ai-assistant` function is from an earlier version and is no longer called by the app.
 
 ## Technical notes
 - Single-page web app (`index.html`), hosted on GitHub Pages.

@@ -318,6 +318,50 @@ legend { font-size: 13px; font-weight: 600; color: var(--ink-2); padding: 0 4px;
 .msg.assistant { max-width: 94%; }
 .chip-btn:disabled { opacity: .5; cursor: default; }
 
+/* ---- version 2: builder, assistant, phone navigation ---- */
+.stepper { display: inline-flex; align-items: center; gap: 4px; }
+.stepper input { width: 56px; text-align: center; padding: 6px 4px; }
+.stepper .btn { width: 30px; height: 30px; padding: 0; font-size: 16px; }
+table.bld td { vertical-align: middle; padding: 7px 10px; }
+table.bld select { min-width: 150px; padding: 7px 9px; }
+.bld-add { margin-top: 12px; } .bld-add select { width: auto; padding: 7px 9px; }
+.inline-field { flex-direction: row; align-items: center; gap: 10px; margin-top: 4px; flex-wrap: wrap; }
+.inline-field select { width: auto; min-width: 200px; }
+.loadlist { max-height: 330px; overflow: auto; }
+.bar.over i { background: #f08f93; }
+.seg.wide { display: flex; margin-bottom: 12px; } .seg.wide button { flex: 1; padding: 10px; }
+.btn.big { padding: 12px 22px; font-size: 16px; }
+.error.list ul { margin: 6px 0 0; padding-left: 20px; font-weight: 400; }
+.preview { border: 2px solid var(--navy); scroll-margin-top: 70px; }
+.qgroup { margin: 10px 4px; } .qgroup b { display: block; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 6px; }
+.suggest.follow { margin: 0 0 4px 36px; }
+.chat-log { max-height: 60vh; }
+.quickask { display: flex; gap: 8px; align-items: center; background: #fff; border-radius: var(--r); box-shadow: var(--shadow); padding: 8px 10px; margin-bottom: 16px; }
+.quickask input { border: 0; flex: 1; min-width: 0; width: auto; } .quickask input:focus { outline: 0; }
+.start { border-left: 4px solid var(--red); }
+.steps { list-style: none; margin: 0; padding: 0; }
+.steps li { display: flex; align-items: center; gap: 10px; padding: 5px 0; }
+.steps li span { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #c9cbe0; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; flex: none; }
+.steps li.done span { background: var(--ok); border-color: var(--ok); color: #fff; }
+.steps li.done .linkbtn { color: var(--muted); text-decoration: line-through; }
+.linkbtn { border: 0; background: none; color: var(--navy); font-weight: 600; cursor: pointer; text-align: left; padding: 0; }
+.day li.now .slot { outline: 2px solid var(--navy); }
+.ptime em { font-style: normal; font-size: 10px; font-weight: 700; color: #fff; background: var(--red); border-radius: 4px; padding: 0 4px; width: fit-content; }
+.bottomnav, .menu-back { display: none; }
+@media (max-width: 860px) {
+  .bottomnav { display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; background: #fff; border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom); }
+  .bottomnav button { flex: 1; border: 0; background: none; padding: 7px 2px 6px; font-size: 11px; color: var(--ink-2); display: flex; flex-direction: column; align-items: center; gap: 1px; cursor: pointer; }
+  .bottomnav button span { font-size: 19px; line-height: 1.1; }
+  .bottomnav button.active { color: var(--navy); font-weight: 700; }
+  .content { padding-bottom: 90px; }
+  #toast { bottom: 76px; }
+  .menu-back { display: block; position: fixed; inset: 59px 0 0 0; background: rgba(20, 22, 50, .35); z-index: 29; }
+  .sidebar { bottom: 0; padding-bottom: 70px; }
+  .tt-controls { flex-wrap: wrap; }
+  table.bld select { min-width: 110px; }
+  .msg { max-width: 100%; } .suggest.follow { margin-left: 0; }
+}
+
 </style>
 </head>
 <body>
@@ -488,7 +532,7 @@ function generateTimetable(mapping, seed) {
 const I18N = {
   en: {
     dashboard: 'Dashboard', myDay: 'My Day', substitutions: 'Substitutions', leave: 'Leave', timetable: 'Timetable',
-    requests: 'DPP & Worksheets', staff: 'Staff', reports: 'Reports', assistant: 'AI Assistant', notices: 'Notices',
+    requests: 'DPP & Worksheets', staff: 'Staff', reports: 'Reports', assistant: 'Smart Assistant', notices: 'Notices',
     audit: 'Audit Log', settings: 'Settings', logout: 'Log out', today: 'Today', markAbsent: 'Mark absent',
     publish: 'Publish', regenerate: 'Re-plan', approve: 'Approve', reject: 'Reject', apply: 'Apply',
     loginTitle: 'Staff login', mobile: 'Mobile number', sendOtp: 'Send OTP', otp: 'Enter OTP', verify: 'Verify & log in',
@@ -501,12 +545,12 @@ const I18N = {
     fullDay: 'Full day', firstHalf: 'First half (P1–4)', secondHalf: 'Second half (P5–8)', specific: 'Specific periods',
     pending: 'Pending', approved: 'Approved', rejected: 'Rejected', requested: 'Requested', in_progress: 'In progress',
     ready: 'Ready', delivered: 'Delivered', draft: 'Draft', published: 'Published', notifications: 'Notifications',
-    language: 'भाषा: हिंदी', copySheet: 'Copy sheet', print: 'Print', ask: 'Ask', aiDraft: 'Draft with AI',
-    worksheet: 'Worksheet', dpp: 'DPP', all: 'All', myRequests: 'My requests', remark: 'Remark',
+    language: 'भाषा: हिंदी', copySheet: 'Copy sheet', print: 'Print', ask: 'Ask', aiDraft: 'Make sheet template',
+    worksheet: 'Worksheet', dpp: 'DPP', all: 'All', myRequests: 'My requests', remark: 'Remark', builder: 'Timetable Builder',
   },
   hi: {
     dashboard: 'डैशबोर्ड', myDay: 'मेरा दिन', substitutions: 'अरेंजमेंट (प्रॉक्सी)', leave: 'छुट्टी', timetable: 'समय-सारणी',
-    requests: 'DPP और वर्कशीट', staff: 'स्टाफ़', reports: 'रिपोर्ट', assistant: 'AI सहायक', notices: 'सूचनाएँ',
+    requests: 'DPP और वर्कशीट', staff: 'स्टाफ़', reports: 'रिपोर्ट', assistant: 'स्मार्ट सहायक', notices: 'सूचनाएँ',
     audit: 'बदलाव रिकॉर्ड', settings: 'सेटिंग्स', logout: 'लॉग आउट', today: 'आज', markAbsent: 'अनुपस्थित दर्ज करें',
     publish: 'प्रकाशित करें', regenerate: 'फिर से योजना', approve: 'स्वीकृत करें', reject: 'अस्वीकार करें', apply: 'आवेदन करें',
     loginTitle: 'स्टाफ़ लॉगिन', mobile: 'मोबाइल नंबर', sendOtp: 'OTP भेजें', otp: 'OTP डालें', verify: 'सत्यापित करें',
@@ -519,8 +563,8 @@ const I18N = {
     fullDay: 'पूरा दिन', firstHalf: 'पहली पाली (P1–4)', secondHalf: 'दूसरी पाली (P5–8)', specific: 'चुने हुए पीरियड',
     pending: 'लंबित', approved: 'स्वीकृत', rejected: 'अस्वीकृत', requested: 'अनुरोधित', in_progress: 'काम जारी',
     ready: 'तैयार', delivered: 'पहुँचा दिया', draft: 'ड्राफ़्ट', published: 'प्रकाशित', notifications: 'सूचनाएँ',
-    language: 'Language: English', copySheet: 'शीट कॉपी करें', print: 'प्रिंट', ask: 'पूछें', aiDraft: 'AI से ड्राफ़्ट',
-    worksheet: 'वर्कशीट', dpp: 'DPP', all: 'सभी', myRequests: 'मेरे अनुरोध', remark: 'टिप्पणी',
+    language: 'Language: English', copySheet: 'शीट कॉपी करें', print: 'प्रिंट', ask: 'पूछें', aiDraft: 'शीट टेम्पलेट बनाएँ',
+    worksheet: 'वर्कशीट', dpp: 'DPP', all: 'सभी', myRequests: 'मेरे अनुरोध', remark: 'टिप्पणी', builder: 'टाइमटेबल बनाएँ',
   },
 };
 
@@ -791,7 +835,7 @@ function emptyState() {
   try { lang = localStorage.getItem('mts-lang') || 'en'; } catch (e) { }
   return {
     lang, session: null, staff: [], tt: {}, classTeachers: {}, absences: [], leaves: [], plans: {}, requests: [],
-    notices: [], notifications: [], audit: [], acks: {},
+    notices: [], notifications: [], audit: [], acks: {}, curriculum: {}, customSubjects: {},
     settings: { subject: 30, classKnown: 20, classTeacher: 10, periodLoad: 5, weekSubs: 8, consecutive: 15, dailyCap: 2 },
   };
 }
@@ -802,7 +846,12 @@ function tableToMap(t) {
   switch (t) {
     case 'staff': return new Map(S.staff.map(x => [x.id, x]));
     case 'timetable': return new Map(Object.entries(S.tt));
-    case 'settings': return new Map([['main', { weights: S.settings, classTeachers: S.classTeachers }]]);
+    case 'settings': {
+      const d = { weights: S.settings, classTeachers: S.classTeachers };
+      if (Object.keys(S.curriculum).length) d.curriculum = S.curriculum;
+      if (Object.keys(S.customSubjects).length) d.subjects = S.customSubjects;
+      return new Map([['main', d]]);
+    }
     case 'plans': return new Map(Object.entries(S.plans));
     case 'acks': return new Map(Object.entries(S.acks));
     default: return new Map(S[t].map(x => [x.id, x]));
@@ -813,7 +862,7 @@ function applyRow(t, id, data) {
   switch (t) {
     case 'staff': { const i = S.staff.findIndex(x => x.id === id); if (del) { if (i >= 0) S.staff.splice(i, 1); } else if (i >= 0) S.staff[i] = data; else S.staff.push(data); sortStaff(); break; }
     case 'timetable': if (del) delete S.tt[id]; else S.tt[id] = data; syncClasses(); break;
-    case 'settings': if (!del && id === 'main') { S.settings = { ...S.settings, ...(data.weights || {}) }; S.classTeachers = data.classTeachers || {}; } break;
+    case 'settings': if (!del && id === 'main') { S.settings = { ...S.settings, ...(data.weights || {}) }; S.classTeachers = data.classTeachers || {}; S.curriculum = data.curriculum || {}; S.customSubjects = data.subjects || {}; Object.assign(SUBJECTS, S.customSubjects); } break;
     case 'plans': if (del) delete S.plans[id]; else S.plans[id] = data; break;
     case 'acks': if (del) delete S.acks[id]; else S.acks[id] = data; break;
     default: {
@@ -1035,7 +1084,6 @@ const UI = {
   loginStep: 1, loginPhone: '', loginError: '',
   chat: [], chatBusy: false, loginBusy: false, codes: null,
 };
-let SAMPLE = null; // Claude AI (only in the hosted version)
 
 const t = k => (I18N[S.lang] && I18N[S.lang][k]) || I18N.en[k] || k;
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -1082,12 +1130,12 @@ async function copyText(text) {
 /* ---------- navigation ---------- */
 function navItems(u) {
   if (isManager(u)) return [
-    ['dashboard', '🏠'], ['subs', '🔁'], ['leave', '📝'], ['timetable', '📅'], ['requests', '📄'],
+    ['dashboard', '🏠'], ['subs', '🔁'], ['leave', '📝'], ['timetable', '📅'], ['builder', '🛠️'], ['requests', '📄'],
     ['staff', '👥'], ['reports', '📊'], ['assistant', '✨'], ['notices', '📢'], ['audit', '🧾'], ['settings', '⚙️'],
   ];
   return [['myday', '🏠'], ['timetable', '📅'], ['leave', '📝'], ['requests', '📄'], ['assistant', '✨'], ['notices', '📢']];
 }
-const VIEW_LABEL = { dashboard: 'dashboard', subs: 'substitutions', leave: 'leave', timetable: 'timetable', requests: 'requests', staff: 'staff', reports: 'reports', assistant: 'assistant', notices: 'notices', audit: 'audit', settings: 'settings', myday: 'myDay' };
+const VIEW_LABEL = { dashboard: 'dashboard', subs: 'substitutions', leave: 'leave', timetable: 'timetable', requests: 'requests', staff: 'staff', reports: 'reports', assistant: 'assistant', notices: 'notices', audit: 'audit', settings: 'settings', myday: 'myDay', builder: 'builder' };
 
 function go(view) { UI.view = view; UI.menuOpen = false; if (view === 'staff') UI.codes = null; try { history.replaceState(null, '', '#' + view); } catch (e) { } render(); window.scrollTo(0, 0); }
 
@@ -1118,8 +1166,10 @@ function render() {
       <button class="nav logout" data-act="logout"><span>🚪</span>${t('logout')}</button>
       <div id="net" class="net busy"></div>
     </nav>
+    ${UI.menuOpen ? '<div class="menu-back" data-act="toggleMenu"></div>' : ''}
     <main class="content">${renderView(UI.view)}</main>
-  </div>`;
+  </div>
+  <nav class="bottomnav">${(isManager(u) ? ['dashboard', 'subs', 'leave', 'assistant'] : ['myday', 'timetable', 'leave', 'assistant']).map(v => { const it = items.find(i => i[0] === v); return `<button class="${UI.view === v ? 'active' : ''}" data-act="go" data-view="${v}"><span>${it[1]}</span>${esc(v === 'assistant' ? L('Ask', 'पूछें') : t(VIEW_LABEL[v]).split(' ')[0])}</button>`; }).join('')}<button data-act="toggleMenu"><span>☰</span>${L('More', 'और')}</button></nav>`;
   if (UI.view === 'assistant') { const log = document.querySelector('.chat-log'); if (log) log.scrollTop = log.scrollHeight; }
   if (UI.view === 'staff' && UI.codes === null && !UI.codesLoading) refreshCodes();
   updateNetBadge();
@@ -1140,6 +1190,7 @@ function renderView(v) {
     case 'audit': return viewAudit();
     case 'settings': return viewSettings();
     case 'myday': return viewMyDay();
+    case 'builder': return viewBuilder();
   }
   return '';
 }
@@ -1210,6 +1261,8 @@ function viewDashboard() {
   return `
   <div class="page-head"><h2>${t('dashboard')}</h2>${dateBar()}</div>
   ${dayIdx(date) < 0 ? `<div class="banner">${t('noClasses')}</div>` : ''}
+  ${startCardHTML()}
+  <form data-form="quickAsk" class="quickask"><span>⚡</span><input name="q" placeholder="${esc(L('Ask anything — e.g. who is free in period 5?', 'कुछ भी पूछें — जैसे पीरियड 5 में कौन खाली है?'))}" autocomplete="off"><button class="btn primary">${t('ask')}</button></form>
   <div class="cards">
     <div class="stat"><span>${t('absentToday')}</span><b>${new Set(abs.map(a => a.teacherId)).size}</b></div>
     <div class="stat"><span>${t('toCover')}</span><b>${gaps.length}</b></div>
@@ -1243,6 +1296,22 @@ function viewDashboard() {
         : `<p class="muted">${L('No new requests.', 'कोई नया अनुरोध नहीं।')}</p>`}
     </section>
   </div>`;
+}
+
+/* first-time checklist for Admin / Coordinator */
+function startCardHTML() {
+  let hidden = false; try { hidden = localStorage.getItem('mts-start-hidden') === '1'; } catch (e) { }
+  if (hidden) return '';
+  const sample = S.staff.some(s => /^90000001\d\d$/.test(s.phone)) || S.staff.some(s => s.phone === '9000000001');
+  const steps = [
+    [!S.staff.some(s => s.phone === '9000000001'), L('Change the Admin mobile number to your own', 'एडमिन का मोबाइल नंबर अपना करें'), 'staff'],
+    [!sample, L('Replace the sample teachers with your real staff', 'नमूना शिक्षकों की जगह अपने असली स्टाफ़ जोड़ें'), 'staff'],
+    [Object.keys(S.curriculum).length > 0, L('Set subjects and build your timetable', 'विषय तय करें और अपनी समय-सारणी बनाएँ'), 'builder'],
+    [S.staff.filter(s => s.active).length > 1 && !sample, L('Share activation codes with staff (Staff screen → Share)', 'स्टाफ़ को एक्टिवेशन कोड भेजें (स्टाफ़ स्क्रीन → भेजें)'), 'staff'],
+  ];
+  if (steps.every(s => s[0])) return '';
+  return `<section class="panel start"><div class="panel-head"><h3>🚀 ${L('Getting started', 'शुरुआत करें')} · ${steps.filter(s => s[0]).length}/${steps.length}</h3><button class="btn tiny ghost" data-act="hideStart">${L('Hide', 'छिपाएँ')}</button></div>
+    <ol class="steps">${steps.map(([done, label, view]) => `<li class="${done ? 'done' : ''}"><span>${done ? '✓' : ''}</span><button class="linkbtn" data-act="go" data-view="${view}">${esc(label)}</button></li>`).join('')}</ol></section>`;
 }
 
 /* ---------- substitution plan ---------- */
@@ -1326,7 +1395,7 @@ function viewMyDay() {
         ${isAcked(date, sub.key, u.id) ? `<span class="ok-text">✓ ${t('seen')}</span>` : `<button class="btn tiny primary" data-act="ackSub" data-key="${esc(sub.key)}">${t('markSeen')}</button>`}</div>`;
       else if (l) cell = `<div class="slot"><b>${esc(l.cls)}</b> · ${esc(subjName(l.s))}</div>`;
       else cell = `<div class="slot free">${t('free')}</div>`;
-      rows += `<li><div class="ptime"><b>P${p}</b><small>${periodTime(p)}</small></div>${cell}</li>`;
+      rows += `<li class="${date === todayISO() && currentPeriod() === p ? 'now' : ''}"><div class="ptime"><b>P${p}</b><small>${periodTime(p)}</small>${date === todayISO() && currentPeriod() === p ? `<em>${L('NOW', 'अभी')}</em>` : ''}</div>${cell}</li>`;
       if (p === LUNCH.after) rows += `<li class="lunch"><div class="ptime"><small>${LUNCH.start}–${LUNCH.end}</small></div><div class="slot">🍱 ${t('lunch')}</div></li>`;
     });
   }
@@ -1421,7 +1490,9 @@ function viewTimetable() {
     rows += `<tr><th><b>P${p}</b><small>${periodTime(p)}</small></th>` + DAYS.map((_, d) => {
       if (mode === 'class') {
         const l = lessonAt(UI.ttClass, d, p);
-        return `<td class="${d === today ? 'today' : ''} subj-${l.s} ${manager ? 'editable' : ''}" ${manager ? `data-act="editCell" data-d="${d}" data-p="${p}"` : ''}><b>${esc(subjName(l.s))}</b><small>${esc(nameOf(l.t))}</small></td>`;
+        const edit = manager ? `data-act="editCell" data-d="${d}" data-p="${p}"` : '';
+        if (!l) return `<td class="${d === today ? 'today' : ''} freecell ${manager ? 'editable' : ''}" ${edit}>—</td>`;
+        return `<td class="${d === today ? 'today' : ''} subj-${l.s} ${manager ? 'editable' : ''}" ${edit}><b>${esc(subjName(l.s))}</b><small>${esc(nameOf(l.t))}</small></td>`;
       }
       const l = teacherLessonAt(UI.ttTeacher, d, p);
       return l ? `<td class="${d === today ? 'today' : ''} subj-${l.s}"><b>${esc(l.cls)}</b><small>${esc(subjName(l.s))}</small></td>` : `<td class="${d === today ? 'today' : ''} freecell">${t('free')}</td>`;
@@ -1439,11 +1510,11 @@ function viewTimetable() {
     <div class="table-wrap"><table class="tt">${head}${rows}</table></div>`;
 }
 function editCellHTML(d, p) {
-  const l = lessonAt(UI.ttClass, d, p);
+  const l = lessonAt(UI.ttClass, d, p) || { s: '', t: '' };
   return `<form data-form="cell" class="stack" data-d="${d}" data-p="${p}">
     <p><b>${esc(UI.ttClass)}</b> · ${dayName(d)} · P${p} (${periodTime(p)})</p>
-    <label>${t('subject')}<select name="s">${subjectOptions(l.s)}</select></label>
-    <label>${t('teacher')}<select name="t">${teacherOptions(l.t)}</select></label>
+    <label>${t('subject')}<select name="s"><option value="">— ${L('No class (free period)', 'कोई कक्षा नहीं (खाली पीरियड)')} —</option>${subjectOptions(l.s)}</select></label>
+    <label>${t('teacher')}<select name="t">${teacherOptions(l.t, { includeEmpty: true })}</select></label>
     <div class="error hidden" id="cellErr"></div>
     <div class="row-end"><button type="button" class="btn" data-act="closeModal">${t('cancel')}</button><button class="btn primary" type="submit">${t('save')}</button></div></form>`;
 }
@@ -1465,7 +1536,7 @@ function reqCard(r) {
     if (r.status === 'ready') actions += `<button class="btn small ok" data-act="reqStatus" data-id="${r.id}" data-st="delivered">${L('Mark delivered', 'पहुँचा दिया')}</button>`;
   }
   if (owner && r.status === 'requested') actions += `<button class="btn small ghost" data-act="reqCancel" data-id="${r.id}">${L('Withdraw', 'वापस लें')}</button>`;
-  if ((manager || owner) && r.status !== 'rejected') actions += `<button class="btn small ai" data-act="aiDraft" data-id="${r.id}">✨ ${r.draft ? L('View draft', 'ड्राफ़्ट देखें') : t('aiDraft')}</button>`;
+  if ((manager || owner) && r.status !== 'rejected') actions += `<button class="btn small ai" data-act="aiDraft" data-id="${r.id}">📄 ${r.draft ? L('View draft', 'ड्राफ़्ट देखें') : t('aiDraft')}</button>`;
   const late = r.neededBy < todayISO() && !['delivered', 'rejected'].includes(r.status);
   return `<div class="card">
     <div class="card-top"><div><span class="kind ${r.kind}">${r.kind === 'dpp' ? 'DPP' : t('worksheet')}</span><div><strong>${esc(r.classId)} · ${esc(subjName(r.subject))}</strong><small>${title}</small></div></div>${statusChip(r.status)}</div>
@@ -1588,32 +1659,6 @@ function viewReports() {
 }
 
 /* ---------- AI assistant ---------- */
-function viewAssistant() {
-  const mgr = isManager(me());
-  const sugg = mgr ? (S.lang === 'hi'
-    ? ['आज कौन अनुपस्थित है और अरेंजमेंट की क्या स्थिति है?', 'इस महीने सबसे ज़्यादा अरेंजमेंट किसने लिए?', 'अगर कल Rajesh Kumar छुट्टी पर हों तो कौन पढ़ाएगा?', 'कौन से DPP/वर्कशीट देर से चल रहे हैं?', '9A का गुरुवार का टाइमटेबल', 'लंबित छुट्टी आवेदन दिखाओ']
-    : ['Who is absent today and is everything covered?', 'Who took the most substitutions this month?', 'If Rajesh Kumar is on leave tomorrow, who would cover?', 'Which DPP or worksheet requests are overdue?', "Show 9A's Thursday timetable", 'List pending leave requests with reasons'])
-    : (S.lang === 'hi'
-    ? ['आज मेरा शेड्यूल क्या है?', 'मेरी छुट्टी के आवेदनों की स्थिति', 'मेरे DPP/वर्कशीट अनुरोध कहाँ तक पहुँचे?', 'गुरुवार को पीरियड 5 में कौन खाली है?', 'कक्षा 7 विज्ञान के लिए पोषण पर 5 प्रश्न सुझाओ']
-    : ["What's my schedule today?", 'Status of my leave requests', 'Where are my DPP and worksheet requests?', 'Who is free in period 5 on Thursday?', 'Suggest 5 questions on nutrition in plants for Class 7']);
-  const chip = AI.status === 'on' ? `<span class="chip st-approved">✨ Claude AI${mgr && AI.used ? ` · ${AI.used}/${AI.limit} ${L('today', 'आज')}` : ''}</span>`
-    : AI.status === 'off' ? `<span class="chip st-requested">${L('AI not set up — built-in answers', 'AI सेट नहीं — अंतर्निहित उत्तर')}</span>`
-    : AI.status === 'limit' ? `<span class="chip st-rejected">${L('Daily AI limit reached', 'दैनिक AI सीमा पूरी')}</span>`
-    : AI.status === 'credit' ? `<span class="chip st-rejected">${L('Claude account needs credit', 'Claude अकाउंट में क्रेडिट चाहिए')}</span>`
-    : `<span class="chip">✨ Claude AI</span>`;
-  return `<div class="page-head"><h2>${t('assistant')}</h2><div class="btns">${chip}${UI.chat.length ? `<button class="btn small ghost" data-act="newChat">${L('New chat', 'नई बातचीत')}</button>` : ''}</div></div>
-    <section class="panel chat">
-      <div class="chat-log">${UI.chat.length ? UI.chat.map(m => m.role === 'assistant'
-        ? `<div class="msg assistant"><span class="ai-badge">✨</span><div class="md">${md(m.text)}</div></div>`
-        : `<div class="msg user"><div>${esc(m.text)}</div></div>`).join('') :
-        `<div class="empty small">${mgr ? L('Ask anything about the school: staff, timetables, absences, substitutions, leave, DPP and worksheet requests, workload and fairness — in Hindi or English.', 'स्कूल के बारे में कुछ भी पूछें: स्टाफ़, समय-सारणी, अनुपस्थिति, अरेंजमेंट, छुट्टी, DPP और वर्कशीट, कार्यभार — हिंदी या अंग्रेज़ी में।') : L('Ask about your timetable, substitutions, leave, requests, free periods — or get help with teaching material.', 'अपनी समय-सारणी, अरेंजमेंट, छुट्टी, अनुरोध, खाली पीरियड के बारे में पूछें — या पढ़ाने की सामग्री में मदद लें।')}</div>`}
-        ${UI.chatBusy ? `<div class="msg assistant"><span class="ai-badge">✨</span><div class="typing" id="liveAnswer">${esc(AI.step || '…')}</div></div>` : ''}</div>
-      <div class="suggest">${sugg.map(s => `<button class="chip-btn" data-act="askSuggest" data-q="${esc(s)}" ${UI.chatBusy ? 'disabled' : ''}>${esc(s)}</button>`).join('')}</div>
-      <form data-form="chat" class="chat-in"><input name="q" placeholder="${esc(L('Ask anything about school data…', 'स्कूल डेटा के बारे में कुछ भी पूछें…'))}" autocomplete="off" ${UI.chatBusy ? 'disabled' : ''}><button class="btn primary" ${UI.chatBusy ? 'disabled' : ''}>${t('ask')}</button></form>
-      <p class="hint">${L('The assistant reads school data you are allowed to see. It never changes anything. Check important answers before acting.', 'सहायक केवल वही डेटा पढ़ता है जो आप देख सकते हैं। यह कुछ नहीं बदलता। ज़रूरी उत्तर काम से पहले जाँच लें।')}</p>
-    </section>`;
-}
-
 /* ---------- notices, audit, settings ---------- */
 function viewNotices() {
   const u = me();
@@ -1755,6 +1800,7 @@ const ACTIONS = {
 
   askSuggest: el => askAssistant(el.dataset.q),
   newChat: () => newChat(),
+  hideStart: () => { try { localStorage.setItem('mts-start-hidden', '1'); } catch (e) { } render(); },
   newNotice: () => openModal(L('Post notice', 'सूचना जारी करें'), `<form data-form="notice" class="stack"><label>${L('Title', 'शीर्षक')} *<input name="title" required></label><label>${L('Message', 'संदेश')} *<textarea name="body" rows="4" required></textarea></label>
     <div class="row-end"><button type="button" class="btn" data-act="closeModal">${t('cancel')}</button><button class="btn primary">${L('Post', 'जारी करें')}</button></div></form>`),
   delNotice: el => { S.notices = S.notices.filter(n => n.id !== el.dataset.id); commit(); },
@@ -1864,13 +1910,15 @@ const FORMS = {
   },
   cell: (fd, form) => {
     const d = Number(form.dataset.d), p = Number(form.dataset.p);
-    const s = fd.get('s'), tid = fd.get('t');
-    const clash = CLASSES.find(c => c !== UI.ttClass && lessonAt(c, d, p).t === tid);
+    const s = fd.get('s'), tid = s ? fd.get('t') : '';
+    if (s && !tid) { const e = document.getElementById('cellErr'); e.textContent = L('Choose a teacher.', 'शिक्षक चुनें।'); e.classList.remove('hidden'); return; }
+    const clash = tid && CLASSES.find(c => c !== UI.ttClass && (lessonAt(c, d, p) || {}).t === tid);
     if (clash) { const e = document.getElementById('cellErr'); e.textContent = L(`${nameOf(tid)} already teaches ${clash} in this period.`, `${nameOf(tid)} इस पीरियड में पहले से ${clash} में हैं।`); e.classList.remove('hidden'); return; }
-    const old = lessonAt(UI.ttClass, d, p);
-    S.tt[UI.ttClass][d][p - 1] = { s, t: tid };
-    logAudit(me().id, `Timetable ${UI.ttClass} ${DAYS[d]} P${p}: ${old.s}/${nameOf(old.t)} → ${s}/${nameOf(tid)}`);
-    if (old.t !== tid) [old.t, tid].forEach(x => notify(x, '', { en: `Timetable changed: ${UI.ttClass} ${DAYS[d]} P${p} is now ${SUBJECTS[s].en} with ${nameOf(tid)}`, hi: `समय-सारणी बदली: ${UI.ttClass} ${DAYS_HI[d]} P${p} अब ${SUBJECTS[s].hi} — ${nameOf(tid)}` }));
+    const old = lessonAt(UI.ttClass, d, p) || { s: '', t: '' };
+    S.tt[UI.ttClass][d][p - 1] = s ? { s, t: tid } : null;
+    const now = s ? `${subjName(s)} with ${nameOf(tid)}` : 'a free period';
+    logAudit(me().id, `Timetable ${UI.ttClass} ${DAYS[d]} P${p}: ${old.s || 'free'}/${old.t ? nameOf(old.t) : '-'} → ${s || 'free'}/${tid ? nameOf(tid) : '-'}`);
+    if (old.t !== tid) [old.t, tid].filter(Boolean).forEach(x => notify(x, '', { en: `Timetable changed: ${UI.ttClass} ${DAYS[d]} P${p} is now ${now}`, hi: `समय-सारणी बदली: ${UI.ttClass} ${DAYS_HI[d]} P${p} — ${s ? subjName(s) + ', ' + nameOf(tid) : 'खाली पीरियड'}` }));
     // refresh any upcoming plans for this weekday
     Object.keys(S.plans).forEach(dt => { if (dt >= todayISO() && dayIdx(dt) === d) generatePlan(dt, me().id); });
     closeModal(); commit(); toast(L('Saved', 'सहेजा गया'));
@@ -1939,34 +1987,17 @@ const FORMS = {
     closeModal(); commit();
   },
   chat: (fd, form) => { const q = String(fd.get('q') || '').trim(); if (q) askAssistant(q); },
+  quickAsk: (fd) => { const q = String(fd.get('q') || '').trim(); if (!q) return; UI.view = 'assistant'; askAssistant(q); window.scrollTo(0, 0); },
 };
 
 /* ---------- DPP / worksheet drafting ---------- */
 function openDraft(id) {
   const r = S.requests.find(x => x.id === id);
   openModal(L('Draft', 'ड्राफ़्ट') + ` — ${r.kind === 'dpp' ? 'DPP' : t('worksheet')} ${r.classId} ${subjName(r.subject)}`, `
-    <p class="hint">${AI.status === 'off' ? L('AI is not set up yet, so this makes a fill-in template in MTS format.', 'AI अभी सेट नहीं है, इसलिए MTS प्रारूप में भरने योग्य टेम्पलेट बनेगा।') : L('Claude writes a first draft from the request. The teacher must check it before printing.', 'Claude अनुरोध से पहला ड्राफ़्ट लिखता है। प्रिंट से पहले शिक्षक जाँचें।')}</p>
+    <p class="hint">${L('Makes a ready-to-fill sheet in MTS format from the request. Type the questions in, then save or copy for printing.', 'अनुरोध से MTS प्रारूप में भरने योग्य शीट बनती है। प्रश्न लिखें, फिर प्रिंट के लिए सहेजें या कॉपी करें।')}</p>
     <textarea id="draftText" class="draft" rows="16">${esc(r.draft || '')}</textarea>
-    <div class="row-end"><button class="btn ai" data-act="aiGenerate" data-id="${r.id}" id="genBtn">✨ ${r.draft ? L('Write again', 'फिर से लिखें') : t('aiDraft')}</button>
+    <div class="row-end"><button class="btn ai" data-act="aiGenerate" data-id="${r.id}" id="genBtn">📄 ${r.draft ? L('Start again from template', 'टेम्पलेट से फिर शुरू') : t('aiDraft')}</button>
       <button class="btn ghost" data-act="copyDraft">📋 ${L('Copy', 'कॉपी')}</button><button class="btn primary" data-act="saveDraft" data-id="${r.id}">${t('save')}</button></div>`, { wide: true });
-}
-function draftPrompt(r) {
-  const head = `You are helping a teacher at ${SCHOOL.name}, ${SCHOOL.place} (CBSE-style school, India).`;
-  if (r.kind === 'dpp') return `${head}
-Write a Daily Practice Problem (DPP) sheet.
-Class: ${r.classId}. Subject: ${SUBJECTS[r.subject].en}. Chapter: ${r.chapter}. Topic: ${r.topic || '(whole chapter)'}.
-Number of questions: ${r.numQ}. Difficulty: ${r.difficulty}. Question types: ${r.qtypes}.
-Teacher's notes: ${r.description || 'none'}.
-Format as plain text, ready to print: a header line "${SCHOOL.name} — DPP", then Class, Subject, Chapter, Date: ____ , Name: ____ , Roll No: ____.
-Number the questions. For MCQs give four options (a)–(d). After the questions add an "Answer key" section with short answers.
-Keep the language level right for the class. Do not add any commentary before or after the sheet.`;
-  return `${head}
-Write a printable worksheet.
-Class: ${r.classId}. Subject: ${SUBJECTS[r.subject].en}. Worksheet type: ${r.wsType}. Page: ${r.pageSize}, ${r.color}.
-What the teacher wants: ${r.description}
-Format as plain text, ready to print: a header line "${SCHOOL.name} — Worksheet", then Class, Subject, Date: ____ , Name: ____ , Roll No: ____.
-Use clear numbered sections and short instructions a student of this class can follow. Where a picture or drawing is needed, write [Picture: …] describing it.
-Fit it to one ${r.pageSize} page if possible. Add a brief "Teacher's answer key" at the end if the activity has answers. No commentary before or after.`;
 }
 function templateDraft(r) {
   const top = `${SCHOOL.name}, ${SCHOOL.place}\n${r.kind === 'dpp' ? 'DAILY PRACTICE PROBLEMS (DPP)' : (r.wsType || '').toUpperCase() + ' WORKSHEET'}\nClass: ${r.classId}    Subject: ${SUBJECTS[r.subject].en}    Date: ________\nName: ______________________    Roll No: ______\n`;
@@ -1976,51 +2007,6 @@ function templateDraft(r) {
     return s + `\nAnswer key\n${Array.from({ length: Math.min(r.numQ, 50) }, (_, i) => `Q${i + 1}: ____`).join('   ')}\n`;
   }
   return `${top}\nTeacher's brief: ${r.description}\n\nSection A — ______________________\n1. ____________________________\n2. ____________________________\n3. ____________________________\n\nSection B — ______________________\n4. ____________________________\n5. ____________________________\n\n[Picture: ______________________]\n\nTeacher's answer key: ______________________\n`;
-}
-/* ---------- assistant ---------- */
-const DAY_WORDS = [
-  [0, /\b(mon|monday|somvar|सोमवार)/i], [1, /\b(tue|tuesday|mangalvar|mangal|मंगलवार)/i], [2, /\b(wed|wednesday|budhvar|budh|बुधवार)/i],
-  [3, /\b(thu|thursday|guruvar|brihaspati|गुरुवार)/i], [4, /\b(fri|friday|shukravar|shukra|शुक्रवार)/i], [5, /\b(sat|saturday|shanivar|shani|शनिवार)/i],
-];
-function parseDay(q) {
-  for (const [d, re] of DAY_WORDS) if (re.test(q)) { let dt = todayISO(); for (let i = 0; i < 7 && dayIdx(dt) !== d; i++) dt = addDays(dt, 1); return { d, date: dt }; }
-  if (/tomorrow|kal|कल/i.test(q)) { const dt = addDays(todayISO(), 1); return { d: dayIdx(dt), date: dt }; }
-  return { d: dayIdx(todayISO()), date: todayISO() };
-}
-function localAnswer(q) {
-  const hi = S.lang === 'hi';
-  const { d, date } = parseDay(q);
-  const pm = q.match(/(?:period|p|पीरियड|घंटी)\s*-?\s*(\d)/i) || q.match(/\b([1-8])(?:st|nd|rd|th)?\s*(?:period|पीरियड)/i);
-  const nameHit = S.staff.find(s => q.toLowerCase().includes(s.name.toLowerCase()) || q.toLowerCase().includes(s.name.split(' ')[0].toLowerCase()));
-  if (/free|khali|खाली|फ्री/i.test(q)) {
-    if (d < 0) return hi ? 'उस दिन रविवार है, स्कूल बंद।' : 'That day is a Sunday — no school.';
-    const periods = pm ? [Number(pm[1])] : PERIODS.map(p => p.n);
-    return periods.map(p => `P${p} (${periodTime(p)}), ${dayName(d)}: ${freeTeachers(d, p, date).join(', ') || (hi ? 'कोई नहीं' : 'nobody')}`).join('\n');
-  }
-  if (/most|sabse|zyada|ज़्यादा|ज्यादा|fair/i.test(q)) {
-    const ym = todayISO().slice(0, 7);
-    const list = teachers().map(tc => [tc.name, monthSubs(tc.id, ym)]).sort((a, b) => b[1] - a[1]).slice(0, 5);
-    return (hi ? 'इस महीने सबसे ज़्यादा प्रकाशित अरेंजमेंट:\n' : 'Most published substitutions this month:\n') + list.map(([n, c], i) => `${i + 1}. ${n} — ${c}`).join('\n');
-  }
-  if (/absent|leave|chutti|छुट्टी|अनुपस्थित|nahi aaye|नहीं आए/i.test(q) && !/pending|lambit|लंबित/i.test(q)) {
-    const abs = absencesOn(date);
-    return abs.length ? `${fmtDate(date)}:\n` + abs.map(a => `• ${nameOf(a.teacherId)} — ${absenceLabel(a)}`).join('\n') : (hi ? `${fmtDate(date)} को कोई अनुपस्थित नहीं।` : `Nobody is absent on ${fmtDate(date)}.`);
-  }
-  if (/pending|lambit|लंबित|waiting/i.test(q)) {
-    const lv = S.leaves.filter(l => l.status === 'pending').length; const rq = S.requests.filter(r => r.status === 'requested').length;
-    return hi ? `लंबित: ${lv} छुट्टी आवेदन, ${rq} नए DPP/वर्कशीट अनुरोध।` : `Waiting: ${lv} leave request(s) and ${rq} new DPP/worksheet request(s).`;
-  }
-  if (nameHit && nameHit.role === 'teacher') {
-    if (d < 0) return hi ? 'उस दिन रविवार है।' : 'That day is a Sunday.';
-    const plan = S.plans[date];
-    return `${nameHit.name} — ${dayName(d)}:\n` + PERIODS.map(p => {
-      const l = teacherLessonAt(nameHit.id, d, p.n);
-      const s = plan && Object.values(plan.items).find(i => i.teacherId === nameHit.id && i.p === p.n);
-      return `P${p.n}: ${isAbsent(nameHit.id, date, p.n) ? (hi ? 'छुट्टी' : 'on leave') : s ? `${hi ? 'अरेंजमेंट' : 'substitution'} ${s.cls} ${subjName(s.subject)}` : l ? `${l.cls} ${subjName(l.s)}` : t('free')}`;
-    }).join('\n');
-  }
-  return hi ? 'मैं ये बता सकता हूँ: किसी पीरियड में कौन खाली है, आज कौन अनुपस्थित है, सबसे ज़्यादा अरेंजमेंट किसके, किसी शिक्षक का शेड्यूल, और लंबित काम।'
-    : 'I can tell you: who is free in a period, who is absent, who has done the most substitutions, any teacher\'s schedule, and what is pending.';
 }
 /* ---------- wiring ---------- */
 document.addEventListener('click', ev => {
@@ -2055,20 +2041,7 @@ function showCode(s, code) {
 }
 
 
-/* ===== AI assistant: Claude (through the school's server function) + school-data tools ===== */
-const AI = { status: 'unknown', convo: [], busy: false, step: '', used: null, limit: null };
-
-/* ---------- talking to the server function ---------- */
-async function callAI(payload) {
-  const { data, error } = await SB.functions.invoke('ai-assistant', { body: payload });
-  if (!error) { AI.status = 'on'; AI.used = data.used; AI.limit = data.limit; return data; }
-  let info = {};
-  try { info = await error.context.json(); } catch (e) { }
-  if (info.error === 'not_configured') AI.status = 'off';
-  else if (info.error === 'limit') AI.status = 'limit';
-  else if (info.error === 'ai_error' && /credit|billing/i.test(info.detail || '')) AI.status = 'credit';
-  const err = new Error(info.error || 'network'); err.info = info; throw err;
-}
+/* ===== Assistant: school-data look-ups used by the built-in assistant (brain.js) ===== */
 
 /* ---------- helpers for tool inputs ---------- */
 function resolveDate(s) {
@@ -2106,7 +2079,7 @@ const subjCode = q => {
 };
 const clsCode = q => (q ? String(q).toUpperCase().replace(/\s|CLASS|-/g, '') : null);
 const inRange = (d, from, to) => (!from || d >= from) && (!to || d <= to);
-const lessonText = l => (l ? `${l.cls || ''} ${SUBJECTS[l.s].en}`.trim() : 'free');
+const lessonText = l => (l ? `${l.cls || ''} ${subjName(l.s)}`.trim() : 'free');
 
 /* ---------- the tools Claude can use ---------- */
 function aiTools() {
@@ -2149,7 +2122,7 @@ function aiTools() {
       input_schema: { type: 'object', properties: { class: { type: 'string' }, day: { type: 'string', description: 'weekday name or date' } }, required: ['class'] },
       run: i => {
         const c = clsCode(i.class); if (!S.tt[c]) return { error: 'Unknown class. Classes: ' + CLASSES.join(', ') };
-        const row = d => PERIODS.map(p => { const l = lessonAt(c, d, p.n); return `P${p.n} ${SUBJECTS[l.s].en} — ${nameOf(l.t)}`; });
+        const row = d => PERIODS.map(p => { const l = lessonAt(c, d, p.n); return l ? `P${p.n} ${subjName(l.s)} — ${nameOf(l.t)}` : `P${p.n} free`; });
         const ct = nameOf(S.classTeachers[c]);
         if (!i.day) return { class: c, classTeacher: ct, week: DAYS.map((d, di) => ({ day: DAYS_LONG[di], periods: row(di) })) };
         const d = /\d/.test(i.day) || /today|tomorrow|aaj|kal/i.test(i.day) ? dayIdx(resolveDate(i.day)) : dayFromName(i.day);
@@ -2161,7 +2134,7 @@ function aiTools() {
       run: i => {
         const cc = clsCode(i.class), sc = subjCode(i.subject); const out = {};
         CLASSES.filter(c => !cc || c === cc).forEach(c => S.tt[c].forEach(day => day.forEach(l => {
-          if (sc && l.s !== sc) return; const k = `${c}|${l.s}|${l.t}`; out[k] = (out[k] || 0) + 1;
+          if (!l || (sc && l.s !== sc)) return; const k = `${c}|${l.s}|${l.t}`; out[k] = (out[k] || 0) + 1;
         })));
         return Object.entries(out).map(([k, n]) => { const [c, s, t] = k.split('|'); return { class: c, subject: SUBJECTS[s].en, teacher: nameOf(t), periodsPerWeek: n }; });
       } },
@@ -2255,104 +2228,6 @@ function aiTools() {
   return list;
 }
 
-function systemPrompt() {
-  const u = me(), mgr = isManager(u), d = dayIdx(todayISO());
-  return `You are the AI assistant in the staff app of ${SCHOOL.name}, ${SCHOOL.place}, India.
-Today is ${todayISO()} (${d >= 0 ? DAYS_LONG[d] : 'Sunday, no school'}). School runs Monday–Saturday, 8 periods: ${PERIODS.map(p => `P${p.n} ${p.start}-${p.end}`).join(', ')}; lunch ${LUNCH.start}-${LUNCH.end}.
-You are talking to ${u.name}, ${mgr ? `the school ${u.role} (full access to all school data)` : 'a teacher (they can see the timetable, their own leave, their own requests and published substitutions; never guess about other people\'s private matters)'}.
-
-How to answer:
-- Get every fact from the tools. Call as many tools as you need, in parallel when independent. Never invent names, numbers or dates.
-- If something is not in the data, say so plainly.
-- If a question is ambiguous, pick the most sensible reading, answer it, and mention the assumption in one short line.
-- Reply in the user's language: Hindi (Devanagari) if they write Hindi, Hinglish if they write Hinglish, otherwise English.
-- Be brief and direct. Lead with the answer. Use a small markdown table for lists of more than three rows, **bold** for key numbers. No headings.
-- Dates as "Mon 16 Nov". Periods as P1–P8.
-- You cannot change anything. If asked to change data, say which screen to use: Substitutions, Leave, Timetable, DPP & Worksheets, Staff, Notices or Settings${mgr ? '' : ' (only Admin/Coordinator can approve or edit)'}.
-- You may also help with teaching work (question ideas, lesson outlines, explanations) when asked.`;
-}
-
-/* ---------- conversation loop ---------- */
-const STEP_LABEL = { school_overview: ['Reading school overview', 'स्कूल जानकारी देख रहा है'], find_staff: ['Looking up staff', 'स्टाफ़ देख रहा है'], teacher_schedule: ['Checking a teacher\'s schedule', 'शिक्षक का शेड्यूल देख रहा है'],
-  class_timetable: ['Checking class timetable', 'कक्षा समय-सारणी देख रहा है'], who_teaches: ['Checking who teaches what', 'कौन क्या पढ़ाता है देख रहा है'], free_teachers: ['Finding free teachers', 'खाली शिक्षक ढूँढ रहा है'],
-  absences: ['Checking absences', 'अनुपस्थिति देख रहा है'], leave_requests: ['Checking leave', 'छुट्टी देख रहा है'], substitutions: ['Checking substitutions', 'अरेंजमेंट देख रहा है'],
-  workload_and_fairness: ['Calculating workload', 'कार्यभार गिन रहा है'], dpp_worksheet_requests: ['Checking DPP & worksheets', 'DPP/वर्कशीट देख रहा है'], notices: ['Reading notices', 'सूचनाएँ पढ़ रहा है'],
-  my_notifications: ['Reading notifications', 'सूचनाएँ पढ़ रहा है'], preview_substitution: ['Working out cover', 'अरेंजमेंट का अनुमान लगा रहा है'], audit_log: ['Reading change log', 'बदलाव रिकॉर्ड देख रहा है'] };
-
-function trimConvo() {
-  // keep the last ~20 messages, starting at a plain user question
-  let c = AI.convo;
-  if (c.length > 20) {
-    c = c.slice(-20);
-    while (c.length && !(c[0].role === 'user' && typeof c[0].content === 'string')) c.shift();
-  }
-  AI.convo = c;
-}
-
-async function askAssistant(q) {
-  if (UI.chatBusy) return;
-  UI.chat.push({ role: 'user', text: q });
-  if (AI.status === 'off' || !SB) { UI.chat.push({ role: 'assistant', text: localAnswer(q), local: true }); render(); return; }
-  UI.chatBusy = true; AI.step = L('Thinking…', 'सोच रहा है…'); render();
-  AI.convo.push({ role: 'user', content: q });
-  trimConvo();
-  const tools = aiTools();
-  const defs = tools.map(({ name, description, input_schema }) => ({ name, description, input_schema }));
-  let answer = '';
-  try {
-    for (let round = 0; round < 8; round++) {
-      const res = await callAI({ system: systemPrompt(), messages: AI.convo, tools: defs, max_tokens: 2500 });
-      AI.convo.push({ role: 'assistant', content: res.content });
-      const uses = (res.content || []).filter(b => b.type === 'tool_use');
-      if (res.stop_reason !== 'tool_use' || !uses.length) {
-        answer = (res.content || []).filter(b => b.type === 'text').map(b => b.text).join('\n').trim();
-        break;
-      }
-      AI.step = uses.map(u => (STEP_LABEL[u.name] ? L(STEP_LABEL[u.name][0], STEP_LABEL[u.name][1]) : u.name)).join(' · ') + '…';
-      const live = document.getElementById('liveAnswer'); if (live) live.textContent = AI.step;
-      const results = uses.map(u => {
-        const tool = tools.find(t => t.name === u.name);
-        let out;
-        try { out = tool ? tool.run(u.input || {}) : { error: 'unknown tool' }; } catch (e) { out = { error: String(e.message || e) }; }
-        let text = JSON.stringify(out);
-        if (text.length > 16000) text = text.slice(0, 16000) + ' …[cut: ask for a narrower range]';
-        return { type: 'tool_result', tool_use_id: u.id, content: text };
-      });
-      AI.convo.push({ role: 'user', content: results });
-    }
-    if (!answer) answer = L('I could not finish that — please ask a narrower question.', 'यह पूरा नहीं हो सका — कृपया छोटा प्रश्न पूछें।');
-    UI.chat.push({ role: 'assistant', text: answer });
-  } catch (e) {
-    // undo the unfinished turn so the conversation stays valid
-    while (AI.convo.length && !(AI.convo[AI.convo.length - 1].role === 'user' && AI.convo[AI.convo.length - 1].content === q)) AI.convo.pop();
-    AI.convo.pop();
-    const why = AI.status === 'credit' ? L('The school\'s Claude account has no credit left. The Admin needs to add credit at console.anthropic.com (Plans & Billing). Built-in answer:', 'स्कूल के Claude अकाउंट में क्रेडिट नहीं है। एडमिन console.anthropic.com (Plans & Billing) पर क्रेडिट जोड़ें। अंतर्निहित उत्तर:')
-      : AI.status === 'limit' ? L('You have reached today\'s AI limit. It resets at midnight.', 'आज की AI सीमा पूरी हो गई। आधी रात को फिर शुरू होगी।')
-      : AI.status === 'off' ? L('AI is not set up yet (the Admin needs to add the Claude API key). Here is a built-in answer:', 'AI अभी सेट नहीं है (एडमिन को Claude API key जोड़नी है)। अंतर्निहित उत्तर:')
-      : L('Could not reach the AI just now. Built-in answer:', 'अभी AI से जुड़ नहीं सका। अंतर्निहित उत्तर:');
-    UI.chat.push({ role: 'assistant', text: why + (AI.status === 'limit' ? '' : '\n\n' + localAnswer(q)), local: true });
-  }
-  UI.chatBusy = false; AI.step = ''; render();
-}
-function newChat() { UI.chat = []; AI.convo = []; render(); }
-
-/* ---------- DPP / worksheet drafts with Claude ---------- */
-async function generateDraft(id) {
-  const r = S.requests.find(x => x.id === id);
-  const ta = document.getElementById('draftText'), btn = document.getElementById('genBtn');
-  if (AI.status === 'off') { ta.value = templateDraft(r); toast(L('AI not set up — template added', 'AI सेट नहीं — टेम्पलेट जोड़ा')); return; }
-  btn.disabled = true; btn.textContent = L('Claude is writing…', 'Claude लिख रहा है…');
-  try {
-    const res = await callAI({ system: 'You write printable school worksheets and practice sheets. Output only the sheet.', messages: [{ role: 'user', content: draftPrompt(r) }], max_tokens: 4000 });
-    ta.value = (res.content || []).filter(b => b.type === 'text').map(b => b.text).join('\n').trim();
-    r.history.push({ at: nowStamp(), by: me().id, text: 'AI draft written — teacher to check' });
-    toast(L('Draft ready — please check before printing', 'ड्राफ़्ट तैयार — प्रिंट से पहले जाँचें'));
-  } catch (e) {
-    ta.value = ta.value || templateDraft(r);
-    toast(AI.status === 'credit' ? L('Claude account has no credit — template added', 'Claude अकाउंट में क्रेडिट नहीं — टेम्पलेट जोड़ा') : AI.status === 'limit' ? L('Daily AI limit reached — template added', 'दैनिक AI सीमा पूरी — टेम्पलेट जोड़ा') : AI.status === 'off' ? L('AI not set up — template added', 'AI सेट नहीं — टेम्पलेट जोड़ा') : L('AI could not write it — try again', 'AI नहीं लिख सका — फिर कोशिश करें'));
-  } finally { btn.disabled = false; btn.textContent = '✨ ' + L('Write again', 'फिर से लिखें'); }
-}
-
 /* ---------- tiny, safe markdown for answers ---------- */
 function md(src) {
   const lines = esc(src).split('\n');
@@ -2378,6 +2253,845 @@ function md(src) {
     html += `<p>${inline(ln)}</p>`; i++;
   }
   return html;
+}
+
+/* ===== Timetable Builder (Admin / Coordinator) ===== */
+const BLD = { cls: null, scope: 'all', preview: null, pcls: null, busy: false, seed: 1 };
+const SLOTS = () => DAYS.length * PERIODS.length;
+
+/* What a class should have each week: { SUBJ: { n: periods, t: teacherId } }.
+   Until someone edits it, it is read from the current timetable. */
+function curriculumOf(cls) {
+  if (S.curriculum[cls]) return S.curriculum[cls];
+  const out = {}, votes = {};
+  (S.tt[cls] || []).forEach(day => day.forEach(l => {
+    if (!l) return;
+    out[l.s] = out[l.s] || { n: 0, t: l.t };
+    out[l.s].n++;
+    votes[l.s] = votes[l.s] || {};
+    votes[l.s][l.t] = (votes[l.s][l.t] || 0) + 1;
+  }));
+  Object.keys(out).forEach(s => { out[s].t = Object.entries(votes[s]).sort((a, b) => b[1] - a[1])[0][0]; });
+  return out;
+}
+function editCurriculum(cls) {
+  if (!S.curriculum[cls]) S.curriculum[cls] = JSON.parse(JSON.stringify(curriculumOf(cls)));
+  return S.curriculum[cls];
+}
+const currTotal = cls => Object.values(curriculumOf(cls)).reduce((a, x) => a + (Number(x.n) || 0), 0);
+function plannedLoad() {
+  const load = {};
+  CLASSES.forEach(c => Object.values(curriculumOf(c)).forEach(x => { if (x.t && x.n) load[x.t] = (load[x.t] || 0) + Number(x.n); }));
+  return load;
+}
+
+/* Problems that make a timetable impossible, before we try to build it */
+function curriculumProblems(classes) {
+  const out = [];
+  classes.forEach(c => {
+    const cur = curriculumOf(c), tot = currTotal(c);
+    if (tot > SLOTS()) out.push(L(`${c}: ${tot} periods planned, but a week has only ${SLOTS()}.`, `${c}: ${tot} पीरियड तय हैं, पर सप्ताह में केवल ${SLOTS()} हैं।`));
+    if (tot === 0) out.push(L(`${c}: no subjects added yet.`, `${c}: अभी कोई विषय नहीं जोड़ा।`));
+    Object.entries(cur).forEach(([s, x]) => {
+      if (!x.n) return;
+      if (!x.t || !staffById(x.t) || !staffById(x.t).active) out.push(L(`${c}: choose a teacher for ${subjName(s)}.`, `${c}: ${subjName(s)} के लिए शिक्षक चुनें।`));
+      if (x.n > DAYS.length * 2) out.push(L(`${c}: ${subjName(s)} has ${x.n} periods; the most possible is ${DAYS.length * 2} (2 a day).`, `${c}: ${subjName(s)} के ${x.n} पीरियड; अधिकतम ${DAYS.length * 2} (दिन में 2) संभव हैं।`));
+    });
+  });
+  Object.entries(plannedLoad()).forEach(([tid, n]) => {
+    if (n > SLOTS()) out.push(L(`${nameOf(tid)} has ${n} periods planned — more than the ${SLOTS()} in a week.`, `${nameOf(tid)} के ${n} पीरियड तय हैं — सप्ताह के ${SLOTS()} से ज़्यादा।`));
+  });
+  return out;
+}
+
+/* Build a clash-free timetable for `targets`; all other classes stay as they are. */
+function buildTimetable(targets, seed) {
+  const ND = DAYS.length, NP = PERIODS.length, NS = ND * NP;
+  let best = null;
+  for (let attempt = 0; attempt < 12; attempt++) {
+    const rnd = mulberry32(seed * 104729 + attempt * 7919);
+    const rows = {};
+    CLASSES.forEach(c => {
+      if (!targets.includes(c)) { rows[c] = []; (S.tt[c] || []).forEach(day => day.forEach(l => rows[c].push(l || null))); while (rows[c].length < NS) rows[c].push(null); return; }
+      const list = [];
+      Object.entries(curriculumOf(c)).forEach(([s, x]) => { for (let i = 0; i < x.n; i++) list.push({ s, t: x.t }); });
+      while (list.length < NS) list.push(null);
+      for (let i = list.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [list[i], list[j]] = [list[j], list[i]]; }
+      rows[c] = list;
+    });
+    const hard = (c, i) => {
+      const cell = rows[c][i]; if (!cell) return 0;
+      let cost = 0;
+      for (const o of CLASSES) if (o !== c && rows[o][i] && rows[o][i].t === cell.t) cost++;
+      const d0 = Math.floor(i / NP) * NP; let same = 0;
+      for (let k = d0; k < d0 + NP; k++) if (rows[c][k] && rows[c][k].s === cell.s) same++;
+      if (same > 2) cost += same - 2;
+      return cost;
+    };
+    const total = () => { let n = 0; targets.forEach(c => { for (let i = 0; i < NS; i++) n += hard(c, i); }); return n; };
+    let cost = total();
+    for (let step = 0; step < 70000 && cost > 0; step++) {
+      const c = targets[Math.floor(rnd() * targets.length)], i = Math.floor(rnd() * NS);
+      if (hard(c, i) === 0 && rnd() > 0.02) continue;
+      let pick = -1, bestDelta = Infinity;
+      for (let k = 0; k < 20; k++) {
+        const j = Math.floor(rnd() * NS);
+        if (j === i) continue;
+        const a = rows[c][i], b = rows[c][j];
+        if ((a && b && a.s === b.s) || (!a && !b)) continue;
+        const before = hard(c, i) + hard(c, j);
+        rows[c][i] = b; rows[c][j] = a;
+        const after = hard(c, i) + hard(c, j);
+        rows[c][i] = a; rows[c][j] = b;
+        const delta = after - before + (rnd() - 0.5) * 0.2;
+        if (delta < bestDelta) { bestDelta = delta; pick = j; }
+      }
+      if (pick >= 0 && bestDelta <= 0.1) [rows[c][i], rows[c][pick]] = [rows[c][pick], rows[c][i]];
+      if (step % 500 === 0) cost = total();
+    }
+    cost = total();
+    if (cost === 0) {
+      // tidy up without breaking anything: free periods to the end of the day, same subject not twice a day
+      const soft = c => {
+        let n = 0;
+        for (let d = 0; d < ND; d++) {
+          let seenFree = false; const cnt = {};
+          for (let p = 0; p < NP; p++) {
+            const x = rows[c][d * NP + p];
+            if (!x) seenFree = true; else { if (seenFree) n += 3; cnt[x.s] = (cnt[x.s] || 0) + 1; }
+          }
+          Object.values(cnt).forEach(v => { if (v > 1) n += 1; });
+        }
+        return n;
+      };
+      for (let step = 0; step < 25000; step++) {
+        const c = targets[Math.floor(rnd() * targets.length)], i = Math.floor(rnd() * NS), j = Math.floor(rnd() * NS);
+        if (i === j) continue;
+        const before = soft(c);
+        if (before === 0) continue;
+        [rows[c][i], rows[c][j]] = [rows[c][j], rows[c][i]];
+        if (hard(c, i) + hard(c, j) > 0 || soft(c) > before) [rows[c][i], rows[c][j]] = [rows[c][j], rows[c][i]];
+      }
+    }
+    if (!best || cost < best.cost) {
+      const tt = {};
+      targets.forEach(c => { tt[c] = []; for (let d = 0; d < ND; d++) tt[c].push(rows[c].slice(d * NP, d * NP + NP).map(x => (x ? { s: x.s, t: x.t } : null))); });
+      best = { tt, cost };
+    }
+    if (cost === 0) break;
+  }
+  return { tt: best.tt, ok: best.cost === 0, cost: best.cost, classes: targets.slice() };
+}
+
+/* Problems in the timetable that is live right now */
+function timetableIssues() {
+  const clashes = [], empty = {};
+  for (let d = 0; d < DAYS.length; d++) for (let p = 1; p <= PERIODS.length; p++) {
+    const seen = {};
+    CLASSES.forEach(c => {
+      const l = lessonAt(c, d, p);
+      if (!l) { empty[c] = (empty[c] || 0) + 1; return; }
+      if (seen[l.t]) clashes.push({ day: d, p, teacher: l.t, classes: [seen[l.t], c] }); else seen[l.t] = c;
+    });
+  }
+  const inactive = [];
+  CLASSES.forEach(c => (S.tt[c] || []).forEach(day => day.forEach(l => { if (l && (!staffById(l.t) || !staffById(l.t).active) && !inactive.includes(`${c}|${l.t}`)) inactive.push(`${c}|${l.t}`); })));
+  return { clashes, empty, inactive };
+}
+
+/* ---------- screen ---------- */
+function ttGridHTML(tt, cls) {
+  const head = `<tr><th>${t('period')}</th>${DAYS.map((d, i) => `<th>${S.lang === 'hi' ? DAYS_HI[i].slice(0, 3) : d}</th>`).join('')}</tr>`;
+  let rows = '';
+  PERIODS.forEach(pp => {
+    rows += `<tr><th><b>P${pp.n}</b><small>${periodTime(pp.n)}</small></th>` + DAYS.map((_, d) => {
+      const l = tt[cls][d][pp.n - 1];
+      return l ? `<td class="subj-${l.s}"><b>${esc(subjName(l.s))}</b><small>${esc(nameOf(l.t))}</small></td>` : `<td class="freecell">—</td>`;
+    }).join('') + '</tr>';
+    if (pp.n === LUNCH.after) rows += `<tr class="lunchrow"><th><small>${LUNCH.start}–${LUNCH.end}</small></th><td colspan="${DAYS.length}">🍱 ${t('lunch')}</td></tr>`;
+  });
+  return `<div class="table-wrap"><table class="tt">${head}${rows}</table></div>`;
+}
+
+function viewBuilder() {
+  if (!BLD.cls || !S.tt[BLD.cls]) BLD.cls = CLASSES[0];
+  const cls = BLD.cls, cur = curriculumOf(cls), tot = currTotal(cls), slots = SLOTS();
+  const load = plannedLoad();
+  const unused = Object.keys(SUBJECTS).filter(s => !cur[s]);
+  const subjRows = Object.entries(cur).map(([s, x]) => `<tr>
+      <td><b>${esc(subjName(s))}</b></td>
+      <td><div class="stepper"><button class="btn tiny" data-act="bldStep" data-s="${s}" data-n="-1" aria-label="less">−</button><input type="number" min="0" max="12" value="${x.n}" data-change="bldPeriods" data-s="${s}" aria-label="${esc(subjName(s))} periods"><button class="btn tiny" data-act="bldStep" data-s="${s}" data-n="1" aria-label="more">+</button></div></td>
+      <td><select data-change="bldTeacher" data-s="${s}" aria-label="${esc(subjName(s))} teacher">${teacherOptions(x.t, { includeEmpty: true, emptyLabel: L('Choose teacher', 'शिक्षक चुनें') })}</select></td>
+      <td><button class="btn tiny ghost" data-act="bldRemoveSubject" data-s="${s}">✕</button></td></tr>`).join('');
+  const problems = curriculumProblems(BLD.scope === 'all' ? CLASSES : [cls]);
+  const loadRows = teachers().map(tc => ({ tc, n: load[tc.id] || 0 })).sort((a, b) => b.n - a.n);
+  const pv = BLD.preview;
+  const issues = timetableIssues();
+
+  let previewHTML = '';
+  if (BLD.busy) previewHTML = `<section class="panel"><div class="spinner"></div><p class="muted" style="text-align:center">${L('Building a clash-free timetable…', 'बिना टकराव की समय-सारणी बन रही है…')}</p></section>`;
+  else if (pv) {
+    if (!pv.classes.includes(BLD.pcls)) BLD.pcls = pv.classes[0];
+    previewHTML = `<section class="panel preview">
+      <div class="panel-head"><h3>${L('Step 3 · Preview', 'चरण 3 · पूर्वावलोकन')}</h3>${pv.ok ? `<span class="chip st-approved">✓ ${L('No clashes', 'कोई टकराव नहीं')}</span>` : `<span class="chip st-rejected">${pv.cost} ${L('clashes left', 'टकराव बाकी')}</span>`}</div>
+      ${pv.ok ? `<p class="muted">${L('This is only a preview. Nothing changes for staff until you press “Use this timetable”.', 'यह केवल पूर्वावलोकन है। “यह समय-सारणी लागू करें” दबाने तक स्टाफ़ के लिए कुछ नहीं बदलता।')}</p>`
+        : `<div class="banner warn">${L('Could not remove every clash. Usually a teacher has too many periods, or too many classes need the same teacher. Reduce periods or change a teacher, then try again.', 'सभी टकराव नहीं हट सके। अक्सर किसी शिक्षक के पीरियड बहुत ज़्यादा होते हैं। पीरियड घटाएँ या शिक्षक बदलें, फिर कोशिश करें।')}</div>`}
+      <div class="tabs">${pv.classes.map(c => `<button class="tab ${c === BLD.pcls ? 'active' : ''}" data-act="bldPreviewClass" data-c="${c}">${c}</button>`).join('')}</div>
+      ${ttGridHTML(pv.tt, BLD.pcls)}
+      <div class="row-end"><button class="btn ghost" data-act="bldDiscard">${L('Discard', 'हटाएँ')}</button><button class="btn" data-act="bldGenerate">↻ ${L('Try another arrangement', 'दूसरी व्यवस्था देखें')}</button>
+        ${pv.ok ? `<button class="btn primary" data-act="bldApply">✓ ${L('Use this timetable', 'यह समय-सारणी लागू करें')}</button>` : ''}</div>
+    </section>`;
+  }
+
+  return `<div class="page-head"><h2>${t('builder')}</h2><button class="btn ghost" data-act="go" data-view="timetable">📅 ${L('See current timetable', 'मौजूदा समय-सारणी देखें')}</button></div>
+  <p class="muted">${L('Set how many periods each subject gets and who teaches it. The app then arranges the week so that no teacher is in two classes at once.', 'तय करें कि हर विषय को कितने पीरियड मिलें और कौन पढ़ाए। फिर ऐप सप्ताह ऐसे जमाता है कि कोई शिक्षक एक साथ दो कक्षाओं में न हो।')}</p>
+  ${issues.clashes.length ? `<div class="banner warn">⚠️ ${L(`The current timetable has ${issues.clashes.length} teacher clash(es). Ask the assistant “check timetable” for the list.`, `मौजूदा समय-सारणी में ${issues.clashes.length} टकराव हैं। सूची के लिए सहायक से “check timetable” पूछें।`)}</div>` : ''}
+
+  <section class="panel">
+    <div class="panel-head"><h3>${L('Step 1 · Choose a class', 'चरण 1 · कक्षा चुनें')}</h3><div class="btns"><button class="btn small" data-act="bldAddClass">+ ${L('Add class', 'कक्षा जोड़ें')}</button><button class="btn small danger-ghost" data-act="bldRemoveClass">${L('Remove this class', 'यह कक्षा हटाएँ')}</button></div></div>
+    <div class="tabs">${CLASSES.map(c => { const n = currTotal(c); return `<button class="tab ${c === cls ? 'active' : ''}" data-act="bldClass" data-c="${c}">${c}${n > slots ? ' ⚠️' : ''}</button>`; }).join('')}</div>
+    <label class="inline-field">${L('Class teacher of', 'कक्षा-शिक्षक —')} ${cls}<select data-change="bldClassTeacher">${teacherOptions(S.classTeachers[cls] || '', { includeEmpty: true })}</select></label>
+  </section>
+
+  <div class="grid2">
+    <section class="panel">
+      <div class="panel-head"><h3>${L('Step 2 · Subjects for', 'चरण 2 · विषय —')} ${cls}</h3>
+        <span class="chip ${tot > slots ? 'st-rejected' : tot === slots ? 'st-approved' : 'st-requested'}">${tot} / ${slots} ${L('periods', 'पीरियड')}${tot < slots ? ` · ${slots - tot} ${L('free', 'खाली')}` : ''}</span></div>
+      <div class="table-wrap"><table class="data bld"><thead><tr><th>${t('subject')}</th><th>${L('Periods / week', 'पीरियड / सप्ताह')}</th><th>${t('teacher')}</th><th></th></tr></thead><tbody>${subjRows || `<tr><td colspan="4" class="muted">${L('No subjects yet. Add one below.', 'अभी कोई विषय नहीं। नीचे से जोड़ें।')}</td></tr>`}</tbody></table></div>
+      <div class="btns bld-add">
+        ${unused.length ? `<select data-change="bldAddSubject" aria-label="Add subject"><option value="">+ ${L('Add subject…', 'विषय जोड़ें…')}</option>${unused.map(s => `<option value="${s}">${esc(subjName(s))}</option>`).join('')}</select>` : ''}
+        <button class="btn small ghost" data-act="bldNewSubject">+ ${L('New subject', 'नया विषय')}</button>
+        <select data-change="bldCopyFrom" aria-label="Copy from class"><option value="">${L('Copy from class…', 'किसी कक्षा से कॉपी…')}</option>${CLASSES.filter(c => c !== cls).map(c => `<option>${c}</option>`).join('')}</select>
+      </div>
+    </section>
+    <section class="panel">
+      <div class="panel-head"><h3>${L('Teacher load (all classes)', 'शिक्षक कार्यभार (सभी कक्षाएँ)')}</h3></div>
+      <div class="table-wrap loadlist"><table class="data bars"><tbody>${loadRows.map(({ tc, n }) => `<tr><td>${esc(tc.name)}</td><td><div class="bar ${n > slots ? 'over' : n > 40 ? 'sub' : ''}"><i style="width:${Math.min(100, (n / slots) * 100)}%"></i><span>${n}${n > slots ? ' ⚠️' : ''}</span></div></td></tr>`).join('')}</tbody></table></div>
+      <p class="hint">${L(`Periods per week out of ${slots}. Above 40 leaves almost no free period for substitutions.`, `${slots} में से प्रति सप्ताह पीरियड। 40 से ऊपर होने पर अरेंजमेंट के लिए खाली पीरियड लगभग नहीं बचते।`)}</p>
+    </section>
+  </div>
+
+  <section class="panel">
+    <div class="panel-head"><h3>${L('Step 3 · Build the timetable', 'चरण 3 · समय-सारणी बनाएँ')}</h3></div>
+    <div class="seg wide"><button class="${BLD.scope === 'all' ? 'active' : ''}" data-act="bldScope" data-scope="all">${L('All classes', 'सभी कक्षाएँ')}</button><button class="${BLD.scope === 'one' ? 'active' : ''}" data-act="bldScope" data-scope="one">${L(`Only ${cls} (keep the others)`, `केवल ${cls} (बाकी वैसी ही)`)}</button></div>
+    ${problems.length ? `<div class="error list"><b>${L('Fix these first:', 'पहले इन्हें ठीक करें:')}</b><ul>${problems.slice(0, 8).map(p => `<li>${esc(p)}</li>`).join('')}</ul></div>` : ''}
+    <div class="row-end"><button class="btn primary big" data-act="bldGenerate" ${problems.length || BLD.busy ? 'disabled' : ''}>🛠️ ${L('Build timetable', 'समय-सारणी बनाएँ')}</button></div>
+  </section>
+  ${previewHTML}`;
+}
+
+/* ---------- actions ---------- */
+Object.assign(ACTIONS, {
+  bldClass: el => { BLD.cls = el.dataset.c; render(); },
+  bldScope: el => { BLD.scope = el.dataset.scope; BLD.preview = null; render(); },
+  bldPreviewClass: el => { BLD.pcls = el.dataset.c; render(); },
+  bldDiscard: () => { BLD.preview = null; render(); },
+  bldStep: el => { const x = editCurriculum(BLD.cls)[el.dataset.s]; x.n = Math.max(0, Math.min(12, (Number(x.n) || 0) + Number(el.dataset.n))); BLD.preview = null; commit(); },
+  bldRemoveSubject: el => { delete editCurriculum(BLD.cls)[el.dataset.s]; BLD.preview = null; commit(); },
+  bldNewSubject: () => openModal(L('New subject', 'नया विषय'), `<form data-form="bldSubject" class="stack">
+    <label>${L('Name in English', 'अंग्रेज़ी में नाम')} *<input name="en" required maxlength="30" placeholder="e.g. Moral Science"></label>
+    <label>${L('Name in Hindi', 'हिंदी में नाम')}<input name="hi" maxlength="30" placeholder="जैसे नैतिक शिक्षा"></label>
+    <div class="error hidden" id="subjErr"></div>
+    <div class="row-end"><button type="button" class="btn" data-act="closeModal">${t('cancel')}</button><button class="btn primary">${t('save')}</button></div></form>`),
+  bldAddClass: () => openModal(L('Add class', 'कक्षा जोड़ें'), `<form data-form="bldClass" class="stack">
+    <label>${L('Class name', 'कक्षा का नाम')} *<input name="name" required maxlength="8" placeholder="e.g. 5A"></label>
+    <label>${L('Start with the subjects of', 'इस कक्षा के विषयों से शुरू करें')}<select name="from"><option value="">${L('Empty', 'खाली')}</option>${CLASSES.map(c => `<option>${c}</option>`).join('')}</select></label>
+    <div class="error hidden" id="clsErr"></div>
+    <div class="row-end"><button type="button" class="btn" data-act="closeModal">${t('cancel')}</button><button class="btn primary">${L('Add', 'जोड़ें')}</button></div></form>`),
+  bldRemoveClass: () => {
+    if (CLASSES.length <= 1) { toast(L('At least one class is needed', 'कम से कम एक कक्षा चाहिए')); return; }
+    const c = BLD.cls;
+    confirmBox(L(`Remove class ${c} and its whole timetable? This cannot be undone.`, `कक्षा ${c} और उसकी पूरी समय-सारणी हटाएँ? यह वापस नहीं होगा।`), () => {
+      delete S.tt[c]; delete S.curriculum[c]; delete S.classTeachers[c]; syncClasses(); BLD.cls = CLASSES[0]; BLD.preview = null;
+      if (UI.ttClass === c) UI.ttClass = CLASSES[0];
+      Object.keys(S.plans).forEach(dt => { if (dt >= todayISO()) generatePlan(dt, me().id); });
+      logAudit(me().id, `Removed class ${c}`); commit(); toast(L('Class removed', 'कक्षा हटाई गई'));
+    }, L('Remove', 'हटाएँ'));
+  },
+  bldGenerate: () => {
+    const targets = BLD.scope === 'all' ? CLASSES.slice() : [BLD.cls];
+    if (curriculumProblems(targets).length) return;
+    BLD.busy = true; BLD.preview = null; render();
+    setTimeout(() => {
+      try { BLD.preview = buildTimetable(targets, BLD.seed++ + Math.floor(Math.random() * 1000)); BLD.pcls = targets.includes(BLD.cls) ? BLD.cls : targets[0]; }
+      catch (e) { toast(L('Could not build — please try again', 'नहीं बन सकी — फिर कोशिश करें')); }
+      BLD.busy = false; render();
+      const el = document.querySelector('.preview'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 60);
+  },
+  bldApply: () => {
+    const pv = BLD.preview; if (!pv || !pv.ok) return;
+    confirmBox(L(`Replace the timetable of ${pv.classes.length === CLASSES.length ? 'all classes' : pv.classes.join(', ')} with this one? All staff will see the new timetable at once.`, `${pv.classes.length === CLASSES.length ? 'सभी कक्षाओं' : pv.classes.join(', ')} की समय-सारणी इससे बदलें? सभी स्टाफ़ को तुरंत नई समय-सारणी दिखेगी।`), () => {
+      pv.classes.forEach(c => { S.tt[c] = pv.tt[c]; if (!S.curriculum[c]) S.curriculum[c] = JSON.parse(JSON.stringify(curriculumOf(c))); });
+      Object.keys(S.plans).forEach(dt => { if (dt >= todayISO()) generatePlan(dt, me().id); });
+      S.staff.filter(s => s.active && s.id !== me().id).forEach(s => notify(s.id, '', { en: 'The school timetable has been updated. Please check your new periods.', hi: 'स्कूल की समय-सारणी बदली गई है। कृपया अपने नए पीरियड देखें।' }));
+      logAudit(me().id, `Applied a new timetable for ${pv.classes.length === CLASSES.length ? 'all classes' : pv.classes.join(', ')}`);
+      BLD.preview = null; UI.ttClass = BLD.cls; UI.ttMode = 'class'; UI.view = 'timetable';
+      commit(); toast(L('New timetable is live', 'नई समय-सारणी लागू हो गई'));
+    }, L('Use this timetable', 'लागू करें'));
+  },
+});
+Object.assign(CHANGES, {
+  bldPeriods: el => { editCurriculum(BLD.cls)[el.dataset.s].n = Math.max(0, Math.min(12, Math.round(Number(el.value) || 0))); BLD.preview = null; commit(); },
+  bldTeacher: el => { editCurriculum(BLD.cls)[el.dataset.s].t = el.value; BLD.preview = null; commit(); },
+  bldAddSubject: el => {
+    if (!el.value) return;
+    const s = el.value, def = teachers().find(tc => tc.subjects.includes(s));
+    editCurriculum(BLD.cls)[s] = { n: 1, t: def ? def.id : '' }; BLD.preview = null; commit();
+  },
+  bldCopyFrom: el => {
+    if (!el.value) return;
+    const from = el.value, to = BLD.cls;
+    confirmBox(L(`Replace the subject list of ${to} with a copy of ${from}?`, `${to} की विषय-सूची को ${from} की कॉपी से बदलें?`), () => { S.curriculum[to] = JSON.parse(JSON.stringify(curriculumOf(from))); BLD.preview = null; commit(); }, L('Copy', 'कॉपी'));
+  },
+  bldClassTeacher: el => { if (el.value) S.classTeachers[BLD.cls] = el.value; else delete S.classTeachers[BLD.cls]; logAudit(me().id, `Class teacher of ${BLD.cls}: ${el.value ? nameOf(el.value) : 'none'}`); commit(); },
+});
+Object.assign(FORMS, {
+  bldSubject: fd => {
+    const en = String(fd.get('en')).trim(), hi = String(fd.get('hi') || '').trim() || en;
+    const err = document.getElementById('subjErr');
+    if (Object.values(SUBJECTS).some(v => v.en.toLowerCase() === en.toLowerCase())) { err.textContent = L('This subject already exists.', 'यह विषय पहले से है।'); err.classList.remove('hidden'); return; }
+    let code = en.replace(/[^A-Za-z]/g, '').slice(0, 3).toUpperCase() || 'SUB', n = 1;
+    while (SUBJECTS[code]) code = code.slice(0, 2) + n++;
+    S.customSubjects[code] = { en, hi }; SUBJECTS[code] = { en, hi };
+    editCurriculum(BLD.cls)[code] = { n: 1, t: '' };
+    logAudit(me().id, `Added subject ${en}`); BLD.preview = null; closeModal(); commit();
+  },
+  bldClass: fd => {
+    const name = String(fd.get('name')).toUpperCase().replace(/\s+/g, ''), err = document.getElementById('clsErr');
+    if (!/^[0-9A-Z\-]{1,8}$/.test(name)) { err.textContent = L('Use letters and numbers only, like 5A or 11SCI.', 'केवल अक्षर और अंक, जैसे 5A या 11SCI।'); err.classList.remove('hidden'); return; }
+    if (S.tt[name]) { err.textContent = L('This class already exists.', 'यह कक्षा पहले से है।'); err.classList.remove('hidden'); return; }
+    S.tt[name] = DAYS.map(() => PERIODS.map(() => null));
+    S.curriculum[name] = fd.get('from') ? JSON.parse(JSON.stringify(curriculumOf(fd.get('from')))) : {};
+    syncClasses(); BLD.cls = name; BLD.scope = 'one'; BLD.preview = null;
+    logAudit(me().id, `Added class ${name}`); closeModal(); commit();
+    toast(L('Class added. Set its subjects, then build its timetable.', 'कक्षा जुड़ी। विषय तय करें, फिर समय-सारणी बनाएँ।'));
+  },
+});
+
+/* ===== Built-in smart assistant: understands questions in English, Hindi and Hinglish
+   and answers from school data. No outside AI service is used. ===== */
+const BR = { ctx: {}, lastIntent: null };
+
+/* ---------- small helpers ---------- */
+const tool = (name, input) => aiTools().find(x => x.name === name).run(input || {});
+const tbl = (head, rows) => `| ${head.join(' | ')} |\n|${head.map(() => '---').join('|')}|\n` + rows.map(r => `| ${r.map(c => String(c == null ? '' : c).replace(/\|/g, '/').replace(/\n/g, ' ')).join(' | ')} |`).join('\n');
+const rlabel = r => (r.from === r.to ? fmtDate(r.from) : `${fmtDate(r.from)} – ${fmtDate(r.to)}`);
+const one = iso => ({ from: iso, to: iso });
+const monthRange = (y, m) => { const last = new Date(y, m, 0).getDate(); return { from: `${y}-${pad(m)}-01`, to: `${y}-${pad(m)}-${pad(last)}` }; };
+const thisMonth = () => { const t0 = todayISO(); return monthRange(Number(t0.slice(0, 4)), Number(t0.slice(5, 7))); };
+const nowHM = () => { const d = new Date(); return pad(d.getHours()) + ':' + pad(d.getMinutes()); };
+function currentPeriod() { const hm = nowHM(); const p = PERIODS.find(x => hm >= x.start && hm < x.end); return p ? p.n : null; }
+function lev(a, b) {
+  if (Math.abs(a.length - b.length) > 1) return 9;
+  const dp = Array.from({ length: a.length + 1 }, (_, i) => [i]);
+  for (let j = 1; j <= b.length; j++) dp[0][j] = j;
+  for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+  return dp[a.length][b.length];
+}
+function dutyAt(tid, dt, p) {
+  const d = dayIdx(dt); if (d < 0) return { k: 'off', text: L('no school', 'स्कूल बंद') };
+  if (isAbsent(tid, dt, p)) return { k: 'leave', text: L('on leave', 'छुट्टी पर') };
+  const plan = S.plans[dt];
+  const sub = plan && (plan.status === 'published' || isManager(me())) && Object.values(plan.items).find(x => x.teacherId === tid && x.p === p);
+  if (sub) return { k: 'sub', text: `${L('Substitution', 'अरेंजमेंट')}: ${sub.cls} · ${subjName(sub.subject)}` };
+  const l = teacherLessonAt(tid, d, p);
+  return l ? { k: 'class', text: `${l.cls} · ${subjName(l.s)}` } : { k: 'free', text: t('free') };
+}
+
+/* ---------- understanding the question ---------- */
+const SUBJ_WORDS = {
+  MAT: ['math', 'maths', 'mathematics', 'ganit', 'गणित'], SCI: ['science', 'vigyan', 'विज्ञान'], ENG: ['english', 'angrezi', 'अंग्रेज़ी', 'अंग्रेजी'],
+  HIN: ['hindi', 'हिंदी', 'हिन्दी'], SST: ['sst', 'social', 'samajik', 'सामाजिक'], SKT: ['sanskrit', 'संस्कृत'], CMP: ['computer', 'computers', 'कंप्यूटर'],
+  GAM: ['games', 'sports', 'khel', 'खेल'], ART: ['art', 'drawing', 'kala', 'कला'], LIB: ['library', 'pustakalay', 'पुस्तकालय'],
+};
+function entSubject(lower) {
+  const pairs = [];
+  Object.keys(SUBJECTS).forEach(code => (SUBJ_WORDS[code] || []).concat([SUBJECTS[code].en.toLowerCase(), SUBJECTS[code].hi]).forEach(w => { if (w) pairs.push([w, code]); }));
+  pairs.sort((a, b) => b[0].length - a[0].length);
+  for (const [w, code] of pairs) if (/^[a-z ]+$/.test(w) ? new RegExp('\\b' + w + '\\b').test(lower) : lower.includes(w)) return code;
+  return null;
+}
+const NAME_STOP = new Set(['office', 'admin', 'teacher', 'sir', 'madam', 'maam', 'the', 'and', 'for', 'who', 'free', 'class', 'leave', 'today', 'period']);
+function entPerson(lower) {
+  const words = lower.match(/[a-z]+/g) || [];
+  let hits = S.staff.map(s => {
+    const toks = s.name.toLowerCase().split(/\s+/).filter(x => x.length >= 3 && !NAME_STOP.has(x));
+    let n = 0, full = 0;
+    toks.forEach(tk => { if (words.includes(tk)) { n += 1; full++; } else if (tk.length >= 5 && words.some(w => w.length >= 4 && lev(tk, w) <= 1)) { n += 0.9; full++; } });
+    return { s, n, all: full === toks.length };
+  }).filter(x => x.n > 0);
+  if (!hits.length) return {};
+  const top = Math.max(...hits.map(h => h.n));
+  let best = hits.filter(h => h.n === top);
+  if (best.length > 1 && best.some(h => h.all)) best = best.filter(h => h.all);
+  return best.length === 1 ? { person: best[0].s } : { ambiguous: best.map(h => h.s) };
+}
+function entClass(q) {
+  const up = q.toUpperCase();
+  const sorted = CLASSES.slice().sort((a, b) => b.length - a.length);
+  for (const c of sorted) {
+    const m = c.match(/^(\d+)(.*)$/);
+    const pat = m ? `(?<![A-Z0-9])${m[1]}[\\s\\-]?${m[2].replace(/[-]/g, '\\-')}(?![A-Z0-9])` : `(?<![A-Z0-9])${c}(?![A-Z0-9])`;
+    if (new RegExp(pat).test(up)) return { cls: c };
+  }
+  const g = q.toLowerCase().match(/(?:class|kaksha|कक्षा|std|standard)\s*(\d{1,2})(?!\d)/);
+  if (g) { const list = CLASSES.filter(c => new RegExp('^' + g[1] + '(?!\\d)').test(c)); if (list.length) return { grade: list }; }
+  return {};
+}
+const ORD = { first: 1, second: 2, third: 3, fourth: 4, fifth: 5, sixth: 6, seventh: 7, eighth: 8, pehla: 1, pehle: 1, pahla: 1, doosra: 2, dusra: 2, teesra: 3, tisra: 3, chautha: 4, panchva: 5, paanchva: 5, chhatha: 6, satva: 7, saatva: 7, aathva: 8, last: 8, aakhri: 8 };
+function entPeriod(lower) {
+  let m = lower.match(/(?:period|पीरियड|घंटी|ghanti|\bp)\s*[-#]?\s*([1-8])(?!\d)/) || lower.match(/\b([1-8])\s*(?:st|nd|rd|th)?\s*(?:period|पीरियड|घंटी|ghanti)/);
+  if (m) return { period: Number(m[1]) };
+  m = lower.match(/\b(first|second|third|fourth|fifth|sixth|seventh|eighth|last|pehla|pehle|pahla|doosra|dusra|teesra|tisra|chautha|panchva|paanchva|chhatha|satva|saatva|aathva|aakhri)\s+(?:period|पीरियड|ghanti)/);
+  if (m) return { period: ORD[m[1]] };
+  if (/\b(now|right now|currently|abhi|is samay|at the moment)\b|अभी|इस समय/.test(lower)) return { now: true, period: currentPeriod() };
+  return {};
+}
+const MONTHS = [['january', 'jan', 'janvari', 'जनवरी'], ['february', 'feb', 'farvari', 'फरवरी'], ['march', 'mar', 'मार्च'], ['april', 'apr', 'अप्रैल'], ['मई'], ['june', 'jun', 'जून'], ['july', 'jul', 'जुलाई'],
+  ['august', 'aug', 'agast', 'अगस्त'], ['september', 'sep', 'sept', 'sitambar', 'सितंबर'], ['october', 'oct', 'aktubar', 'अक्टूबर'], ['november', 'nov', 'navambar', 'नवंबर'], ['december', 'dec', 'disambar', 'दिसंबर']];
+const WDAYS = [['monday', 'mon', 'somvar', 'somwar', 'सोमवार'], ['tuesday', 'tue', 'tues', 'mangalvar', 'mangalwar', 'मंगलवार'], ['wednesday', 'wed', 'budhvar', 'budhwar', 'बुधवार'],
+  ['thursday', 'thu', 'thur', 'thurs', 'guruvar', 'guruwar', 'brihaspativar', 'गुरुवार'], ['friday', 'fri', 'shukravar', 'shukrawar', 'शुक्रवार'], ['saturday', 'sat', 'shanivar', 'shaniwar', 'शनिवार']];
+const hasWord = (lower, w) => (/^[a-z]+$/.test(w) ? new RegExp('\\b' + w + '\\b').test(lower) : lower.includes(w));
+function entRange(lower) {
+  const today = todayISO(), y = Number(today.slice(0, 4));
+  const past = /\b(was|were|did|took|tha|thi|thay|hua|hui|hue|gaya|gaye|gayi|liya|pichhle|pichle|last)\b|था|थी|थे|हुआ|गया|लिया|पिछले/.test(lower);
+  let m = lower.match(/\b(\d{4})-(\d{2})-(\d{2})\b/); if (m) return one(m[0]);
+  m = lower.match(/\b(\d{1,2})[\/.](\d{1,2})(?:[\/.](\d{2,4}))?\b/);
+  if (m && +m[2] >= 1 && +m[2] <= 12 && +m[1] <= 31) return one(`${m[3] ? (m[3].length === 2 ? '20' + m[3] : m[3]) : y}-${pad(m[2])}-${pad(m[1])}`);
+  for (let i = 0; i < 12; i++) for (const w of MONTHS[i]) {
+    if (!hasWord(lower, w)) continue;
+    const dm = lower.match(new RegExp('\\b(\\d{1,2})(?:st|nd|rd|th)?\\s+' + w + '\\b')) || lower.match(new RegExp('\\b' + w + '\\s+(\\d{1,2})(?:st|nd|rd|th)?\\b'));
+    let yr = y; if (monthRange(y, i + 1).from > today && past) yr = y - 1;
+    if (dm && +dm[1] <= 31) return one(`${yr}-${pad(i + 1)}-${pad(dm[1])}`);
+    return monthRange(yr, i + 1);
+  }
+  if (/\bin may\b|\bmay month\b|\bof may\b/.test(lower)) return monthRange(y, 5);
+  if (/day after tomorrow|\bparso\b|\bparson\b|परसों/.test(lower)) return one(addDays(today, past ? -2 : 2));
+  if (/\byesterday\b|beeta kal|बीता कल/.test(lower)) return one(addDays(today, -1));
+  if (/\btomorrow\b|\btmrw\b|aane wala kal/.test(lower)) return one(addDays(today, 1));
+  if (/\bkal\b|कल(?![\u0900-\u097F])/.test(lower)) return one(addDays(today, past ? -1 : 1));
+  if (/\btoday\b|\baaj\b|आज|\btonight\b/.test(lower)) return one(today);
+  const ws = weekStart(today);
+  if (/last week|pichh?le (hafte|saptah|week)|पिछले (हफ्ते|सप्ताह)/.test(lower)) return { from: addDays(ws, -7), to: addDays(ws, -2) };
+  if (/next week|agle (hafte|saptah|week)|अगले (हफ्ते|सप्ताह)/.test(lower)) return { from: addDays(ws, 7), to: addDays(ws, 12) };
+  if (/this week|is (hafte|saptah|week)|इस (हफ्ते|सप्ताह)|\bweek\b|\bhafte\b|\bweekly\b/.test(lower) && !/per week|a week|\/ ?week|weekly|prati saptah/.test(lower)) return { from: ws, to: addDays(ws, 5) };
+  if (/last month|pichh?le (mahine|month|maah)|पिछले (महीने|माह)/.test(lower)) { const d = new Date(y, Number(today.slice(5, 7)) - 2, 1); return monthRange(d.getFullYear(), d.getMonth() + 1); }
+  if (/this month|is (mahine|month|maah)|इस (महीने|माह)|\bmonth\b|\bmahine\b|\bmonthly\b/.test(lower)) return thisMonth();
+  if (/this year|is saal|इस साल|\byear\b/.test(lower)) return { from: `${y}-01-01`, to: `${y}-12-31` };
+  if (/so far|till now|ab tak|अब तक|all time|overall/.test(lower)) return { from: '2000-01-01', to: '2099-12-31', all: true };
+  for (let i = 0; i < 6; i++) for (const w of WDAYS[i]) if (hasWord(lower, w)) {
+    let dt = today;
+    if (past) { dt = addDays(today, -1); for (let k = 0; k < 7 && dayIdx(dt) !== i; k++) dt = addDays(dt, -1); }
+    else for (let k = 0; k < 7 && dayIdx(dt) !== i; k++) dt = addDays(dt, 1);
+    return { ...one(dt), weekday: i };
+  }
+  if (/\bsunday\b|\bravivar\b|रविवार|\bitwar\b/.test(lower)) { let dt = today; for (let k = 0; k < 7 && dayIdx(dt) !== -1; k++) dt = addDays(dt, 1); return one(dt); }
+  return null;
+}
+
+/* ---------- answers ---------- */
+function briefing(dt) {
+  const u = me(), d = dayIdx(dt), lines = [];
+  if (d < 0) return L(`**${fmtDate(dt)}** is a Sunday — no school.`, `**${fmtDate(dt)}** रविवार है — स्कूल बंद।`);
+  if (!isManager(u)) {
+    const duties = PERIODS.map(p => dutyAt(u.id, dt, p.n));
+    const subs = duties.filter(x => x.k === 'sub').length, cls = duties.filter(x => x.k === 'class').length;
+    lines.push(L(`**${fmtDate(dt)}** — you have **${cls}** teaching period(s)${subs ? ` and **${subs}** substitution period(s)` : ''}.`, `**${fmtDate(dt)}** — आपके **${cls}** पीरियड${subs ? ` और **${subs}** अरेंजमेंट पीरियड` : ''} हैं।`));
+    if (duties.some(x => x.k === 'leave')) lines.push(L('You are marked on leave for part or all of the day.', 'आप दिन के कुछ या पूरे समय छुट्टी पर दर्ज हैं।'));
+    const pl = S.leaves.filter(l => l.teacherId === u.id && l.status === 'pending').length;
+    const rq = S.requests.filter(r => r.teacherId === u.id && !['delivered', 'rejected'].includes(r.status)).length;
+    lines.push(`- ${L('Leave waiting for approval', 'स्वीकृति हेतु छुट्टी')}: **${pl}**`, `- ${L('Your open DPP/worksheet requests', 'आपके खुले DPP/वर्कशीट अनुरोध')}: **${rq}**`);
+    return lines.join('\n');
+  }
+  const abs = absencesOn(dt), names = [...new Set(abs.map(a => nameOf(a.teacherId)))];
+  const plan = S.plans[dt], items = plan ? Object.values(plan.items) : [];
+  const unc = items.filter(i => !i.teacherId).length, unseen = plan && plan.status === 'published' ? items.filter(i => i.teacherId && !isAcked(dt, i.key, i.teacherId)).length : 0;
+  lines.push(`**${fmtDate(dt)}**`);
+  lines.push(`- ${L('Absent', 'अनुपस्थित')}: **${names.length}**${names.length ? ' — ' + names.join(', ') : ''}`);
+  if (items.length) {
+    lines.push(`- ${L('Periods to cover', 'भरने वाले पीरियड')}: **${items.length}** · ${L('not covered', 'खाली')}: **${unc}** · ${L('plan', 'योजना')}: **${plan.status === 'published' ? L('published', 'प्रकाशित') : L('NOT published yet', 'अभी प्रकाशित नहीं')}**`);
+    if (unseen) lines.push(`- ${L('Substitutes who have not tapped “Seen”', '“देख लिया” न दबाने वाले')}: **${unseen}**`);
+  } else lines.push(`- ${L('No periods need cover.', 'कोई पीरियड खाली नहीं।')}`);
+  const today = todayISO();
+  lines.push(`- ${L('Leave requests waiting', 'लंबित छुट्टी आवेदन')}: **${S.leaves.filter(l => l.status === 'pending').length}**`);
+  lines.push(`- ${L('New DPP/worksheet requests', 'नए DPP/वर्कशीट अनुरोध')}: **${S.requests.filter(r => r.status === 'requested').length}** · ${L('overdue', 'देर से')}: **${S.requests.filter(r => r.neededBy < today && !['delivered', 'rejected'].includes(r.status)).length}**`);
+  const iss = timetableIssues();
+  if (iss.clashes.length) lines.push(`- ⚠️ ${L('Timetable clashes', 'समय-सारणी टकराव')}: **${iss.clashes.length}**`);
+  return lines.join('\n');
+}
+
+function scheduleAnswer(p, r, week) {
+  if (week) {
+    const head = [t('period')].concat(DAYS.map((d, i) => (S.lang === 'hi' ? DAYS_HI[i].slice(0, 3) : d)));
+    const rows = PERIODS.map(pp => [`P${pp.n}`].concat(DAYS.map((_, d) => { const l = teacherLessonAt(p.id, d, pp.n); return l ? `${l.cls} ${subjName(l.s)}` : '—'; })));
+    return `**${p.name}** — ${L('weekly timetable', 'साप्ताहिक समय-सारणी')} (${weeklyLoad(p.id)} ${L('periods', 'पीरियड')})\n\n` + tbl(head, rows);
+  }
+  const dt = r.from;
+  if (dayIdx(dt) < 0) return L(`${fmtDate(dt)} is a Sunday — no school.`, `${fmtDate(dt)} रविवार है — स्कूल बंद।`);
+  const rows = PERIODS.map(pp => [`P${pp.n}`, periodTime(pp.n), dutyAt(p.id, dt, pp.n).text]);
+  const n = rows.filter(x => x[2] !== t('free')).length;
+  return `**${p.name}** — ${fmtDate(dt)} (${n} ${L('busy periods', 'व्यस्त पीरियड')})\n\n` + tbl([t('period'), L('Time', 'समय'), L('Duty', 'कार्य')], rows);
+}
+function classAnswer(cls, r, week) {
+  const ct = S.classTeachers[cls] ? ` · ${L('class teacher', 'कक्षा-शिक्षक')}: ${nameOf(S.classTeachers[cls])}` : '';
+  if (week || !r) {
+    const head = [t('period')].concat(DAYS.map((d, i) => (S.lang === 'hi' ? DAYS_HI[i].slice(0, 3) : d)));
+    const rows = PERIODS.map(pp => [`P${pp.n}`].concat(DAYS.map((_, d) => { const l = lessonAt(cls, d, pp.n); return l ? `${subjName(l.s)} (${nameOf(l.t).split(' ')[0]})` : '—'; })));
+    return `**${cls}** — ${L('weekly timetable', 'साप्ताहिक समय-सारणी')}${ct}\n\n` + tbl(head, rows);
+  }
+  const dt = r.from, d = dayIdx(dt);
+  if (d < 0) return L(`${fmtDate(dt)} is a Sunday — no school.`, `${fmtDate(dt)} रविवार है — स्कूल बंद।`);
+  const plan = S.plans[dt];
+  const rows = PERIODS.map(pp => {
+    const l = lessonAt(cls, d, pp.n); if (!l) return [`P${pp.n}`, periodTime(pp.n), '—', '—'];
+    const sub = plan && (plan.status === 'published' || isManager(me())) && plan.items[`${cls}|${pp.n}`];
+    return [`P${pp.n}`, periodTime(pp.n), subjName(l.s), sub ? `${sub.teacherId ? nameOf(sub.teacherId) : L('NOT COVERED', 'खाली')} (${L('for', 'की जगह')} ${nameOf(l.t)})` : nameOf(l.t)];
+  });
+  return `**${cls}** — ${fmtDate(dt)}${ct}\n\n` + tbl([t('period'), L('Time', 'समय'), t('subject'), t('teacher')], rows);
+}
+function helpText() {
+  const mgr = isManager(me());
+  return L(`I answer from the school's own data. Try asking:\n
+- **Today**: "today's summary", "who is absent today?", "is everything covered?"
+- **Teachers**: "Rajesh Kumar's schedule tomorrow", "where is Priya Sharma now?", "who is free in period 5?", "who teaches Science in 9A?"
+- **Classes**: "9A timetable on Thursday", "what does 8B have now?"
+- **Substitutions**: "who took the most substitutions this month?", "uncovered periods today", "who has not seen their substitution?"
+- **Leave**: "pending leave", "how many leaves did Neha take this month?", "who took the most leave?"
+- **DPP & worksheets**: "overdue requests", "DPP requests for 10A", "worksheets waiting for approval"
+- **Workload**: "who has the most periods?", "periods per week of Amit Singh"
+${mgr ? '- **Planning**: "if Rajesh Kumar is absent tomorrow who will cover?", "check timetable for clashes", "who changed the timetable?"\n' : ''}- You can also type in Hindi or Hinglish: "aaj kaun absent hai", "period 5 me kaun khali hai", "meri chutti".`,
+  `मैं स्कूल के अपने डेटा से उत्तर देता हूँ। ऐसे पूछें:\n
+- **आज**: "आज का सारांश", "आज कौन अनुपस्थित है?", "क्या सब पीरियड भर गए?"
+- **शिक्षक**: "Rajesh Kumar का कल का शेड्यूल", "Priya Sharma अभी कहाँ हैं?", "पीरियड 5 में कौन खाली है?", "9A में विज्ञान कौन पढ़ाता है?"
+- **कक्षा**: "9A का गुरुवार का टाइमटेबल"
+- **अरेंजमेंट**: "इस महीने सबसे ज़्यादा अरेंजमेंट किसके?", "आज खाली रह गए पीरियड"
+- **छुट्टी**: "लंबित छुट्टी", "Neha ने इस महीने कितनी छुट्टी ली?"
+- **DPP और वर्कशीट**: "देर से चल रहे अनुरोध", "10A के DPP"
+- **कार्यभार**: "सबसे ज़्यादा पीरियड किसके हैं?"
+${mgr ? '- **योजना**: "अगर कल Rajesh Kumar न आएँ तो कौन पढ़ाएगा?", "टाइमटेबल में टकराव जाँचो"\n' : ''}- Hinglish भी चलेगी: "aaj kaun absent hai", "meri chutti".`);
+}
+
+function brainAnswer(q) {
+  const lower = q.toLowerCase().replace(/[?!।,]/g, ' ').replace(/\s+/g, ' ').trim();
+  const u = me(), mgr = isManager(u);
+  const has = re => re.test(lower);
+  // entities
+  let { person, ambiguous } = entPerson(lower);
+  const selfRef = has(/\b(my|me|mine|mera|meri|mere|main|mujhe|apna|apni|apne|i)\b|मेरा|मेरी|मेरे|मैं|मुझे|अपना|अपनी/);
+  const pron = has(/\b(his|her|their|he|she|unka|unki|unke|uska|uski|inka|inki|woh|wo|vo|unhone|them|same teacher)\b|उनका|उनकी|उसका|उसकी|वह|वो/);
+  let { cls, grade } = entClass(q);
+  let subject = entSubject(lower);
+  let { period, now } = entPeriod(lower);
+  let range = entRange(lower);
+  const hadEntity = !!(person || cls || grade || subject || period || range);
+  if (!person && selfRef) person = u;
+  if (!person && pron && BR.ctx.person) person = staffById(BR.ctx.person);
+  if (ambiguous && !person) return { text: L(`Which one do you mean? ${ambiguous.map(s => `**${s.name}**`).join(', ')}`, `आप किसकी बात कर रहे हैं? ${ambiguous.map(s => `**${s.name}**`).join(', ')}`), chips: ambiguous.map(s => q.replace(/[?]/g, '') + ' — ' + s.name).slice(0, 3) };
+
+  const week = has(/\bweek\b|weekly|\bhafte\b|\bsaptah\b|pura hafta|whole week|full timetable|सप्ताह|हफ्त/);
+
+  /* intent table: first match wins */
+  const intents = [
+    ['greet', () => has(/^(hi|hello|hey|namaste|namaskar|good (morning|afternoon|evening)|नमस्ते|नमस्कार)\b/) && lower.split(' ').length <= 3],
+    ['thanks', () => has(/^(thanks|thank you|thankyou|shukriya|dhanyavad|dhanyawad|ok thanks|great|nice|धन्यवाद|शुक्रिया)\b/)],
+    ['help', () => has(/\bhelp\b|what can you|kya kar sakte|kya puch|how to use|madad|मदद|क्या पूछ|examples?\b/)],
+    ['timing', () => has(/\b(timing|timings|what time|kitne baje|kab (shuru|khatam)|when does|start time|end time|bell)\b|बजे|समय क्या/) && has(/period|lunch|school|break|chhutti|पीरियड|स्कूल|लंच|ghanti|घंटी|[1-8]/)],
+    ['whatif', () => has(/\b(if|agar|yadi|suppose|what if)\b|अगर|यदि/) && has(/absent|leave|chutti|chhutti|nahi aa|na aa|not come|doesn.?t come|छुट्टी|अनुपस्थित|न आ|नहीं आ/)],
+    ['summary', () => has(/summary|briefing|\bbrief\b|overview|daily report|status report|saransh|sar[a]?ansh|aaj ka haal|kya chal raha|what.?s happening|how is today|सारांश|हाल/)],
+    ['ttcheck', () => has(/clash|conflict|takrav|takraav|टकराव|double.?book/) || (has(/\bcheck\b|jaanch|जाँच|verify|problem|issue|galti/) && has(/time ?table|samay|समय-सारणी|schedule/))],
+    ['free', () => has(/\bfree\b|khali|khaali|खाली|फ्री|available|uplabdh|vacant/)],
+    ['subs', () => has(/substitut|arrangement|arrangment|proxy|\bcover(ed|age|s|ing)?\b|uncovered|अरेंजमेंट|प्रॉक्सी|adjustment/)],
+    ['workload', () => has(/workload|work load|busiest|lightest|most periods|least periods|sabse (zyada|jyada|kam) period|periods? per week|kitne period|how many periods|karyabhar|कार्यभार|कितने पीरियड/)],
+    ['absent', () => has(/absent|anupasthit|अनुपस्थित|not present|gair ?hazir|nahi aa(ye|ya|yi)|नहीं आ|on leave|chh?utti par|छुट्टी पर|who is (out|away)|present/) && !has(/pending|approve|reject|apply|applied|status|lambit|लंबित/)],
+    ['leave', () => has(/\bleaves?\b|chh?utti|छुट्टी|avkash|अवकाश|holiday request/)],
+    ['requests', () => has(/\bdpps?\b|work ?sheets?|वर्कशीट|requests?\b|anurodh|अनुरोध|overdue|practice problem/)],
+    ['classteacher', () => has(/class ?teacher|kaksha.?(shikshak|adhyapak)|कक्षा-शिक्षक|कक्षा शिक्षक/)],
+    ['whoteaches', () => has(/who (teaches|takes|is teaching)|kaun padha|kon padha|teaches|padhata|padhati|padhate|teacher (of|for)|ka teacher|ke teacher|कौन पढ़ा|पढ़ाता|पढ़ाती|पढ़ाते|what does .* teach|kya padha/)],
+    ['contact', () => has(/phone|mobile|contact|number|नंबर|मोबाइल/) && !!person],
+    ['stafflist', () => has(/how many (teachers|staff)|kitne (teacher|shikshak|staff)|list (of )?(all )?(teachers|staff)|all teachers|staff list|sabhi (teacher|shikshak)|teachers? list|कितने शिक्षक|सभी शिक्षक|inactive|who are the|teachers of|shikshak/)],
+    ['notices', () => has(/notice|suchna|सूचना|announcement|circular/) && !has(/notification/)],
+    ['notifs', () => has(/notification|alerts?\b/)],
+    ['audit', () => has(/audit|change log|who changed|kisne (badla|kiya)|history of changes|बदलाव|किसने/)],
+    ['counts', () => has(/how many (classes|sections|periods|subjects)|kitni (kaksha|class)|kitne (section|vishay)|total classes|कितनी कक्षा/)],
+    ['where', () => !!person && has(/where|kahan|kaha|kidhar|कहाँ|कहां|which class|kis class|kaun si class|किस कक्षा/)],
+    ['classnow', () => !!cls && (now || !!period) && !person],
+    ['schedule', () => !!person && has(/schedule|time ?table|periods?|classes|routine|\bday\b|\bdin\b|duty|duties|शेड्यूल|समय-सारणी|पीरियड|busy/)],
+    ['classtt', () => !!(cls || grade) && has(/time ?table|schedule|routine|periods|समय-सारणी|टाइमटेबल/)],
+    ['persononly', () => !!person && !selfRef],
+    ['classonly', () => !!(cls || grade)],
+    ['subjectinfo', () => !!subject],
+    ['periodonly', () => !!period],
+    ['dateonly', () => !!range],
+    ['selfonly', () => !!person],
+  ];
+  let intent = (intents.find(([, test]) => test()) || [])[0];
+  const bare = ['persononly', 'classonly', 'subjectinfo', 'periodonly', 'dateonly', 'selfonly'].includes(intent);
+  // follow-up: "and tomorrow?", "what about 9A?" — reuse the previous kind of question
+  const followUp = has(/^(and|aur|what about|how about|or|ya|same for|then|phir|और)\b/) || lower.split(' ').length <= 3;
+  if (BR.lastIntent && hadEntity && followUp && bare) {
+    const c = BR.ctx, li = BR.lastIntent;
+    const newPerson = !!entPerson(lower).person, newClass = !!(cls || grade);
+    const fits = (range && ['schedule', 'where', 'free', 'classtt', 'classnow', 'subs', 'absent', 'leave', 'requests', 'summary', 'whatif', 'workload'].includes(li))
+      || (newPerson && ['schedule', 'where', 'free', 'subs', 'absent', 'leave', 'requests', 'whatif', 'workload', 'contact', 'whoteaches'].includes(li))
+      || (newClass && ['classtt', 'classnow', 'whoteaches', 'classteacher', 'requests', 'subs'].includes(li))
+      || (subject && ['whoteaches', 'free', 'requests', 'stafflist'].includes(li))
+      || (period && ['free', 'where', 'classnow', 'schedule'].includes(li));
+    if (fits) {
+      intent = li;
+      if (!person && c.person && !newClass) person = staffById(c.person);
+      if (!newClass && c.cls && !newPerson) cls = c.cls;
+      if (!subject && c.subject && ['whoteaches', 'free'].includes(li)) subject = c.subject;
+      if (!period && c.period && !range && ['free', 'where', 'classnow'].includes(li)) period = c.period;
+      if (!range && c.range && ['schedule', 'where', 'free', 'classtt', 'classnow', 'absent', 'whatif'].includes(li)) range = c.range;
+    }
+  }
+  intent = { persononly: 'schedule', selfonly: 'schedule', classonly: 'classtt', periodonly: 'free' }[intent] || intent;
+  const Rr = range || one(todayISO()), RMr = range || thisMonth();
+  const out = runIntent(intent, { q, lower, has, u, mgr, person, cls, grade, subject, period, now, range, R: Rr, RM: RMr, week, selfRef });
+  if (intent && !['greet', 'thanks', 'help'].includes(intent)) {
+    BR.lastIntent = intent;
+    BR.ctx = { person: person ? person.id : BR.ctx.person, cls: cls || BR.ctx.cls, subject: subject || BR.ctx.subject, period: period || null, range: range || null };
+  }
+  return out;
+}
+
+function runIntent(intent, e) {
+  const { has, u, mgr, person, cls, grade, subject, period, range, R, RM, week } = e;
+  const today = todayISO();
+  const noData = (en, hi) => ({ text: L(en, hi) });
+  switch (intent) {
+    case 'greet': return { text: L(`Namaste ${u.name.split(' ')[0]}! Ask me anything about the school's timetable, absences, substitutions, leave or requests.`, `नमस्ते ${u.name.split(' ')[0]}! समय-सारणी, अनुपस्थिति, अरेंजमेंट, छुट्टी या अनुरोध के बारे में कुछ भी पूछें।`), chips: [L("Today's summary", 'आज का सारांश'), L('What can you do?', 'आप क्या कर सकते हैं?')] };
+    case 'thanks': return { text: L('Happy to help.', 'खुशी हुई।') };
+    case 'help': return { text: helpText() };
+    case 'timing': {
+      if (period) return { text: L(`**P${period}** runs **${periodTime(period)}**.`, `**P${period}** का समय **${periodTime(period)}** है।`) };
+      const rows = PERIODS.map(p => [`P${p.n}`, periodTime(p.n)]); rows.splice(LUNCH.after, 0, [t('lunch'), `${LUNCH.start}–${LUNCH.end}`]);
+      return { text: `${L('School day', 'स्कूल का दिन')} (${DAYS[0]}–${DAYS[DAYS.length - 1]})\n\n` + tbl([t('period'), L('Time', 'समय')], rows) };
+    }
+    case 'summary': return { text: briefing(R.from), chips: mgr ? [L('Who is free now?', 'अभी कौन खाली है?'), L('Pending leave', 'लंबित छुट्टी'), L('Overdue requests', 'देर से चल रहे अनुरोध')] : [L('My schedule today', 'आज मेरा शेड्यूल'), L('My leave', 'मेरी छुट्टी')] };
+    case 'ttcheck': {
+      const iss = timetableIssues(), lines = [];
+      if (!iss.clashes.length) lines.push(L('✅ **No clashes** — no teacher is in two classes at the same time.', '✅ **कोई टकराव नहीं** — कोई शिक्षक एक साथ दो कक्षाओं में नहीं है।'));
+      else lines.push(L(`⚠️ **${iss.clashes.length} clash(es)** found:`, `⚠️ **${iss.clashes.length} टकराव** मिले:`) + '\n\n' + tbl([L('Day', 'दिन'), t('period'), t('teacher'), L('Classes', 'कक्षाएँ')], iss.clashes.slice(0, 30).map(c => [dayName(c.day), `P${c.p}`, nameOf(c.teacher), c.classes.join(' + ')])));
+      const emp = Object.entries(iss.empty);
+      if (emp.length) lines.push(L('Empty periods per week: ', 'प्रति सप्ताह खाली पीरियड: ') + emp.map(([c, n]) => `${c}: ${n}`).join(', '));
+      if (iss.inactive.length) lines.push(L('⚠️ Periods given to removed or inactive staff: ', '⚠️ हटाए गए/निष्क्रिय स्टाफ़ को दिए पीरियड: ') + iss.inactive.map(x => x.split('|')[0] + ' (' + nameOf(x.split('|')[1]) + ')').join(', '));
+      const over = teachers().filter(tc => weeklyLoad(tc.id) > 40);
+      if (over.length) lines.push(L('Teachers with more than 40 periods a week: ', '40 से ज़्यादा पीरियड वाले शिक्षक: ') + over.map(tc => `${tc.name} (${weeklyLoad(tc.id)})`).join(', '));
+      return { text: lines.join('\n\n') };
+    }
+    case 'whatif': {
+      if (!mgr) return { text: L('Only the Admin or Coordinator can plan substitutions. You can see your own substitution periods on My Day.', 'अरेंजमेंट की योजना केवल एडमिन या कोऑर्डिनेटर बना सकते हैं। अपने अरेंजमेंट पीरियड आप “मेरा दिन” पर देख सकते हैं।') };
+      if (!person || person.role !== 'teacher') return noData('Tell me which teacher, e.g. "If Rajesh Kumar is absent tomorrow, who will cover?"', 'बताएँ कौन-से शिक्षक, जैसे "अगर कल Rajesh Kumar न आएँ तो कौन पढ़ाएगा?"');
+      let dt = range ? range.from : (dayIdx(today) < 0 ? addDays(today, 1) : today);
+      if (dt < today && has(/\bkal\b|कल/)) dt = addDays(today, 1);
+      const scope = has(/first half|pehli pali|morning|subah|पहली पाली/) ? 'first' : has(/second half|doosri pali|dusri pali|after lunch|afternoon|दूसरी पाली/) ? 'second' : 'full';
+      const res = tool('preview_substitution', { teacher: person.id, date: dt, scope });
+      if (res.note) return { text: L(`${fmtDate(dt)} is a Sunday — no school.`, `${fmtDate(dt)} रविवार है।`) };
+      if (!res.periodsToCover.length) return { text: L(`**${person.name}** has no classes in that time on ${fmtDate(dt)}, so nothing needs cover.`, `${fmtDate(dt)} को उस समय **${person.name}** की कोई कक्षा नहीं, इसलिए अरेंजमेंट नहीं चाहिए।`) };
+      const rows = res.periodsToCover.map(g => [`P${g.period}`, g.class, g.subject, g.suggestions[0] ? `**${g.suggestions[0].teacher}** (${g.suggestions[0].score})` : L('nobody free', 'कोई खाली नहीं'), g.suggestions.slice(1).map(s => s.teacher).join(', ') || '—']);
+      return { text: L(`If **${person.name}** is absent on **${fmtDate(dt)}**${scope !== 'full' ? ` (${scope} half)` : ''}, **${rows.length}** period(s) need cover. This is only a preview — nothing was changed.`, `अगर **${person.name}** **${fmtDate(dt)}** को न आएँ, तो **${rows.length}** पीरियड भरने होंगे। यह केवल अनुमान है — कुछ बदला नहीं गया।`) + '\n\n' + tbl([t('period'), t('class'), t('subject'), L('Best substitute', 'सबसे उपयुक्त'), L('Other options', 'अन्य विकल्प')], rows) + '\n\n' + L('To do it for real, use **Mark absent** on the Substitutions screen.', 'असल में करने के लिए अरेंजमेंट स्क्रीन पर **अनुपस्थित दर्ज करें** दबाएँ।') };
+    }
+    case 'free': {
+      const dt = R.from, d = dayIdx(dt);
+      if (d < 0) return { text: L(`${fmtDate(dt)} is a Sunday — no school.`, `${fmtDate(dt)} रविवार है — स्कूल बंद।`) };
+      if (e.now && !period) return { text: L(`No period is running right now (${nowHM()}).`, `अभी (${nowHM()}) कोई पीरियड नहीं चल रहा।`), chips: [L('Who is free in period 5?', 'पीरियड 5 में कौन खाली है?')] };
+      if (person && person.role === 'teacher' && !(e.selfRef && has(/who|kaun|कौन/))) {
+        if (period) { const du = dutyAt(person.id, dt, period); return { text: du.k === 'free' ? L(`✅ Yes — **${person.name}** is free in **P${period}** on ${fmtDate(dt)}.`, `✅ हाँ — **${person.name}** ${fmtDate(dt)} को **P${period}** में खाली हैं।`) : L(`❌ No — in **P${period}** on ${fmtDate(dt)}, **${person.name}** has: ${du.text}.`, `❌ नहीं — ${fmtDate(dt)} को **P${period}** में **${person.name}**: ${du.text}।`) }; }
+        const fp = PERIODS.filter(pp => dutyAt(person.id, dt, pp.n).k === 'free').map(pp => `P${pp.n} (${periodTime(pp.n)})`);
+        return { text: fp.length ? L(`**${person.name}** is free on ${fmtDate(dt)} in: ${fp.join(', ')}.`, `**${person.name}** ${fmtDate(dt)} को इन पीरियड में खाली हैं: ${fp.join(', ')}।`) : L(`**${person.name}** has no free period on ${fmtDate(dt)}.`, `${fmtDate(dt)} को **${person.name}** का कोई पीरियड खाली नहीं।`) };
+      }
+      const res = tool('free_teachers', { date: dt, period: period || undefined });
+      const filt = names => (subject ? names.filter(n => { const s = findPerson(n); return s && s.subjects.includes(subject); }) : names);
+      if (period) { const names = filt(res.periods[0].free); return { text: names.length ? L(`Free in **P${period}** (${periodTime(period)}) on ${fmtDate(dt)}${subject ? `, ${subjName(subject)} teachers` : ''} — **${names.length}**:\n\n`, `${fmtDate(dt)} को **P${period}** (${periodTime(period)}) में खाली — **${names.length}**:\n\n`) + names.map(n => `- ${n}`).join('\n') : L(`No ${subject ? subjName(subject) + ' teacher' : 'teacher'} is free in P${period} on ${fmtDate(dt)}.`, `${fmtDate(dt)} को P${period} में कोई ${subject ? subjName(subject) + ' ' : ''}शिक्षक खाली नहीं।`) }; }
+      return { text: `${L('Free teachers on', 'खाली शिक्षक —')} ${fmtDate(dt)}\n\n` + tbl([t('period'), L('Free', 'खाली')], res.periods.map(x => [`P${x.period}`, filt(x.free).join(', ') || '—'])) };
+    }
+    case 'subs': {
+      const rank = has(/most|highest|maximum|sabse (zyada|jyada|adhik)|top|least|lowest|sabse kam|fair|barabar|ranking|सबसे|count|kitne|how many/);
+      if (rank && !(person && has(/how many|kitne|count/))) {
+        const res = tool('workload_and_fairness', { from: RM.from, to: RM.to }).teachers;
+        const least = has(/least|lowest|sabse kam|सबसे कम/);
+        const list = res.slice().sort((a, b) => (least ? a.substitutionsTaken - b.substitutionsTaken : b.substitutionsTaken - a.substitutionsTaken));
+        const tot = res.reduce((a, x) => a + x.substitutionsTaken, 0);
+        if (!tot) return { text: L(`No published substitutions in ${rlabel(RM)}.`, `${rlabel(RM)} में कोई प्रकाशित अरेंजमेंट नहीं।`) };
+        const gap = Math.max(...res.map(x => x.substitutionsTaken)) - Math.min(...res.map(x => x.substitutionsTaken));
+        return { text: L(`Substitutions taken, ${rlabel(RM)} — **${tot}** in total, gap between most and least: **${gap}**${gap > 3 ? ' ⚠️ (target is 3 or less)' : ''}`, `अरेंजमेंट, ${rlabel(RM)} — कुल **${tot}**, सबसे ज़्यादा और सबसे कम का अंतर: **${gap}**`) + '\n\n' + tbl([t('teacher'), L('Substitutions', 'अरेंजमेंट'), L('Periods/week', 'पीरियड/सप्ताह')], list.slice(0, 12).map(x => [x.teacher, x.substitutionsTaken, x.periodsPerWeek])) };
+      }
+      const P = person && person.role === 'teacher' ? person : null;
+      const rr = range || (P ? thisMonth() : one(today));
+      let rows = tool('substitutions', { from: rr.from, to: rr.to, teacher: P ? P.id : undefined, class: cls || undefined });
+      if (has(/not covered|uncovered|unfilled|khali reh|nahi bhar|खाली रह/)) { rows = rows.filter(x => x.substitute === 'NOT COVERED'); if (!rows.length) return { text: L(`✅ Every period is covered (${rlabel(rr)}).`, `✅ सभी पीरियड भर गए हैं (${rlabel(rr)})।`) }; }
+      const unseenQ = has(/not seen|unseen|hasn.?t seen|haven.?t seen|nahi dekha|acknowledg|नहीं देखा/);
+      if (unseenQ) { rows = rows.filter(x => x.planStatus === 'published' && x.substitute !== 'NOT COVERED' && !x.seen); if (!rows.length) return { text: L(`✅ Everyone has tapped “Seen” (${rlabel(rr)}).`, `✅ सभी ने “देख लिया” दबा दिया है (${rlabel(rr)})।`) }; }
+      if (!rows.length) return { text: L(`No substitutions${P ? ` for **${P.name}**` : ''}${cls ? ` in ${cls}` : ''} (${rlabel(rr)}).`, `${rlabel(rr)} में${P ? ` **${P.name}** के लिए` : ''} कोई अरेंजमेंट नहीं।`) };
+      const unc = rows.filter(x => x.substitute === 'NOT COVERED').length, draft = rows.some(x => x.planStatus !== 'published');
+      const multi = rr.from !== rr.to;
+      if (unseenQ) return { text: L(`**${rows.length}** substitution period(s) not yet marked “Seen” (${rlabel(rr)}):`, `**${rows.length}** अरेंजमेंट पीरियड अभी “देख लिया” नहीं हुए (${rlabel(rr)}):`) + '\n\n' + tbl([t('period'), t('class'), L('Substitute', 'अरेंजमेंट')], rows.map(x => [`P${x.period}`, x.class, x.substitute])) };
+      return { text: L(`**${rows.length}** substitution period(s)${P ? ` involving **${P.name}**` : ''}, ${rlabel(rr)}${unc ? ` — ⚠️ **${unc} not covered**` : ''}${draft ? ' — plan **not published yet**' : ''}`, `**${rows.length}** अरेंजमेंट पीरियड, ${rlabel(rr)}${unc ? ` — ⚠️ **${unc} खाली**` : ''}${draft ? ' — योजना **अभी प्रकाशित नहीं**' : ''}`) + '\n\n' +
+        tbl((multi ? [t('date')] : []).concat([t('period'), t('class'), t('subject'), L('Absent', 'अनुपस्थित'), L('Substitute', 'अरेंजमेंट'), t('seen')]), rows.slice(0, 40).map(x => (multi ? [fmtDate(x.date)] : []).concat([`P${x.period}`, x.class, x.subject, x.absentTeacher, x.substitute === 'NOT COVERED' ? L('⚠️ NOT COVERED', '⚠️ खाली') : x.substitute, x.seen ? '✓' : '—']))) };
+    }
+    case 'workload': {
+      if (person && person.role === 'teacher') {
+        const perDay = DAYS.map((d, i) => `${d} ${periodsOnDay(person.id, i)}`).join(', ');
+        return { text: L(`**${person.name}** teaches **${weeklyLoad(person.id)}** periods a week (${perDay}).`, `**${person.name}** सप्ताह में **${weeklyLoad(person.id)}** पीरियड पढ़ाते हैं (${perDay})।`) };
+      }
+      const least = has(/least|lightest|lowest|sabse kam|सबसे कम/);
+      const list = teachers().map(tc => ({ n: tc.name, w: weeklyLoad(tc.id), s: tc.subjects.map(subjName).join(', ') })).sort((a, b) => (least ? a.w - b.w : b.w - a.w));
+      const avg = (list.reduce((a, x) => a + x.w, 0) / (list.length || 1)).toFixed(1);
+      return { text: L(`Teaching periods per week (average **${avg}**, out of ${SLOTS()}):`, `प्रति सप्ताह पीरियड (औसत **${avg}**, ${SLOTS()} में से):`) + '\n\n' + tbl([t('teacher'), L('Periods/week', 'पीरियड/सप्ताह'), L('Subjects', 'विषय')], list.map(x => [x.n, x.w, x.s])) };
+    }
+    case 'absent': {
+      const rows = tool('absences', { from: R.from, to: R.to, teacher: person && person.role === 'teacher' && !e.selfRef ? person.id : undefined });
+      if (person && person.role === 'teacher' && !e.selfRef && R.from === R.to) return { text: rows.length ? L(`Yes — **${person.name}** is absent on ${fmtDate(R.from)} (${rows[0].scope}${rows[0].note ? ', ' + rows[0].note : ''}).`, `हाँ — **${person.name}** ${fmtDate(R.from)} को अनुपस्थित हैं।`) : L(`No — **${person.name}** is not marked absent on ${fmtDate(R.from)}.`, `नहीं — **${person.name}** ${fmtDate(R.from)} को अनुपस्थित दर्ज नहीं हैं।`) };
+      if (!rows.length) return { text: mgr ? L(`✅ Nobody is marked absent (${rlabel(R)}).`, `✅ कोई अनुपस्थित दर्ज नहीं (${rlabel(R)})।`) : L(`You are not marked absent (${rlabel(R)}). I can only see your own absences.`, `आप अनुपस्थित दर्ज नहीं हैं (${rlabel(R)})। मैं केवल आपकी अपनी अनुपस्थिति देख सकता हूँ।`) };
+      const multi = R.from !== R.to, lab = { full: L('Full day', 'पूरा दिन'), first: L('First half', 'पहली पाली'), second: L('Second half', 'दूसरी पाली') };
+      return { text: L(`**${new Set(rows.map(x => x.teacher)).size}** teacher(s) absent, ${rlabel(R)}:`, `**${new Set(rows.map(x => x.teacher)).size}** शिक्षक अनुपस्थित, ${rlabel(R)}:`) + '\n\n' + tbl((multi ? [t('date')] : []).concat([t('teacher'), L('When', 'कब'), L('Note', 'नोट')]), rows.slice(0, 40).map(x => (multi ? [fmtDate(x.date)] : []).concat([x.teacher, lab[x.scope] || x.scope, x.note]))), chips: mgr && !multi ? [L('Is everything covered?', 'क्या सब पीरियड भर गए?')] : [] };
+    }
+    case 'leave': {
+      const P = person && person.role === 'teacher' ? person : null;
+      if (has(/most|highest|sabse (zyada|jyada)|सबसे ज़्यादा|सबसे ज्यादा|ranking/) && !P) {
+        const res = tool('workload_and_fairness', { from: RM.from, to: RM.to }).teachers.filter(x => x.leaveDays > 0).sort((a, b) => b.leaveDays - a.leaveDays);
+        return { text: res.length ? L(`Leave days, ${rlabel(RM)}:`, `छुट्टी के दिन, ${rlabel(RM)}:`) + '\n\n' + tbl([t('teacher'), L('Days absent', 'अनुपस्थित दिन')], res.map(x => [x.teacher, x.leaveDays])) : L(`Nobody was absent in ${rlabel(RM)}.`, `${rlabel(RM)} में कोई अनुपस्थित नहीं रहा।`) };
+      }
+      if (P && has(/how many|kitni|kitne|count|total|days|din|कितनी|कितने/)) {
+        const days = new Set(S.absences.filter(a => a.teacherId === P.id && a.date >= RM.from && a.date <= RM.to).map(a => a.date));
+        return { text: L(`**${P.name}** was absent on **${days.size}** day(s) in ${rlabel(RM)}${days.size ? ': ' + [...days].sort().map(fmtDate).join(', ') : ''}.`, `**${P.name}** ${rlabel(RM)} में **${days.size}** दिन अनुपस्थित रहे${days.size ? ': ' + [...days].sort().map(fmtDate).join(', ') : ''}।`) };
+      }
+      const status = has(/pending|waiting|lambit|लंबित|to approve|awaiting|decide/) ? 'pending' : has(/approved|sweekrit|svikrit|स्वीकृत|granted/) ? 'approved' : has(/rejected|asweekrit|अस्वीकृत|denied|refused/) ? 'rejected' : (!P && !range ? 'pending' : undefined);
+      const rows = tool('leave_requests', { status, teacher: P ? P.id : undefined, from: range ? range.from : undefined, to: range ? range.to : undefined });
+      const what = status ? t(status).toLowerCase() + ' ' : '';
+      if (!rows.length) return { text: L(`No ${what}leave requests${P ? ` for **${P.name}**` : ''}${range ? ` (${rlabel(range)})` : ''}.${mgr ? '' : ' I can only see your own.'}`, `कोई ${status ? t(status) + ' ' : ''}छुट्टी आवेदन नहीं${P ? ` (**${P.name}**)` : ''}।`) };
+      return { text: L(`**${rows.length}** ${what}leave request(s)${P ? ` of **${P.name}**` : ''}${range ? `, ${rlabel(range)}` : ''}:`, `**${rows.length}** ${status ? t(status) + ' ' : ''}छुट्टी आवेदन${P ? ` — **${P.name}**` : ''}:`) + '\n\n' + tbl([t('teacher'), L('Dates', 'तारीख़'), t('type'), L('Reason', 'कारण'), t('status')], rows.slice(0, 30).map(x => [x.teacher, x.from === x.to ? fmtDate(x.from) : `${fmtDate(x.from)} – ${fmtDate(x.to)}`, x.type, x.reason.length > 70 ? x.reason.slice(0, 70) + '…' : x.reason, t(x.status) + (x.remark ? ` (${x.remark})` : '')])) + (mgr && status === 'pending' ? '\n\n' + L('Approve or reject them on the **Leave** screen.', '**छुट्टी** स्क्रीन पर स्वीकृत या अस्वीकृत करें।') : '') };
+    }
+    case 'requests': {
+      const kind = has(/\bdpps?\b|practice problem/) && !has(/work ?sheet|वर्कशीट/) ? 'dpp' : has(/work ?sheet|वर्कशीट/) && !has(/\bdpps?\b/) ? 'worksheet' : undefined;
+      const overdue = has(/overdue|late|delayed|der se|देर|pending for long|missed/);
+      const status = has(/waiting for approval|to approve|new requests?|naye|नए|not approved/) ? 'requested' : has(/in progress|kaam jaari|being prepared/) ? 'in_progress' : has(/\bready\b|taiyar|तैयार/) ? 'ready' : has(/delivered|pahuncha|पहुँचा|completed|done/) ? 'delivered' : has(/rejected|अस्वीकृत/) ? 'rejected' : has(/approved|स्वीकृत/) ? 'approved' : undefined;
+      const P = person && (person.role === 'teacher' || e.selfRef) ? person : null;
+      let rows = tool('dpp_worksheet_requests', { kind, status, class: cls || undefined, teacher: P ? P.id : undefined, overdue_only: overdue, open_only: !status && !overdue && !has(/all|sabhi|सभी|history|total/) });
+      if (subject) rows = rows.filter(x => x.subject === SUBJECTS[subject].en);
+      const label = (kind === 'dpp' ? 'DPP ' : kind === 'worksheet' ? L('worksheet ', 'वर्कशीट ') : L('DPP/worksheet ', 'DPP/वर्कशीट ')) + (overdue ? L('overdue ', 'देर से ') : '') ;
+      if (has(/how many|kitne|count|total|कितने/)) return { text: L(`**${rows.length}** ${label}request(s)${status ? ' with status ' + t(status) : !overdue ? ' open' : ''}${cls ? ` for ${cls}` : ''}${P ? ` by/for ${P.name}` : ''}.`, `**${rows.length}** ${label}अनुरोध${cls ? ` (${cls})` : ''}।`) };
+      if (!rows.length) return { text: overdue ? L('✅ Nothing is overdue.', '✅ कुछ भी देर से नहीं है।') : L(`No ${label}requests found${cls ? ` for ${cls}` : ''}${P ? ` for ${P.name}` : ''}.${mgr ? '' : ' I can only see your own.'}`, `कोई ${label}अनुरोध नहीं मिला।`) };
+      return { text: L(`**${rows.length}** ${label}request(s)${cls ? ` for ${cls}` : ''}${P ? ` — ${P.name}` : ''}:`, `**${rows.length}** ${label}अनुरोध:`) + '\n\n' + tbl([L('Kind', 'प्रकार'), t('class'), t('subject'), L('What', 'क्या'), L('Needed by', 'कब तक'), t('status'), L('By', 'द्वारा')], rows.slice(0, 30).map(x => [x.kind === 'dpp' ? 'DPP' : t('worksheet'), x.class, x.subject, x.what.length > 60 ? x.what.slice(0, 60) + '…' : x.what, fmtDate(x.neededBy) + (x.overdue ? ' ⚠️' : ''), t(x.status), x.raisedBy])) };
+    }
+    case 'classteacher': {
+      if (cls) return { text: S.classTeachers[cls] ? L(`The class teacher of **${cls}** is **${nameOf(S.classTeachers[cls])}**.`, `**${cls}** के कक्षा-शिक्षक **${nameOf(S.classTeachers[cls])}** हैं।`) : L(`No class teacher is set for ${cls}.`, `${cls} के लिए कक्षा-शिक्षक तय नहीं।`) };
+      if (person && !e.selfRef || (e.selfRef && person)) { const mine = Object.entries(S.classTeachers).filter(([, v]) => v === person.id).map(([k]) => k); if (person.role === 'teacher') return { text: mine.length ? L(`**${person.name}** is class teacher of **${mine.join(', ')}**.`, `**${person.name}** **${mine.join(', ')}** के कक्षा-शिक्षक हैं।`) : L(`**${person.name}** is not a class teacher.`, `**${person.name}** किसी कक्षा के कक्षा-शिक्षक नहीं हैं।`) }; }
+      return { text: L('Class teachers:', 'कक्षा-शिक्षक:') + '\n\n' + tbl([t('class'), L('Class teacher', 'कक्षा-शिक्षक')], CLASSES.map(c => [c, S.classTeachers[c] ? nameOf(S.classTeachers[c]) : '—'])) };
+    }
+    case 'whoteaches': {
+      if (person && person.role === 'teacher' && !cls && !subject) {
+        const rows = tool('who_teaches', {}).filter(x => x.teacher === person.name);
+        return { text: rows.length ? L(`**${person.name}** teaches (${weeklyLoad(person.id)} periods a week):`, `**${person.name}** पढ़ाते हैं (सप्ताह में ${weeklyLoad(person.id)} पीरियड):`) + '\n\n' + tbl([t('class'), t('subject'), L('Periods/week', 'पीरियड/सप्ताह')], rows.map(x => [x.class, subjName(subjCode(x.subject) || x.subject), x.periodsPerWeek])) : L(`**${person.name}** has no periods in the timetable.`, `समय-सारणी में **${person.name}** का कोई पीरियड नहीं।`) };
+      }
+      const classes = cls ? [cls] : grade || null;
+      let rows = tool('who_teaches', { subject: subject ? subject : undefined });
+      if (classes) rows = rows.filter(x => classes.includes(x.class));
+      if (!rows.length) return { text: L('Nothing in the timetable matches that.', 'समय-सारणी में ऐसा कुछ नहीं मिला।') };
+      if (rows.length === 1) return { text: L(`**${rows[0].teacher}** teaches ${rows[0].subject} in **${rows[0].class}** (${rows[0].periodsPerWeek} periods a week).`, `**${rows[0].class}** में ${subjName(subject || subjCode(rows[0].subject) || '')} **${rows[0].teacher}** पढ़ाते हैं (सप्ताह में ${rows[0].periodsPerWeek} पीरियड)।`) };
+      rows.sort((a, b) => CLASSES.indexOf(a.class) - CLASSES.indexOf(b.class) || b.periodsPerWeek - a.periodsPerWeek);
+      return { text: tbl([t('class'), t('subject'), t('teacher'), L('Periods/week', 'पीरियड/सप्ताह')], rows.slice(0, 60).map(x => [x.class, x.subject, x.teacher, x.periodsPerWeek])) };
+    }
+    case 'contact': {
+      if (!mgr) return { text: L('Only the Admin or Coordinator can see mobile numbers.', 'मोबाइल नंबर केवल एडमिन या कोऑर्डिनेटर देख सकते हैं।') };
+      return { text: L(`**${person.name}**: +91 ${person.phone}${person.active ? '' : ' (inactive)'}`, `**${person.name}**: +91 ${person.phone}`) };
+    }
+    case 'stafflist': {
+      let list = S.staff.filter(s => (has(/inactive|nishkriya|निष्क्रिय/) ? !s.active : s.active));
+      if (subject) list = list.filter(s => s.subjects.includes(subject));
+      if (!has(/staff/) || subject) list = list.filter(s => s.role === 'teacher' || subject);
+      if (has(/how many|kitne|कितने|count/) && !has(/list|names|naam/)) return { text: L(`There are **${list.length}** ${subject ? subjName(subject) + ' ' : ''}${has(/inactive/) ? 'inactive ' : 'active '}${has(/staff/) && !subject ? 'staff members' : 'teachers'}.`, `**${list.length}** ${subject ? subjName(subject) + ' ' : ''}${has(/staff/) && !subject ? 'स्टाफ़ सदस्य' : 'शिक्षक'} हैं।`), chips: [L('List all teachers', 'सभी शिक्षकों की सूची')] };
+      if (!list.length) return { text: L('No staff match that.', 'ऐसा कोई स्टाफ़ नहीं।') };
+      return { text: `**${list.length}** ${subject ? subjName(subject) + ' ' : ''}${L('staff', 'स्टाफ़')}:\n\n` + tbl([L('Name', 'नाम'), L('Role', 'भूमिका'), L('Subjects', 'विषय'), L('Periods/week', 'पीरियड/सप्ताह'), L('Class teacher', 'कक्षा-शिक्षक')], list.map(s => [s.name, roleLabel(s.role), s.subjects.map(subjName).join(', ') || '—', s.role === 'teacher' ? weeklyLoad(s.id) : '—', Object.entries(S.classTeachers).filter(([, v]) => v === s.id).map(([k]) => k).join(', ') || '—'])) };
+    }
+    case 'notices': return { text: S.notices.length ? S.notices.slice(0, 8).map(n => `- **${n.title}** (${fmtTime(n.at)}, ${nameOf(n.by)}): ${n.body}`).join('\n') : L('There are no notices.', 'कोई सूचना नहीं।') };
+    case 'notifs': { const mine = S.notifications.filter(n => n.userId === u.id).slice(0, 10); return { text: mine.length ? mine.map(n => `- ${S.lang === 'hi' ? n.hi : n.en} (${fmtTime(n.at)})`).join('\n') : L('You have no notifications.', 'आपके लिए कोई सूचना नहीं।') }; }
+    case 'audit': {
+      if (!mgr) return { text: L('Only the Admin or Coordinator can see the change log.', 'बदलाव रिकॉर्ड केवल एडमिन या कोऑर्डिनेटर देख सकते हैं।') };
+      const key = has(/time ?table|समय-सारणी/) ? 'timetable' : has(/leave|छुट्टी/) ? 'leave' : has(/staff|स्टाफ़/) ? 'staff' : has(/substitut|plan|arrangement/) ? 'substitution' : '';
+      let rows = S.audit.filter(a => (!key || a.text.toLowerCase().includes(key)) && (!e.person || e.selfRef || a.by === e.person.id) && (!range || (a.at.slice(0, 10) >= range.from && a.at.slice(0, 10) <= range.to))).slice(0, 25);
+      return { text: rows.length ? L('Recent changes:', 'हाल के बदलाव:') + '\n\n' + tbl([L('When', 'कब'), L('Who', 'कौन'), L('What', 'क्या')], rows.map(a => [fmtTime(a.at), nameOf(a.by), a.text])) : L('No matching entries in the change log.', 'बदलाव रिकॉर्ड में ऐसा कुछ नहीं।') };
+    }
+    case 'counts': return { text: L(`The school has **${CLASSES.length}** classes (${CLASSES.join(', ')}), **${teachers().length}** active teachers, **${Object.keys(SUBJECTS).length}** subjects, and **${PERIODS.length}** periods a day, ${DAYS.length} days a week.`, `स्कूल में **${CLASSES.length}** कक्षाएँ (${CLASSES.join(', ')}), **${teachers().length}** सक्रिय शिक्षक, **${Object.keys(SUBJECTS).length}** विषय, और दिन में **${PERIODS.length}** पीरियड हैं।`) };
+    case 'where': {
+      const dt = R.from, p = period || currentPeriod();
+      if (person.role !== 'teacher') return { text: L(`${person.name} is ${roleLabel(person.role)} and has no teaching periods.`, `${person.name} ${roleLabel(person.role)} हैं; उनके पढ़ाने के पीरियड नहीं हैं।`) };
+      if (dt === today && !p) return { text: L(`No period is running right now (${nowHM()}). Here is the day:\n\n`, `अभी (${nowHM()}) कोई पीरियड नहीं चल रहा। पूरा दिन:\n\n`) + scheduleAnswer(person, R) };
+      if (!p) return { text: scheduleAnswer(person, R) };
+      const du = dutyAt(person.id, dt, p);
+      return { text: L(`**${person.name}**, ${fmtDate(dt)} **P${p}** (${periodTime(p)}): **${du.text}**.`, `**${person.name}**, ${fmtDate(dt)} **P${p}** (${periodTime(p)}): **${du.text}**।`), chips: [L(`${person.name.split(' ')[0]}'s full day`, `${person.name.split(' ')[0]} का पूरा दिन`)] };
+    }
+    case 'classnow': {
+      const dt = R.from, d = dayIdx(dt), p = period;
+      if (d < 0) return { text: L('That day is a Sunday — no school.', 'उस दिन रविवार है।') };
+      if (!p) return { text: L(`No period is running right now (${nowHM()}).\n\n`, `अभी (${nowHM()}) कोई पीरियड नहीं चल रहा।\n\n`) + classAnswer(cls, R) };
+      const l = lessonAt(cls, d, p); if (!l) return { text: L(`**${cls}** has a free period in P${p} on ${fmtDate(dt)}.`, `${fmtDate(dt)} को P${p} में **${cls}** का खाली पीरियड है।`) };
+      const plan = S.plans[dt], sub = plan && (plan.status === 'published' || mgr) && plan.items[`${cls}|${p}`];
+      return { text: L(`**${cls}**, ${fmtDate(dt)} **P${p}** (${periodTime(p)}): **${subjName(l.s)}** with **${sub ? (sub.teacherId ? nameOf(sub.teacherId) + ' (substitute for ' + nameOf(l.t) + ')' : 'NOBODY — not covered') : nameOf(l.t)}**.`, `**${cls}**, ${fmtDate(dt)} **P${p}** (${periodTime(p)}): **${subjName(l.s)}** — **${sub ? (sub.teacherId ? nameOf(sub.teacherId) + ' (' + nameOf(l.t) + ' की जगह)' : 'कोई नहीं — खाली') : nameOf(l.t)}**।`) };
+    }
+    case 'schedule': {
+      if (person.role !== 'teacher') return { text: mgr && e.selfRef ? briefing(R.from) : L(`${person.name} is ${roleLabel(person.role)} and has no teaching periods.`, `${person.name} ${roleLabel(person.role)} हैं; उनके पढ़ाने के पीरियड नहीं हैं।`) };
+      if (period && !week) { const du = dutyAt(person.id, R.from, period); return { text: L(`**${person.name}**, ${fmtDate(R.from)} **P${period}** (${periodTime(period)}): **${du.text}**.`, `**${person.name}**, ${fmtDate(R.from)} **P${period}**: **${du.text}**।`) }; }
+      const f = person.name.split(' ')[0];
+      return { text: scheduleAnswer(person, R, week && !(range && range.from === range.to)), chips: [L(`${f}'s whole week`, `${f} का पूरा सप्ताह`), L(`When is ${f} free today?`, `${f} आज कब खाली हैं?`)] };
+    }
+    case 'classtt': {
+      if (!cls && grade) return { text: grade.map(c => classAnswer(c, range, week || !range)).join('\n\n') };
+      if (subject) { const rows = tool('who_teaches', { class: cls, subject }); if (rows.length) return { text: L(`In **${cls}**, ${rows[0].subject} is taught by **${rows.map(r => r.teacher).join(', ')}** (${rows.reduce((a, r) => a + r.periodsPerWeek, 0)} periods a week).`, `**${cls}** में ${subjName(subject)} **${rows.map(r => r.teacher).join(', ')}** पढ़ाते हैं।`) }; }
+      const single = range && range.from === range.to;
+      return { text: classAnswer(cls, single ? range : null, !single), chips: single ? [L(`${cls} whole week`, `${cls} पूरा सप्ताह`)] : [L(`${cls} timetable today`, `${cls} आज का टाइमटेबल`), L(`Class teacher of ${cls}`, `${cls} के कक्षा-शिक्षक`)] };
+    }
+    case 'subjectinfo': {
+      const list = teachers().filter(s => s.subjects.includes(subject));
+      const rows = tool('who_teaches', { subject });
+      return { text: L(`**${subjName(subject)}** — ${list.length} teacher(s): ${list.map(s => s.name).join(', ') || '—'}`, `**${subjName(subject)}** — ${list.length} शिक्षक: ${list.map(s => s.name).join(', ') || '—'}`) + (rows.length ? '\n\n' + tbl([t('class'), t('teacher'), L('Periods/week', 'पीरियड/सप्ताह')], rows.sort((a, b) => CLASSES.indexOf(a.class) - CLASSES.indexOf(b.class)).map(x => [x.class, x.teacher, x.periodsPerWeek])) : '') };
+    }
+    case 'dateonly': return { text: briefing(R.from) };
+  }
+  return { text: L("I didn't understand that. I can answer questions about the school's data — here are some examples.", 'मैं यह नहीं समझ सका। मैं स्कूल के डेटा से जुड़े प्रश्नों के उत्तर दे सकता हूँ — कुछ उदाहरण:') + '\n\n' + helpText().split('\n').slice(2).join('\n') };
+}
+
+/* ---------- chat plumbing ---------- */
+function askAssistant(q) {
+  UI.chat.push({ role: 'user', text: q });
+  let out;
+  try { out = brainAnswer(q); } catch (err) { out = { text: L('Sorry, I could not work that out. Please ask in a different way.', 'क्षमा करें, यह नहीं निकाल सका। कृपया दूसरे तरीके से पूछें।') }; }
+  UI.chat.push({ role: 'assistant', text: out.text, chips: out.chips || [] });
+  if (UI.chat.length > 60) UI.chat = UI.chat.slice(-60);
+  render();
+  const i = document.querySelector('.chat-in input'); if (i && window.innerWidth > 860) i.focus();
+}
+function newChat() { UI.chat = []; BR.ctx = {}; BR.lastIntent = null; render(); }
+function generateDraft(id) {
+  const r = S.requests.find(x => x.id === id);
+  document.getElementById('draftText').value = templateDraft(r);
+  toast(L('Template added — type the questions in', 'टेम्पलेट जोड़ा — प्रश्न लिखें'));
+}
+
+function viewAssistant() {
+  const mgr = isManager(me());
+  const groups = mgr ? [
+    [L('Today', 'आज'), [L("Today's summary", 'आज का सारांश'), L('Who is absent today?', 'आज कौन अनुपस्थित है?'), L('Substitutions today', 'आज के अरेंजमेंट'), L('Who is free now?', 'अभी कौन खाली है?')]],
+    [L('Staff', 'स्टाफ़'), [L('Who has the most periods?', 'सबसे ज़्यादा पीरियड किसके हैं?'), L('Most substitutions this month', 'इस महीने सबसे ज़्यादा अरेंजमेंट'), L('Pending leave', 'लंबित छुट्टी'), L('Who took the most leave this month?', 'इस महीने सबसे ज़्यादा छुट्टी किसने ली?')]],
+    [L('Planning', 'योजना'), [L(`If ${(teachers()[0] || { name: 'a teacher' }).name} is absent tomorrow who will cover?`, `अगर कल ${(teachers()[0] || { name: '' }).name} न आएँ तो कौन पढ़ाएगा?`), L('Check timetable for clashes', 'टाइमटेबल में टकराव जाँचो'), L('Overdue requests', 'देर से चल रहे अनुरोध'), L(`${CLASSES[0]} timetable tomorrow`, `${CLASSES[0]} का कल का टाइमटेबल`)]],
+  ] : [
+    [L('My day', 'मेरा दिन'), [L('My schedule today', 'आज मेरा शेड्यूल'), L('My schedule tomorrow', 'कल मेरा शेड्यूल'), L('When am I free today?', 'आज मैं कब खाली हूँ?'), L('My substitutions this month', 'इस महीने मेरे अरेंजमेंट')]],
+    [L('My requests', 'मेरे अनुरोध'), [L('My leave', 'मेरी छुट्टी'), L('My DPP and worksheet requests', 'मेरे DPP और वर्कशीट अनुरोध'), L('Notices', 'सूचनाएँ')]],
+    [L('School', 'स्कूल'), [L('Who is free in period 5?', 'पीरियड 5 में कौन खाली है?'), L(`${CLASSES[0]} timetable today`, `${CLASSES[0]} का आज का टाइमटेबल`), L('Period timings', 'पीरियड का समय')]],
+  ];
+  const last = UI.chat[UI.chat.length - 1];
+  return `<div class="page-head"><h2>${t('assistant')}</h2><div class="btns"><span class="chip st-approved">⚡ ${L('Instant answers from school data', 'स्कूल डेटा से तुरंत उत्तर')}</span>${UI.chat.length ? `<button class="btn small ghost" data-act="newChat">${L('Clear', 'साफ़ करें')}</button>` : ''}</div></div>
+    <section class="panel chat">
+      <div class="chat-log">${UI.chat.length ? UI.chat.map(m => m.role === 'assistant'
+        ? `<div class="msg assistant"><span class="ai-badge">⚡</span><div class="md">${md(m.text)}</div></div>`
+        : `<div class="msg user"><div>${esc(m.text)}</div></div>`).join('') + (last && last.chips && last.chips.length ? `<div class="suggest follow">${last.chips.map(s => `<button class="chip-btn" data-act="askSuggest" data-q="${esc(s)}">${esc(s)}</button>`).join('')}</div>` : '')
+        : `<div class="empty small">${L('Ask in English, Hindi or Hinglish — or tap a question below.', 'अंग्रेज़ी, हिंदी या Hinglish में पूछें — या नीचे कोई प्रश्न चुनें।')}</div>
+           ${groups.map(([name, qs]) => `<div class="qgroup"><b>${esc(name)}</b><div class="suggest">${qs.map(s => `<button class="chip-btn" data-act="askSuggest" data-q="${esc(s)}">${esc(s)}</button>`).join('')}</div></div>`).join('')}`}</div>
+      <form data-form="chat" class="chat-in"><input name="q" placeholder="${esc(L('e.g. who is free in period 5 tomorrow?', 'जैसे: कल पीरियड 5 में कौन खाली है?'))}" autocomplete="off"><button class="btn primary">${t('ask')}</button></form>
+      <p class="hint">${L('Answers come straight from the school data you are allowed to see. Nothing is sent to any outside AI service, and the assistant never changes anything.', 'उत्तर सीधे उसी स्कूल डेटा से आते हैं जो आप देख सकते हैं। कुछ भी किसी बाहरी AI सेवा को नहीं भेजा जाता, और सहायक कुछ नहीं बदलता।')} <a href="#" data-act="askSuggest" data-q="help">${L('What can I ask?', 'क्या पूछ सकते हैं?')}</a></p>
+    </section>`;
 }
 
 boot();
