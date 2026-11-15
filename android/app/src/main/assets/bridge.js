@@ -36,6 +36,17 @@
     });
   }
 
+  /* ---------- the app's files come from the phone itself, so the website's service worker isn't needed ---------- */
+  if (window.ServiceWorkerContainer && navigator.serviceWorker) {
+    try {
+      var SWC = ServiceWorkerContainer.prototype, getRegs = SWC.getRegistrations;
+      if (getRegs) getRegs.call(navigator.serviceWorker).then(function (rs) { rs.forEach(function (r) { r.unregister(); }); }).catch(function () { });
+      SWC.register = function () { return Promise.reject(new Error('Not used in the Android app')); };
+      SWC.getRegistration = function () { return Promise.resolve(undefined); };
+      SWC.getRegistrations = function () { return Promise.resolve([]); };
+    } catch (e) { }
+  }
+
   /* ---------- notifications ---------- */
   function notify(title, opts) {
     opts = opts || {};

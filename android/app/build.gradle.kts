@@ -24,8 +24,8 @@ android {
         applicationId = "com.meridiantheschool.mtsstaff"
         minSdk = 24
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.1"
 
         // The web app the native shell opens. Change this one line to point the app at another address.
         buildConfigField("String", "APP_URL", "\"https://ravis995692-ui.github.io/mts-staff-app/beta/\"")
@@ -70,4 +70,19 @@ dependencies {
     implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.webkit)
     implementation(libs.androidx.core.splashscreen)
+}
+
+// Copies the newest web app files (../beta and the icons) into the APK's bundled copy.
+// Run it before building a new APK:  Gradle panel > app > Tasks > other > updateWebApp
+// (the app also updates itself from the website, so this is only needed now and then).
+tasks.register<Copy>("updateWebApp") {
+    group = "mts"
+    description = "Copies the latest web app files into src/main/assets/web"
+    from(rootProject.file("..")) {
+        include(
+            "beta/index.html", "beta/app.js.gz", "beta/supabase.js.gz",
+            "beta/manifest.webmanifest", "icon-192.png", "icon-512.png",
+        )
+    }
+    into(layout.projectDirectory.dir("src/main/assets/web"))
 }

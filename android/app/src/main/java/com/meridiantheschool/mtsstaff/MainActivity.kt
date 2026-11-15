@@ -14,6 +14,7 @@ import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -31,6 +32,8 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.webkit.ServiceWorkerClientCompat
+import androidx.webkit.ServiceWorkerControllerCompat
 import androidx.webkit.WebSettingsCompat
 import androidx.webkit.WebViewCompat
 import androidx.webkit.WebViewFeature
@@ -104,10 +107,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         Notifications.createChannel(this)
+        WebContent.init(this)
         setupWebView()
         onBackPressedDispatcher.addCallback(this) { handleBack() }
 
         web.loadUrl(startUrl(intent))
+        WebContent.checkForUpdate()
     }
 
     @SuppressLint("SetJavaScriptEnabled", "JavascriptInterface")
@@ -142,7 +147,20 @@ class MainActivity : AppCompatActivity() {
             docStartScript = true
         }
 
+        // the app's own files come from the phone (see WebContent), also for the old service worker
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.SERVICE_WORKER_BASIC_USAGE) &&
+            WebViewFeature.isFeatureSupported(WebViewFeature.SERVICE_WORKER_SHOULD_INTERCEPT_REQUEST)
+        ) {
+            ServiceWorkerControllerCompat.getInstance().setServiceWorkerClient(object : ServiceWorkerClientCompat() {
+                override fun shouldInterceptRequest(request: WebResourceRequest): WebResourceResponse? =
+                    WebContent.intercept(request)
+            })
+        }
+
         web.webViewClient = object : WebViewClient() {
+            override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? =
+                WebContent.intercept(request)
+
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                 val url = request.url
                 return when {
@@ -283,6 +301,7 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         web.onResume()
+        WebContent.checkForUpdate()
     }
 
     override fun onPause() {
