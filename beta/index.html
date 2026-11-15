@@ -1814,6 +1814,7 @@ function viewReports() {
   const sts = ['requested', 'approved', 'in_progress', 'ready', 'delivered', 'rejected'];
   return `<div class="page-head"><h2>${t('reports')}</h2><div class="btns"><input type="month" value="${ym}" data-change="reportMonth" aria-label="Month"><button class="btn primary" data-act="exportAll">⬇️ ${L('Download Excel', 'Excel डाउनलोड')}</button><button class="btn ghost" data-act="printReport">🖨️ ${L('Print / PDF', 'प्रिंट / PDF')}</button><button class="btn ghost" data-act="copyReport">📋 CSV</button></div></div>
     ${reportAttendanceHTML(ym)}
+    ${salaryPanelHTML(ym)}
     <div class="cards">
       <div class="stat"><span>${L('Substitutions published', 'प्रकाशित अरेंजमेंट')}</span><b>${subsVals.reduce((a, b) => a + b, 0)}</b></div>
       <div class="stat ${spread > 3 ? 'warn' : ''}"><span>${L('Fairness gap (most − least)', 'असमानता (अधिकतम − न्यूनतम)')}</span><b>${spread}</b></div>
@@ -2402,7 +2403,7 @@ function monthRegisterHTML(ym) {
     <section class="panel"><div class="table-wrap"><table class="data register"><thead><tr><th>${L('Staff', 'स्टाफ़')}</th>${days.map(d => `<th class="${dayIdx(d) < 0 ? 'sun' : ''}">${Number(d.slice(8))}</th>`).join('')}<th>P</th><th>L</th><th>A</th><th>LV</th></tr></thead>
     <tbody>${people.map(p => { const s = monthStats(p.id, ym); return `<tr><td><b>${esc(p.name)}</b></td>${days.map(d => { const st = d > todayISO() ? '' : attStatus(p.id, d); return `<td class="r-${st}">${sym[st] || ''}</td>`; }).join('')}<td>${s.present}</td><td>${s.late}</td><td>${s.absent}</td><td>${s.leave}</td></tr>`; }).join('')}</tbody></table></div>
     <p class="hint">P = ${attLabel('present')} · L = ${attLabel('late')} · A = ${attLabel('absent')} · LV = ${attLabel('leave')} · ? = ${attLabel('review')}</p>
-    <div class="row-end"><button class="btn ghost" data-act="exportAttendance">⬇️ ${L('Download Excel', 'Excel डाउनलोड')}</button><button class="btn ghost" data-act="printAttendance">🖨️ ${L('Print / PDF', 'प्रिंट / PDF')}</button></div></section>`;
+    <div class="row-end"><button class="btn primary" data-act="exportSalary">💼 ${L('Salary sheet', 'वेतन शीट')}</button><button class="btn ghost" data-act="exportAttendance">⬇️ ${L('Download Excel', 'Excel डाउनलोड')}</button><button class="btn ghost" data-act="printAttendance">🖨️ ${L('Print / PDF', 'प्रिंट / PDF')}</button></div></section>`;
 }
 function attemptsHTML() {
   if (V2.attempts === null && !V2.attemptsBusy) { loadAttempts(); return `<div class="empty">${L('Loading…', 'लोड हो रहा है…')}</div>`; }
@@ -2893,7 +2894,14 @@ function settingsV2HTML() {
       <form data-form="leavePolicy" class="stack"><div class="three">${LEAVE_TYPES.map(tp => `<label>${esc(leaveTypeName(tp))}<input type="number" name="${esc(tp)}" min="0" max="365" value="${pol[tp] || 0}"></label>`).join('')}
         <label>${L('Leave year starts in', 'छुट्टी वर्ष शुरू')}<select name="yearStart">${Array.from({ length: 12 }, (_, i) => `<option value="${i + 1}" ${Number(pol.yearStart) === i + 1 ? 'selected' : ''}>${new Date(2026, i, 1).toLocaleDateString(S.lang === 'hi' ? 'hi-IN' : 'en-IN', { month: 'long' })}</option>`).join('')}</select></label></div>
       <p class="hint">${L('0 = no limit is tracked for that type.', '0 = उस प्रकार की सीमा नहीं गिनी जाती।')}</p>
-      <div class="row-end"><button class="btn primary">${t('save')}</button></div></form></section>`;
+      <div class="row-end"><button class="btn primary">${t('save')}</button></div></form></section>
+    ${(() => { const r = salaryRules(); return `<section class="panel"><h3>💼 ${L('Salary sheet rules', 'वेतन शीट नियम')}</h3>
+      <form data-form="salaryRules" class="stack"><div class="three">
+        <label>${L('Late marks for one cut', 'कितनी देर पर कटौती')}<input type="number" name="lateCount" min="0" max="31" value="${r.lateCount}"></label>
+        <label>${L('Cut for those late marks', 'उतनी देर पर कटौती')}<select name="lateCut">${[[0.25, L('Quarter day', 'चौथाई दिन')], [0.5, L('Half day', 'आधा दिन')], [1, L('Full day', 'पूरा दिन')]].map(([v, l]) => `<option value="${v}" ${r.lateCut === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+        <label>${L('Check-ins waiting for approval count as', 'स्वीकृति बाकी चेक-इन गिनें')}<select name="pendingAs"><option value="present" ${r.pendingAs === 'present' ? 'selected' : ''}>${attLabel('present')}</option><option value="absent" ${r.pendingAs === 'absent' ? 'selected' : ''}>${attLabel('absent')}</option></select></label></div>
+      <p class="hint">${L('0 late marks = no cut for being late. The sheet shows days only, not money.', '0 = देर पर कोई कटौती नहीं। शीट में केवल दिन हैं, राशि नहीं।')}</p>
+      <div class="row-end"><button class="btn primary">${t('save')}</button></div></form></section>`; })()}`;
 }
 
 /* =================================================================
@@ -3022,6 +3030,132 @@ Object.assign(FORMS, {
     if (!e.days.length || !e.rooms.length) { toast(L('Choose dates and at least one room.', 'तारीख़ें और कम से कम एक कक्ष चुनें।')); return; }
     autoAssign(e); S.exams.push(e); V2.examId = e.id; closeModal();
     logAudit(me().id, `Created exam ${e.name}`); commit(); toast(L('Exam created and duties shared — check and publish', 'परीक्षा बनी और ड्यूटी बँटी — जाँचकर प्रकाशित करें'));
+  },
+});
+
+
+/* =================================================================
+   12. SALARY-READY ATTENDANCE SHEET (days only — no amounts)
+   ================================================================= */
+const DEFAULT_SALARY_RULES = { lateCount: 3, lateCut: 0.5, pendingAs: 'present' };
+const salaryRules = () => ({ ...DEFAULT_SALARY_RULES, ...((S.config && S.config.salaryRules) || {}) });
+/* For one person: every approved leave day in the leave year, in date order, marked paid or unpaid
+   (paid while the yearly allowance for that type lasts; 0 allowance = not limited; Official duty is always paid). */
+function leaveDayMap(tid, ym) {
+  const pol = leavePolicy(); const yr = leaveYear(ym + '-01');
+  const used = {}; const map = {};
+  S.leaves.filter(l => l.teacherId === tid && l.status === 'approved' && l.to >= yr.from && l.from <= yr.to)
+    .sort((a, b) => a.from.localeCompare(b.from))
+    .forEach(l => workDaysBetween(l.from < yr.from ? yr.from : l.from, l.to).forEach(d => {
+      const unit = l.scope === 'full' ? 1 : 0.5;
+      const allow = Number(pol[l.type]) || 0;
+      used[l.type] = (used[l.type] || 0) + unit;
+      const unlimited = l.type === 'Official duty' || allow <= 0;
+      const over = unlimited ? 0 : Math.min(unit, Math.max(0, used[l.type] - allow));
+      const prev = map[d] || { paid: 0, unpaid: 0, types: [] };
+      map[d] = { paid: prev.paid + unit - over, unpaid: prev.unpaid + over, types: prev.types.concat(l.type), duty: prev.duty || l.type === 'Official duty' };
+    }));
+  return map;
+}
+/* one row of numbers for one person and month (counts up to today for the current month) */
+function salaryRow(p, ym) {
+  const rules = salaryRules();
+  const [y, m] = ym.split('-').map(Number);
+  const daysInMonth = new Date(y, m, 0).getDate();
+  const lm = leaveDayMap(p.id, ym);
+  const r = { daysInMonth, sundays: 0, working: 0, counted: 0, present: 0, late: 0, duty: 0, paidLeave: 0, unpaidLeave: 0, absent: 0, pending: 0, before: 0, notes: [] };
+  for (let d = 1; d <= daysInMonth; d++) {
+    const iso = `${ym}-${pad(d)}`;
+    if (dayIdx(iso) < 0) { r.sundays++; continue; }
+    r.working++;
+    if (iso > todayISO()) continue;
+    r.counted++;
+    const st = attStatus(p.id, iso);
+    const lv = lm[iso];
+    if (st === 'untracked') { r.before++; continue; }
+    if (st === 'present' || st === 'late') {
+      if (st === 'late') r.late++; else r.present++;
+      if (lv) { r.paidLeave += lv.paid; r.unpaidLeave += lv.unpaid; } // half-day leave on a day they also came
+      continue;
+    }
+    if (st === 'review') { r.pending++; if (rules.pendingAs === 'present') r.present++; else r.absent++; continue; }
+    if (st === 'leave') {
+      if (lv) { if (lv.duty) r.duty += lv.paid; else r.paidLeave += lv.paid; r.unpaidLeave += lv.unpaid; if (lv.paid + lv.unpaid < 1) r.absent += 1 - (lv.paid + lv.unpaid); }
+      else r.absent++; // marked absent by the office without a leave application
+      continue;
+    }
+    if (st === 'absent' || st === 'rejected') { r.absent++; continue; }
+    if (st === 'not_in') { r.counted--; continue; } // today, before closing time
+  }
+  r.lateCut = rules.lateCount > 0 ? Math.floor(r.late / rules.lateCount) * rules.lateCut : 0;
+  r.lwp = r.absent + r.unpaidLeave + r.lateCut;
+  r.payableFull = Math.max(0, daysInMonth - r.lwp);
+  if (r.pending) r.notes.push(L(`${r.pending} check-in(s) waiting for approval`, `${r.pending} चेक-इन स्वीकृति बाकी`));
+  if (r.before) r.notes.push(L(`${r.before} day(s) before attendance started, counted as present`, `${r.before} दिन हाज़िरी शुरू होने से पहले, उपस्थित गिने`));
+  if (r.unpaidLeave) r.notes.push(L('leave beyond the yearly allowance', 'वार्षिक सीमा से अधिक छुट्टी'));
+  return r;
+}
+const salaryPeople = () => S.staff.filter(s => s.active && s.role !== 'admin').slice().sort((a, b) => a.name.localeCompare(b.name));
+function salarySheets(ym) {
+  const rules = salaryRules();
+  const monthDone = ym < todayISO().slice(0, 7);
+  const head = [L('S.No.', 'क्र.'), L('Staff', 'स्टाफ़'), L('Role', 'पद'), L('Days in month', 'माह के दिन'), L('Sundays', 'रविवार'), L('Working days', 'कार्य दिवस'),
+    L('Present (on time)', 'उपस्थित (समय पर)'), L('Late', 'देर से'), L('Official duty', 'विद्यालय कार्य'), L('Paid leave', 'सवेतन छुट्टी'), L('Absent', 'अनुपस्थित'), L('Unpaid leave', 'अवैतनिक छुट्टी'),
+    L(`Late cut (${rules.lateCount} late = ${rules.lateCut} day)`, `देर कटौती (${rules.lateCount} देर = ${rules.lateCut} दिन)`), L('Total days cut (LWP)', 'कुल कटौती दिन (LWP)'), L('Payable days', 'देय दिन'), L('Remarks', 'टिप्पणी')];
+  const rows = [head];
+  const people = salaryPeople();
+  people.forEach((p, i) => {
+    const r = salaryRow(p, ym);
+    rows.push([i + 1, p.name, roleLabel(p.role), r.daysInMonth, r.sundays, r.working, r.present, r.late, r.duty, r.paidLeave, r.absent, r.unpaidLeave, r.lateCut, r.lwp, r.payableFull, r.notes.join('; ')]);
+  });
+  // day-by-day detail, so every number above can be checked
+  const [y, m] = ym.split('-').map(Number);
+  const last = new Date(y, m, 0).getDate();
+  const days = Array.from({ length: last }, (_, i) => `${ym}-${pad(i + 1)}`);
+  const code = (p, d, lm) => {
+    if (dayIdx(d) < 0) return 'S';
+    if (d > todayISO()) return '';
+    const st = attStatus(p.id, d); const lv = lm[d];
+    if (st === 'present') return lv ? 'P/½L' : 'P';
+    if (st === 'late') return lv ? 'L/½L' : 'L';
+    if (st === 'review') return '?';
+    if (st === 'untracked') return '-';
+    if (st === 'leave') return lv ? (lv.duty ? 'OD' : lv.unpaid ? 'UL' : 'PL') : 'A';
+    if (st === 'absent' || st === 'rejected') return 'A';
+    return '';
+  };
+  const grid = [[L('Staff', 'स्टाफ़'), ...days.map(d => Number(d.slice(8)))]];
+  people.forEach(p => { const lm = leaveDayMap(p.id, ym); grid.push([p.name, ...days.map(d => code(p, d, lm))]); });
+  const key = [[L('Code', 'कोड'), L('Meaning', 'अर्थ')], ['P', attLabel('present')], ['L', attLabel('late')], ['OD', L('Official duty (paid)', 'विद्यालय कार्य (सवेतन)')], ['PL', L('Paid leave', 'सवेतन छुट्टी')], ['UL', L('Unpaid leave (allowance used up)', 'अवैतनिक छुट्टी (सीमा पूरी)')],
+    ['A', L('Absent (no approved leave)', 'अनुपस्थित (स्वीकृत छुट्टी नहीं)')], ['½L', L('Half-day leave on that day', 'उस दिन आधे दिन की छुट्टी')], ['?', L('Check-in waiting for approval', 'चेक-इन स्वीकृति बाकी')], ['-', L('Before attendance started (counted present)', 'हाज़िरी शुरू होने से पहले (उपस्थित गिना)')], ['S', L('Sunday', 'रविवार')],
+    ['', ''], [L('Rule', 'नियम'), L(`Payable days = days in month − absent − unpaid leave − late cut. Every ${rules.lateCount} late marks cut ${rules.lateCut} day. Leave is paid until the yearly allowance for its type is used up.`, `देय दिन = माह के दिन − अनुपस्थित − अवैतनिक छुट्टी − देर कटौती। हर ${rules.lateCount} देर पर ${rules.lateCut} दिन कटौती। छुट्टी तब तक सवेतन है जब तक उस प्रकार की वार्षिक सीमा बची है।`)],
+    [L('Status', 'स्थिति'), monthDone ? L('Month complete', 'माह पूरा') : L(`Counted up to ${fmtDate(todayISO())}. Days after today are treated as present.`, `${fmtDate(todayISO())} तक गिना गया। आज के बाद के दिन उपस्थित माने गए।`)]];
+  return [{ name: L('Salary days', 'वेतन दिवस'), rows, widths: [6, 26, 14, 9, 9, 9, 10, 7, 9, 9, 9, 10, 14, 12, 10, 40] },
+    { name: L('Day by day', 'दिनवार'), rows: grid, widths: [26, ...days.map(() => 5)] },
+    { name: L('Key', 'संकेत'), rows: key, widths: [10, 90] }];
+}
+function salaryPanelHTML(ym) {
+  if (S.v2Missing) return '';
+  const rules = salaryRules();
+  const people = salaryPeople();
+  const rows = people.map(p => ({ p, r: salaryRow(p, ym) }));
+  const monthDone = ym < todayISO().slice(0, 7);
+  return `<section class="panel"><div class="panel-head"><h3>💼 ${L('Salary-ready attendance', 'वेतन हेतु हाज़िरी')} · ${ym}</h3><div class="btns"><button class="btn small primary" data-act="exportSalary">⬇️ Excel</button><button class="btn small ghost" data-act="printSalary">🖨️ ${L('Print / PDF', 'प्रिंट / PDF')}</button></div></div>
+    <p class="hint">${monthDone ? '' : L(`Month not finished: counted up to today, later days are treated as present. `, `माह पूरा नहीं: आज तक गिना गया, बाद के दिन उपस्थित माने गए। `)}${L(`Every ${rules.lateCount} late marks cut ${rules.lateCut} day. Leave beyond the yearly allowance is unpaid.`, `हर ${rules.lateCount} देर पर ${rules.lateCut} दिन कटौती। वार्षिक सीमा से अधिक छुट्टी अवैतनिक।`)} <a href="#" data-act="go" data-view="settings">${L('Change rules', 'नियम बदलें')}</a></p>
+    <div class="table-wrap"><table class="data"><thead><tr><th>${L('Staff', 'स्टाफ़')}</th><th>${L('Working', 'कार्य')}</th><th>${attLabel('present')}</th><th>${attLabel('late')}</th><th>${L('Paid leave', 'सवेतन छुट्टी')}</th><th>${attLabel('absent')}</th><th>${L('Unpaid leave', 'अवैतनिक')}</th><th>${L('Late cut', 'देर कटौती')}</th><th>${L('Days cut', 'कटौती')}</th><th>${L('Payable', 'देय')}</th></tr></thead>
+    <tbody>${rows.map(({ p, r }) => `<tr><td><b>${esc(p.name)}</b>${r.notes.length ? `<br><small class="muted">${esc(r.notes.join('; '))}</small>` : ''}</td><td>${r.working}</td><td>${r.present}</td><td class="${r.late >= rules.lateCount ? 'warn-text' : ''}">${r.late}</td><td>${r.paidLeave + r.duty}</td><td class="${r.absent ? 'bad' : ''}">${r.absent}</td><td class="${r.unpaidLeave ? 'bad' : ''}">${r.unpaidLeave}</td><td>${r.lateCut}</td><td class="${r.lwp ? 'bad' : ''}"><b>${r.lwp}</b></td><td><b>${r.payableFull}</b> / ${r.daysInMonth}</td></tr>`).join('')}</tbody></table></div></section>`;
+}
+Object.assign(ACTIONS, {
+  exportSalary: () => { const ym = UI.reportMonth || todayISO().slice(0, 7); deliverFile(makeXlsx(salarySheets(ym)), `MTS-salary-attendance-${ym}.xlsx`, L('Salary attendance', 'वेतन हाज़िरी') + ' ' + ym); logAudit(me().id, `Downloaded salary attendance sheet ${ym}`); },
+  printSalary: () => { const ym = UI.reportMonth || todayISO().slice(0, 7); const sh = salarySheets(ym); printHTML(L('Salary-ready attendance', 'वेतन हेतु हाज़िरी') + ' — ' + ym, rowsToTable(sh[0].rows) + '<br>' + rowsToTable(sh[2].rows)); },
+});
+Object.assign(FORMS, {
+  salaryRules: fd => {
+    const lateCount = Math.max(0, Math.min(31, Math.round(Number(fd.get('lateCount')) || 0)));
+    const lateCut = [0.25, 0.5, 1].includes(Number(fd.get('lateCut'))) ? Number(fd.get('lateCut')) : 0.5;
+    const pendingAs = fd.get('pendingAs') === 'absent' ? 'absent' : 'present';
+    S.config.salaryRules = { lateCount, lateCut, pendingAs };
+    logAudit(me().id, `Salary rules: ${lateCount} late = ${lateCut} day cut`); commit(); toast(L('Saved', 'सहेजा गया'));
   },
 });
 
