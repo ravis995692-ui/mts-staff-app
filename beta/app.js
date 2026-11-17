@@ -577,7 +577,7 @@ async function flushNow() {
   if (!u || !SB) return;
   const mgr = isManager(u);
   NET.saving = true; updateNetBadge();
-  let failed = '';
+  let failed = '', clashMsg = '';
   for (const t of TABLES) {
     if (!mgr && !TEACHER_WRITABLE.has(t)) continue;
     if (S.v2Missing && V2_TABLES.has(t)) continue;
@@ -608,15 +608,18 @@ async function flushNow() {
         dels.forEach(id => last.delete(id));
       }
     } catch (e) {
+      const clash = e && /^CLASH\|/.test(e.message || '');
       const denied = e && (e.code === '42501' || /row-level security|not allowed|permission/i.test(e.message || ''));
-      if (denied) { await reloadTable(t); failed = 'denied'; }
+      if (clash) { const parts = e.message.split('|'); clashMsg = L(parts[1] || '', parts[2] || parts[1] || ''); await reloadTable(t); failed = 'clash'; }
+      else if (denied) { await reloadTable(t); failed = failed === 'clash' ? failed : 'denied'; }
       else failed = failed || 'network';
     }
   }
   NET.saving = false;
   NET.error = failed;
   updateNetBadge();
-  if (failed === 'denied') { toast(L('That change is not allowed for your role — it was undone.', 'आपकी भूमिका में यह बदलाव अनुमत नहीं — वापस कर दिया गया।')); render(); }
+  if (failed === 'clash') { toast('⛔ ' + clashMsg + ' ' + L('Not saved.', 'सहेजा नहीं गया।')); render(); }
+  else if (failed === 'denied') { toast(L('That change is not allowed for your role — it was undone.', 'आपकी भूमिका में यह बदलाव अनुमत नहीं — वापस कर दिया गया।')); render(); }
   else if (failed === 'network') toast(L('Could not save — check internet. Will retry automatically.', 'सहेज नहीं सका — इंटरनेट जाँचें। अपने-आप फिर कोशिश होगी।'));
 }
 setInterval(() => { if (NET.error === 'network' && me()) queueFlush(); }, 20000);
@@ -697,6 +700,7 @@ async function enterApp(staffId) {
   subscribeLive();
   render();
   saveOfflineCopy(); registerSW(); notifWatch();
+  setTimeout(maybeCheckInPopup, 600);
 }
 
 async function doLogout() {
@@ -2516,7 +2520,13 @@ Object.assign(CHANGES, {
   },
   examSet: el => {
     const e = examById(el.dataset.id); const k = el.dataset.key; const i = Number(el.dataset.i);
-    e.duties = e.duties || {}; const ids = (e.duties[k] || []).slice(); ids[i] = el.value; e.duties[k] = ids.filter(Boolean);
+    e.duties = e.duties || {};
+    if (el.value) {
+      const sessKey = k.split('|').slice(0, 2).join('|') + '|';
+      const other = Object.entries(e.duties).find(([kk, xs]) => xs.some((x, j) => x === el.value && !(kk === k && j === i)) && kk.startsWith(sessKey));
+      if (other) { toast('⛔ ' + L(`${nameOf(el.value)} already has duty in ${other[0].split('|')[2]} at this time.`, `${nameOf(el.value)} की इसी समय ${other[0].split('|')[2]} में ड्यूटी है।`)); render(); return; }
+    }
+    const ids = (e.duties[k] || []).slice(); ids[i] = el.value; e.duties[k] = ids.filter(Boolean);
     e.updatedAt = nowStamp(); commit();
   },
 });
@@ -3942,5 +3952,49 @@ function viewAssistant() {
     </section>`;
 }
 
-boot();
 
+/* =================================================================
+   ATTENDANCE POP-UP
+   Opens by itself when the app is opened during check-in hours and the
+   teacher has not marked attendance yet, and every time "Mark my attendance" is tapped.
+   ================================================================= */
+function needsCheckIn(u) {
+  if (!u || S.v2Missing || u.role === 'admin') return false;
+  const date = todayISO();
+  if (dayIdx(date) < 0 || attStatus(u.id, date) !== 'not_in') return false;
+  const cfg = campusCfg(), hm = nowHM();
+  return hm >= cfg.open && hm <= cfg.close;
+}
+function checkInPopupHTML() {
+  const u = me(), cfg = campusCfg(), hm = nowHM(), date = todayISO(), d = dayIdx(date);
+  const late = hm > cfg.late;
+  let first = null;
+  if (d >= 0) for (let p = 1; p <= PERIODS.length && !first; p++) { const l = teacherLessonAt(u.id, d, p); if (l) first = { p, l }; }
+  return `<div class="stack checkin-pop">
+    <p style="font-size:1.15em"><b>👋 ${esc(L(`Good morning, ${u.name}`, `सुप्रभात, ${u.name}`))}</b></p>
+    <p>${esc(fmtDate(date))} · ${L('Time now', 'अभी समय')} <b>${hm}</b></p>
+    <div class="banner ${late ? 'warn' : 'ok'}">${late
+      ? esc(L(`It is after ${cfg.late}, so this will be marked LATE.`, `${cfg.late} के बाद है, इसलिए यह देर (LATE) दर्ज होगी।`))
+      : esc(L(`You are on time. Mark before ${cfg.late} to avoid late.`, `आप समय पर हैं। देर से बचने के लिए ${cfg.late} से पहले लगाएँ।`))}</div>
+    ${first ? `<p class="muted">${esc(L('Your first period today', 'आज आपका पहला पीरियड'))}: <b>P${first.p}</b> · ${esc(first.l.label)} · ${esc(subjName(first.l.s))}</p>` : ''}
+    <p class="hint">${esc(L('Mark only when you are inside the school, from your own phone.', 'हाज़िरी तभी लगाएँ जब आप स्कूल में हों, अपने ही फ़ोन से।'))}</p>
+    <div class="row-end"><button class="btn" data-act="checkInLater">${esc(L('Later', 'बाद में'))}</button><button class="btn primary" data-act="checkInGo">✅ ${esc(L('Mark present now', 'अभी उपस्थित दर्ज करें'))}</button></div></div>`;
+}
+function openCheckInPopup() { openModal(L('Mark your attendance', 'अपनी हाज़िरी लगाएँ'), checkInPopupHTML()); }
+function maybeCheckInPopup() {
+  const u = me();
+  if (!needsCheckIn(u)) return;
+  if (document.getElementById('modal-root').innerHTML) return;
+  const last = V2.checkPopAt || 0;
+  if (Date.now() - last < 20 * 60 * 1000) return;   // not more than once in 20 minutes
+  V2.checkPopAt = Date.now();
+  openCheckInPopup();
+}
+Object.assign(ACTIONS, {
+  checkIn: () => { if (V2.checkBusy) return; openCheckInPopup(); },
+  checkInGo: () => { closeModal(); doCheck('in'); },
+  checkInLater: () => { V2.checkPopAt = Date.now(); closeModal(); },
+});
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') setTimeout(maybeCheckInPopup, 800); });
+
+boot();
