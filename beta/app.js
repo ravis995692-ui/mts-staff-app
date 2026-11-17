@@ -1027,7 +1027,7 @@ function viewSubs() {
     ${waPanelHTML(date, plan)}
     <div class="row-end">
       <button class="btn ghost" data-act="copySheet">📋 ${t('copySheet')}</button>
-      <button class="btn ghost" data-act="printSheet">🖨️ ${t('print')}</button>
+      <button class="btn ghost" data-act="printSheet">📄 PDF</button>
       <button class="btn" data-act="replan">↻ ${t('regenerate')}</button>
       <button class="btn primary" data-act="publishPlan">${plan.status === 'published' ? '✓ ' + t('published') : t('publish')}</button>
     </div>
@@ -1192,6 +1192,8 @@ function viewTimetable() {
     <div class="tt-controls">
       <div class="seg"><button class="${mode === 'class' ? 'active' : ''}" data-act="ttMode" data-mode="class">${t('class')}</button><button class="${mode === 'teacher' ? 'active' : ''}" data-act="ttMode" data-mode="teacher">${t('teacher')}</button></div>
       ${mode === 'class' ? `<select data-change="ttClass" aria-label="Class">${classOptions(UI.ttClass)}</select>` : `<select data-change="ttTeacher" aria-label="Teacher">${teacherOptions(UI.ttTeacher)}</select>`}
+      <button class="btn ghost" data-act="pdfTimetable">📄 PDF</button>
+      <button class="btn ghost" data-act="pdfTimetableAll">📄 ${mode === 'class' ? L('All classes', 'सभी कक्षाएँ') : L('All teachers', 'सभी शिक्षक')}</button>
       ${manager && mode === 'class' ? `<button class="btn ${V2.swapFrom ? 'primary' : 'ghost'}" data-act="swapMode">⇄ ${V2.swapFrom ? L('Done swapping', 'बदलना पूरा') : L('Swap periods', 'पीरियड बदलें')}</button>` : ''}
     </div></div>
     ${V2.swapFrom ? `<div class="banner">${V2.swapFrom === 'on' ? L('Tap the first period to move.', 'पहला पीरियड चुनें।') : L(`Now tap where ${dayName(V2.swapFrom.d)} P${V2.swapFrom.p} should go. The two periods change places if no teacher clashes.`, `अब वह जगह चुनें जहाँ ${dayName(V2.swapFrom.d)} P${V2.swapFrom.p} जाए। टकराव न हो तो दोनों पीरियड जगह बदल लेंगे।`)}</div>` : ''}
@@ -1335,7 +1337,7 @@ function viewReports() {
   const spread = Math.max(...subsVals) - Math.min(...subsVals);
   const req = { dpp: S.requests.filter(r => r.kind === 'dpp'), worksheet: S.requests.filter(r => r.kind === 'worksheet') };
   const sts = ['requested', 'approved', 'in_progress', 'ready', 'delivered', 'rejected'];
-  return `<div class="page-head"><h2>${t('reports')}</h2><div class="btns"><input type="month" value="${ym}" data-change="reportMonth" aria-label="Month"><button class="btn primary" data-act="exportAll">⬇️ ${L('Download Excel', 'Excel डाउनलोड')}</button><button class="btn ghost" data-act="printReport">🖨️ ${L('Print / PDF', 'प्रिंट / PDF')}</button><button class="btn ghost" data-act="copyReport">📋 CSV</button></div></div>
+  return `<div class="page-head"><h2>${t('reports')}</h2><div class="btns"><input type="month" value="${ym}" data-change="reportMonth" aria-label="Month"><button class="btn primary" data-act="exportAll">⬇️ ${L('Download Excel', 'Excel डाउनलोड')}</button><button class="btn ghost" data-act="printReport">📄 PDF</button><button class="btn ghost" data-act="copyReport">📋 CSV</button></div></div>
     ${reportAttendanceHTML(ym)}
     ${salaryPanelHTML(ym)}
     <div class="cards">
@@ -1927,7 +1929,7 @@ function monthRegisterHTML(ym) {
     <section class="panel"><div class="table-wrap"><table class="data register"><thead><tr><th>${L('Staff', 'स्टाफ़')}</th>${days.map(d => `<th class="${dayIdx(d) < 0 ? 'sun' : ''}" title="${esc(holidayName(d) || '')}">${Number(d.slice(8))}${holidayName(d) ? '🎉' : ''}</th>`).join('')}<th>P</th><th>L</th><th>A</th><th>LV</th></tr></thead>
     <tbody>${people.map(p => { const s = monthStats(p.id, ym); return `<tr><td><b>${esc(p.name)}</b></td>${days.map(d => { const st = d > todayISO() ? '' : attStatus(p.id, d); return `<td class="r-${st}">${sym[st] || ''}</td>`; }).join('')}<td>${s.present}</td><td>${s.late}</td><td>${s.absent}</td><td>${s.leave}</td></tr>`; }).join('')}</tbody></table></div>
     <p class="hint">P = ${attLabel('present')} · L = ${attLabel('late')} · A = ${attLabel('absent')} · LV = ${attLabel('leave')} · ? = ${attLabel('review')}</p>
-    <div class="row-end"><button class="btn primary" data-act="exportSalary">💼 ${L('Salary sheet', 'वेतन शीट')}</button><button class="btn ghost" data-act="exportAttendance">⬇️ ${L('Download Excel', 'Excel डाउनलोड')}</button><button class="btn ghost" data-act="printAttendance">🖨️ ${L('Print / PDF', 'प्रिंट / PDF')}</button></div></section>`;
+    <div class="row-end"><button class="btn primary" data-act="exportSalary">💼 ${L('Salary sheet', 'वेतन शीट')}</button><button class="btn ghost" data-act="exportAttendance">⬇️ ${L('Download Excel', 'Excel डाउनलोड')}</button><button class="btn ghost" data-act="printAttendance">📄 PDF</button></div></section>`;
 }
 function attemptsHTML() {
   if (V2.attempts === null && !V2.attemptsBusy) { loadAttempts(); return `<div class="empty">${L('Loading…', 'लोड हो रहा है…')}</div>`; }
@@ -2137,7 +2139,7 @@ function viewExams() {
   return `<div class="page-head"><h2>${esc(e.name)}</h2><div class="btns"><button class="btn ghost" data-act="examBack">← ${L('All exams', 'सभी परीक्षाएँ')}</button></div></div>
     <div class="row-end left">${e.published ? statusChip('published') : statusChip('draft')}
       <button class="btn" data-act="examAuto" data-id="${e.id}">⚖️ ${L('Share duties fairly', 'ड्यूटी बराबर बाँटें')}</button>
-      <button class="btn ghost" data-act="examPrint" data-id="${e.id}">🖨️ ${L('Print / PDF', 'प्रिंट / PDF')}</button>
+      <button class="btn ghost" data-act="examPrint" data-id="${e.id}">📄 PDF</button>
       <button class="btn ghost" data-act="examExport" data-id="${e.id}">⬇️ Excel</button>
       <button class="btn primary" data-act="examPublish" data-id="${e.id}">${e.published ? L('Publish again', 'फिर प्रकाशित करें') : t('publish')}</button></div>
     ${e.days.map(date => `<section class="panel"><h3>${fmtDate(date)}</h3><div class="table-wrap"><table class="data"><thead><tr><th>${L('Room', 'कक्ष')}</th>${e.sessions.map(se => `<th>${esc(se.label)} <small>${esc(se.time)}</small></th>`).join('')}</tr></thead>
@@ -2670,7 +2672,7 @@ function salaryPanelHTML(ym) {
   const people = salaryPeople();
   const rows = people.map(p => ({ p, r: salaryRow(p, ym) }));
   const monthDone = ym < todayISO().slice(0, 7);
-  return `<section class="panel"><div class="panel-head"><h3>💼 ${L('Salary-ready attendance', 'वेतन हेतु हाज़िरी')} · ${ym}</h3><div class="btns"><button class="btn small primary" data-act="exportSalary">⬇️ Excel</button><button class="btn small ghost" data-act="printSalary">🖨️ ${L('Print / PDF', 'प्रिंट / PDF')}</button></div></div>
+  return `<section class="panel"><div class="panel-head"><h3>💼 ${L('Salary-ready attendance', 'वेतन हेतु हाज़िरी')} · ${ym}</h3><div class="btns"><button class="btn small primary" data-act="exportSalary">⬇️ Excel</button><button class="btn small ghost" data-act="printSalary">📄 PDF</button></div></div>
     <p class="hint">${monthDone ? '' : L(`Month not finished: counted up to today, later days are treated as present. `, `माह पूरा नहीं: आज तक गिना गया, बाद के दिन उपस्थित माने गए। `)}${L(`Every ${rules.lateCount} late marks cut ${rules.lateCut} day. Leave beyond the yearly allowance is unpaid.`, `हर ${rules.lateCount} देर पर ${rules.lateCut} दिन कटौती। वार्षिक सीमा से अधिक छुट्टी अवैतनिक।`)} <a href="#" data-act="go" data-view="settings">${L('Change rules', 'नियम बदलें')}</a></p>
     <div class="table-wrap"><table class="data"><thead><tr><th>${L('Staff', 'स्टाफ़')}</th><th>${L('Working', 'कार्य')}</th><th>${attLabel('present')}</th><th>${attLabel('late')}</th><th>${L('Paid leave', 'सवेतन छुट्टी')}</th><th>${attLabel('absent')}</th><th>${L('Unpaid leave', 'अवैतनिक')}</th><th>${L('Late cut', 'देर कटौती')}</th><th>${L('Days cut', 'कटौती')}</th><th>${L('Payable', 'देय')}</th></tr></thead>
     <tbody>${rows.map(({ p, r }) => `<tr><td><b>${esc(p.name)}</b>${r.notes.length ? `<br><small class="muted">${esc(r.notes.join('; '))}</small>` : ''}</td><td>${r.working}</td><td>${r.present}</td><td class="${r.late >= rules.lateCount ? 'warn-text' : ''}">${r.late}</td><td>${r.paidLeave + r.duty}</td><td class="${r.absent ? 'bad' : ''}">${r.absent}</td><td class="${r.unpaidLeave ? 'bad' : ''}">${r.unpaidLeave}</td><td>${r.lateCut}</td><td class="${r.lwp ? 'bad' : ''}"><b>${r.lwp}</b></td><td><b>${r.payableFull}</b> / ${r.daysInMonth}</td></tr>`).join('')}</tbody></table></div></section>`;
@@ -4059,5 +4061,269 @@ Object.assign(FORMS, {
 V2.lockWas = null;
 setInterval(() => { const u = S && me(); if (!u) return; const now = needsCheckIn(u); if (V2.lockWas !== null && now !== V2.lockWas) render(); V2.lockWas = now; }, 30000);
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && S && me() && needsCheckIn(me())) render(); });
+
+
+/* =================================================================
+   PDF EXPORT
+   Every PDF: plain white page, black text, school logo and name in bold at the top.
+   Pages are drawn on a canvas (so Hindi shows correctly) and saved as a real .pdf file
+   that can be downloaded or shared straight to WhatsApp.
+   ================================================================= */
+const PDF_FONT = '"Segoe UI", Roboto, "Noto Sans", "Noto Sans Devanagari", "Nirmala UI", Mangal, Arial, sans-serif';
+let pdfLogoImg = null;
+function pdfLogo() {
+  if (pdfLogoImg) return pdfLogoImg;
+  pdfLogoImg = new Promise(ok => { const im = new Image(); im.onload = () => ok(im); im.onerror = () => ok(null); im.src = LOGO_SRC; });
+  return pdfLogoImg;
+}
+function pdfWrap(ctx, text, maxW) {
+  const out = [];
+  String(text == null ? '' : text).split('\n').forEach(para => {
+    const words = para.split(' ');
+    let line = '';
+    const pushWord = w => {
+      if (ctx.measureText(w).width <= maxW) return w;
+      let part = '';                                  // a single word wider than the column: break it
+      for (const ch of Array.from(w)) { if (ctx.measureText(part + ch).width > maxW && part) { out.push(part); part = ch; } else part += ch; }
+      return part;
+    };
+    words.forEach(w => {
+      const test = line ? line + ' ' + w : w;
+      if (ctx.measureText(test).width <= maxW) line = test;
+      else { if (line) out.push(line); line = pushWord(w); }
+    });
+    out.push(line);
+  });
+  return out;
+}
+/* docs: [{ title, sub, sections: [{ heading, rows, equalCols, landscape }] }] ; each doc starts on a new page */
+async function makePdf(docs, opt = {}) {
+  const logo = await pdfLogo();
+  const land = !!opt.landscape;
+  const W = land ? 2339 : 1654, H = land ? 1654 : 2339, M = 80;      // A4 at 200 dpi
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const ctx = cv.getContext('2d');
+  const F = (px, bold) => `${bold ? '700' : '400'} ${px}px ${PDF_FONT}`;
+  const pages = []; let page = null, y = 0;
+  const HEADER_H = 250, FOOT = 70;
+  const newPage = () => { page = []; pages.push(page); y = M + HEADER_H; };
+  const room = () => H - M - FOOT - y;
+  const stamp = new Date().toLocaleString(S.lang === 'hi' ? 'hi-IN' : 'en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+  for (const doc of docs) {
+    newPage();
+    // document title
+    ctx.font = F(40, true); const tl = pdfWrap(ctx, doc.title, W - 2 * M);
+    page.push(((yy, lines) => c => { c.font = F(40, true); c.textAlign = 'center'; lines.forEach((l, i) => c.fillText(l, W / 2, yy + 40 + i * 50)); })(y, tl));
+    y += tl.length * 50 + 10;
+    if (doc.sub) { const yy = y; page.push(c => { c.font = F(27); c.textAlign = 'center'; c.fillText(doc.sub, W / 2, yy + 28); }); y += 50; }
+    y += 14;
+    for (const sec of doc.sections) {
+      const rows = sec.rows.filter(Boolean);
+      if (!rows.length) continue;
+      const head = rows[0], body = rows.slice(1);
+      const nc = head.length, avail = W - 2 * M;
+      // choose a font size that lets the widest words fit
+      let fs = sec.fontSize || 26, widths = null, pad = 12;
+      for (; fs >= 11; fs -= 2) {
+        ctx.font = F(fs, true);
+        pad = Math.max(6, Math.round(fs * 0.45));
+        const nat = Array(nc).fill(0), min = Array(nc).fill(0);
+        rows.forEach(r => { if (r.span != null) return; r.forEach((v, ci) => String(v == null ? '' : v).split('\n').forEach(seg => {
+          nat[ci] = Math.max(nat[ci], ctx.measureText(seg).width + 2 * pad);
+          seg.split(' ').forEach(w => { min[ci] = Math.max(min[ci], Math.min(ctx.measureText(w).width, avail * 0.35) + 2 * pad); });
+        })); });
+        if (sec.equalCols) { const rest = Math.max(...min.slice(1)); for (let i = 1; i < nc; i++) { min[i] = rest; nat[i] = Math.max(...nat.slice(1)); } }
+        const sMin = min.reduce((a, b) => a + b, 0), sNat = nat.reduce((a, b) => a + b, 0);
+        if (sMin > avail) continue;
+        if (sNat <= avail) widths = nat.map(w => w * avail / sNat);
+        else { const extra = avail - sMin, grow = nat.map((w, i) => w - min[i]), sg = grow.reduce((a, b) => a + b, 0) || 1; widths = min.map((w, i) => w + extra * grow[i] / sg); }
+        break;
+      }
+      if (!widths) { fs = 11; widths = Array(nc).fill(avail / nc); }
+      const lh = Math.round(fs * 1.3);
+      const layoutRow = (r, bold) => {
+        ctx.font = F(fs, bold);
+        if (r.span != null) return { span: r.span, lines: [pdfWrap(ctx, r.span, avail - 2 * pad)], h: lh + 2 * pad };
+        const lines = r.map((v, ci) => pdfWrap(ctx, v, widths[ci] - 2 * pad));
+        return { lines, h: Math.max(...lines.map(l => l.length)) * lh + 2 * pad };
+      };
+      const hRow = layoutRow(head, true);
+      const drawRow = (lr, yy, bold, isHead) => c => {
+        c.lineWidth = isHead ? 3 : 1.5; c.strokeStyle = '#000'; c.font = F(fs, bold); c.textAlign = 'left';
+        if (lr.span != null) {
+          c.strokeRect(M, yy, avail, lr.h);
+          c.font = F(fs, true); c.textAlign = 'center'; c.fillText(lr.lines[0][0] || '', M + avail / 2, yy + pad + fs); return;
+        }
+        let x = M;
+        lr.lines.forEach((ls, ci) => {
+          c.strokeRect(x, yy, widths[ci], lr.h);
+          const firstColBold = ci === 0 && sec.firstColBold;
+          c.font = F(fs, bold || firstColBold);
+          ls.forEach((l, li) => { c.font = F(fs, bold || firstColBold || (sec.boldFirstLine && li === 0)); c.fillText(l, x + pad, yy + pad + fs + li * lh); });
+          x += widths[ci];
+        });
+      };
+      if (sec.heading) {
+        if (room() < 60 + hRow.h + lh * 2 + 2 * pad) newPage();
+        const yy = y; page.push(c => { c.font = F(30, true); c.textAlign = 'left'; c.fillText(sec.heading, M, yy + 32); }); y += 50;
+      }
+      if (room() < hRow.h + lh + 2 * pad) newPage();
+      page.push(drawRow(hRow, y, true, true)); y += hRow.h;
+      for (const r of body) {
+        const lr = layoutRow(r, false);
+        if (lr.h > room()) { newPage(); page.push(drawRow(hRow, y, true, true)); y += hRow.h; }
+        page.push(drawRow(lr, y, false, false)); y += lr.h;
+      }
+      y += 36;
+    }
+    if (doc.note) { ctx.font = F(24); const nl = pdfWrap(ctx, doc.note, W - 2 * M); if (room() < nl.length * 32) newPage(); const yy = y; page.push(c => { c.font = F(24); c.textAlign = 'left'; nl.forEach((l, i) => c.fillText(l, M, yy + 26 + i * 32)); }); y += nl.length * 32; }
+  }
+
+  // draw every page: white background, black ink, logo + bold school name, footer.
+  // Pages are stored as sharp black-and-white images (small files); the logo is added in colour on top.
+  const Z = 1.5;                                             // draw at 300 dpi
+  const out = document.createElement('canvas'); out.width = Math.round(W * Z); out.height = Math.round(H * Z);
+  const o = out.getContext('2d');
+  const bw = 'CompressionStream' in window;
+  const LG = 170, logoH = LG, logoW = logo ? LG * (logo.width / logo.height) : 0;
+  o.font = F(64, true); const nameW = o.measureText(SCHOOL.name).width;
+  const x0 = (W - ((logo ? logoW + 34 : 0) + nameW)) / 2, logoBox = { x: x0, y: M - 10, w: logoW, h: logoH };
+  let logoJpg = null;
+  if (logo && bw) {
+    const lc = document.createElement('canvas'); lc.width = Math.round(logoW * Z); lc.height = Math.round(logoH * Z);
+    const lx = lc.getContext('2d'); lx.fillStyle = '#fff'; lx.fillRect(0, 0, lc.width, lc.height); lx.drawImage(logo, 0, 0, lc.width, lc.height);
+    logoJpg = { bytes: b64bytes(lc.toDataURL('image/jpeg', 0.9)), w: lc.width, h: lc.height };
+  }
+  const imgs = [];
+  for (let i = 0; i < pages.length; i++) {
+    o.setTransform(1, 0, 0, 1, 0, 0);
+    o.fillStyle = '#fff'; o.fillRect(0, 0, out.width, out.height);
+    o.setTransform(Z, 0, 0, Z, 0, 0);
+    o.fillStyle = '#000'; o.strokeStyle = '#000'; o.textBaseline = 'alphabetic';
+    if (logo && !bw) o.drawImage(logo, logoBox.x, logoBox.y, logoBox.w, logoBox.h);
+    const tx = x0 + (logo ? logoW + 34 : 0);
+    o.textAlign = 'left'; o.font = F(64, true); o.fillText(SCHOOL.name, tx, M + 78);
+    o.font = F(30); o.fillText(SCHOOL.place, tx + 2, M + 126);
+    o.lineWidth = 4; o.beginPath(); o.moveTo(M, M + HEADER_H - 50); o.lineTo(W - M, M + HEADER_H - 50); o.stroke();
+    pages[i].forEach(fn => { o.fillStyle = '#000'; fn(o); });
+    o.fillStyle = '#000'; o.font = F(22); o.textAlign = 'center';
+    o.fillText(`${SCHOOL.name} · ${L('Made on', 'तैयार')} ${stamp} · ${L('Page', 'पृष्ठ')} ${i + 1} / ${pages.length}`, W / 2, H - M + 10);
+    if (bw) imgs.push({ kind: 'bw', w: out.width, h: out.height, bytes: await pdfBitmap(o, out.width, out.height) });
+    else imgs.push({ kind: 'jpg', w: out.width, h: out.height, bytes: b64bytes(out.toDataURL('image/jpeg', 0.75)) });
+    await new Promise(r => setTimeout(r, 0));                 // keep the phone responsive
+  }
+  return pdfAssemble(imgs, land, logoJpg, logoJpg && { x: logoBox.x / W, y: logoBox.y / H, w: logoBox.w / W, h: logoBox.h / H });
+}
+function b64bytes(dataUrl) { const bin = atob(dataUrl.split(',')[1]); const u8 = new Uint8Array(bin.length); for (let k = 0; k < bin.length; k++) u8[k] = bin.charCodeAt(k); return u8; }
+/* canvas -> 1-bit black/white rows -> zlib (PDF FlateDecode) */
+async function pdfBitmap(ctx, w, h) {
+  const rowBytes = Math.ceil(w / 8), packed = new Uint8Array(rowBytes * h);
+  const STEP = 200;
+  for (let y0 = 0; y0 < h; y0 += STEP) {
+    const hh = Math.min(STEP, h - y0), px = ctx.getImageData(0, y0, w, hh).data;
+    for (let y = 0; y < hh; y++) {
+      const base = (y0 + y) * rowBytes;
+      for (let x = 0; x < w; x++) {
+        const i = (y * w + x) * 4;
+        if ((px[i] * 3 + px[i + 1] * 6 + px[i + 2]) / 10 >= 150) packed[base + (x >> 3)] |= 128 >> (x & 7);   // 1 = white
+      }
+    }
+  }
+  const zs = new Blob([packed]).stream().pipeThrough(new CompressionStream('deflate'));
+  return new Uint8Array(await new Response(zs).arrayBuffer());
+}
+function pdfAssemble(imgs, land, logoJpg, lb) {
+  const pw = land ? 841.89 : 595.28, ph = land ? 595.28 : 841.89;
+  const enc = new TextEncoder(), parts = [], offs = [];
+  let len = 0;
+  const push = x => { const b = typeof x === 'string' ? enc.encode(x) : x; parts.push(b); len += b.length; };
+  push(new Uint8Array([37, 80, 68, 70, 45, 49, 46, 52, 10, 37, 226, 227, 207, 211, 10]));   // %PDF-1.4 + binary marker
+  const obj = (id, str, bytes, tail) => { offs[id] = len; push(`${id} 0 obj\n${str}`); if (bytes) { push(bytes); push(tail); } push('\nendobj\n'); };
+  const n = imgs.length, LOGO = 3, first = 4;
+  obj(1, '<< /Type /Catalog /Pages 2 0 R >>');
+  obj(2, `<< /Type /Pages /Count ${n} /Kids [${imgs.map((_, i) => `${first + i * 3} 0 R`).join(' ')}] >>`);
+  if (logoJpg) obj(LOGO, `<< /Type /XObject /Subtype /Image /Width ${logoJpg.w} /Height ${logoJpg.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${logoJpg.bytes.length} >>\nstream\n`, logoJpg.bytes, '\nendstream');
+  else obj(LOGO, '<< >>');
+  imgs.forEach((im, i) => {
+    const pg = first + i * 3, io = pg + 1, ct = pg + 2;
+    obj(pg, `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pw} ${ph}] /Resources << /XObject << /Im0 ${io} 0 R${logoJpg ? ` /Lg ${LOGO} 0 R` : ''} >> >> /Contents ${ct} 0 R >>`);
+    const dict = im.kind === 'bw'
+      ? `/ColorSpace /DeviceGray /BitsPerComponent 1 /Filter /FlateDecode`
+      : `/ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode`;
+    obj(io, `<< /Type /XObject /Subtype /Image /Width ${im.w} /Height ${im.h} ${dict} /Length ${im.bytes.length} >>\nstream\n`, im.bytes, '\nendstream');
+    let c = `q ${pw} 0 0 ${ph} 0 0 cm /Im0 Do Q`;
+    if (logoJpg) { const f = v => v.toFixed(2); c += ` q ${f(lb.w * pw)} 0 0 ${f(lb.h * ph)} ${f(lb.x * pw)} ${f(ph - (lb.y + lb.h) * ph)} cm /Lg Do Q`; }
+    obj(ct, `<< /Length ${c.length} >>\nstream\n${c}\nendstream`);
+  });
+  const total = first + n * 3 - 1, xref = len;
+  push(`xref\n0 ${total + 1}\n0000000000 65535 f \n` + offs.slice(1, total + 1).map(o => String(o).padStart(10, '0') + ' 00000 n \n').join(''));
+  push(`trailer\n<< /Size ${total + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`);
+  return new Blob(parts, { type: 'application/pdf' });
+}
+const pdfName = s => String(s).replace(/[^\wऀ-ॿ-]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+async function savePdf(docs, filename, title, opt) {
+  if (V2.pdfBusy) return;
+  V2.pdfBusy = true; toast(L('Making PDF…', 'PDF बन रही है…'));
+  try { const blob = await makePdf(docs, opt); await deliverFile(blob, filename, title); }
+  catch (e) { console.error(e); toast(L('Could not make the PDF', 'PDF नहीं बन सकी')); }
+  finally { V2.pdfBusy = false; }
+}
+
+/* ---------- what goes into each PDF ---------- */
+const pdfDayHead = () => [t('period'), ...DAYS.map((d, i) => (S.lang === 'hi' ? DAYS_HI[i] : DAYS_LONG[i]))];
+function pdfTimetableRows(cell) {
+  const rows = [pdfDayHead()];
+  PERIODS.forEach(pp => {
+    rows.push([`P${pp.n}\n${pp.start}–${pp.end}`, ...DAYS.map((_, d) => cell(d, pp.n))]);
+    if (pp.n === LUNCH.after) { const r = []; r.span = `${t('lunch').toUpperCase()}  ${LUNCH.start}–${LUNCH.end}`; rows.push(r); }
+  });
+  return rows;
+}
+function pdfClassDoc(cls) {
+  const ct = S.classTeachers && S.classTeachers[cls];
+  return {
+    title: `${L('Class timetable', 'कक्षा समय-सारणी')} — ${cls}`,
+    sub: ct ? `${L('Class teacher', 'कक्षा-शिक्षक')}: ${nameOf(ct)}` : '',
+    sections: [{ rows: pdfTimetableRows((d, p) => { const l = lessonAt(cls, d, p); return l ? `${cellSubj(l)}\n${cellTeachers(l)}${l.j ? '\n(' + L('combined', 'संयुक्त') + ')' : ''}` : '—'; }), equalCols: true, firstColBold: true, boldFirstLine: true, fontSize: 31 }],
+  };
+}
+function pdfTeacherDoc(tid) {
+  const ctOf = Object.entries(S.classTeachers || {}).filter(([, v]) => v === tid).map(([k]) => k);
+  return {
+    title: `${L('Teacher timetable', 'शिक्षक समय-सारणी')} — ${nameOf(tid)}`,
+    sub: `${L('Periods a week', 'साप्ताहिक पीरियड')}: ${weeklyLoad(tid)}${ctOf.length ? ' · ' + L('Class teacher of', 'कक्षा-शिक्षक') + ' ' + ctOf.join(', ') : ''}`,
+    sections: [{ rows: pdfTimetableRows((d, p) => { const l = teacherLessonAt(tid, d, p); return l ? `${l.label}\n${subjName(l.s)}` : t('free'); }), equalCols: true, firstColBold: true, boldFirstLine: true, fontSize: 31 }],
+  };
+}
+function pdfArrangementDoc(date) {
+  const plan = S.plans[date];
+  const rows = [[t('period'), t('class'), t('subject'), L('Absent teacher', 'अनुपस्थित शिक्षक'), L('Substitute', 'अरेंजमेंट शिक्षक'), L('Signature', 'हस्ताक्षर')]];
+  if (plan) Object.values(plan.items).sort((a, b) => a.p - b.p || CLASSES.indexOf(a.cls) - CLASSES.indexOf(b.cls))
+    .forEach(i => rows.push([`P${i.p}\n${periodTime(i.p)}`, i.cls, subjName(i.subject), nameOf(i.absentId), i.teacherId ? nameOf(i.teacherId) : L('NOT COVERED', 'खाली'), '']));
+  const absent = absencesOn(date).map(a => `${nameOf(a.teacherId)} (${absenceLabel(a)})`).join(', ');
+  return {
+    title: `${L('Arrangement sheet', 'अरेंजमेंट शीट')} — ${fmtDate(date)}`,
+    sub: plan ? (plan.status === 'published' ? L('Published', 'प्रकाशित') : L('Draft — not yet published', 'ड्राफ़्ट — अभी प्रकाशित नहीं')) : L('No arrangements for this day', 'इस दिन कोई अरेंजमेंट नहीं'),
+    sections: [{ rows, firstColBold: true }],
+    note: absent ? `${L('Absent today', 'आज अनुपस्थित')}: ${absent}` : '',
+  };
+}
+
+Object.assign(ACTIONS, {
+  pdfTimetable: () => {
+    if (UI.ttMode === 'teacher') savePdf([pdfTeacherDoc(UI.ttTeacher)], `MTS-Timetable-${pdfName(nameOf(UI.ttTeacher))}.pdf`, nameOf(UI.ttTeacher), { landscape: true });
+    else savePdf([pdfClassDoc(UI.ttClass)], `MTS-Timetable-${pdfName(UI.ttClass)}.pdf`, UI.ttClass, { landscape: true });
+  },
+  pdfTimetableAll: () => {
+    if (UI.ttMode === 'teacher') savePdf(teachers().filter(x => weeklyLoad(x.id) > 0).sort((a, b) => a.name.localeCompare(b.name)).map(x => pdfTeacherDoc(x.id)), 'MTS-Timetable-All-Teachers.pdf', L('All teachers', 'सभी शिक्षक'), { landscape: true });
+    else savePdf(CLASSES.map(pdfClassDoc), 'MTS-Timetable-All-Classes.pdf', L('All classes', 'सभी कक्षाएँ'), { landscape: true });
+  },
+  printSheet: () => savePdf([pdfArrangementDoc(UI.date)], `MTS-Arrangement-${UI.date}.pdf`, L('Arrangement sheet', 'अरेंजमेंट शीट')),
+  printAttendance: () => { const ym = UI.reportMonth || todayISO().slice(0, 7); const sh = attendanceSheets(ym); savePdf([{ title: `${L('Staff attendance', 'स्टाफ़ हाज़िरी')} — ${ym}`, sections: [{ heading: sh[0].name, rows: sh[0].rows, firstColBold: true }, { heading: sh[1].name, rows: sh[1].rows, firstColBold: true, fontSize: 20 }] }], `MTS-Staff-Attendance-${ym}.pdf`, ym, { landscape: true }); },
+  printSalary: () => { const ym = UI.reportMonth || todayISO().slice(0, 7); const sh = salarySheets(ym); savePdf([{ title: `${L('Salary-ready attendance', 'वेतन हेतु हाज़िरी')} — ${ym}`, sections: [{ heading: sh[0].name, rows: sh[0].rows, firstColBold: true }, { heading: sh[2].name, rows: sh[2].rows, firstColBold: true }] }], `MTS-Salary-Attendance-${ym}.pdf`, ym, { landscape: true }); },
+  examPrint: el => { const e = examById(el.dataset.id); savePdf([{ title: `${e.name} — ${L('Invigilation chart', 'निरीक्षण चार्ट')}`, sections: [{ rows: examSheet(e).rows, firstColBold: true }] }], `MTS-${pdfName(e.name)}-Duties.pdf`, e.name, { landscape: true }); },
+  printReport: () => { const ym = UI.reportMonth || todayISO().slice(0, 7); savePdf([{ title: `${L('Monthly report', 'मासिक रिपोर्ट')} — ${ym}`, sections: [{ heading: L('Attendance', 'हाज़िरी'), rows: attendanceSheets(ym)[0].rows, firstColBold: true }, { heading: L('Workload', 'कार्यभार'), rows: workloadSheet(ym).rows, firstColBold: true }, { heading: L('Leave left', 'शेष छुट्टी'), rows: leaveSheets()[0].rows, firstColBold: true }] }], `MTS-Monthly-Report-${ym}.pdf`, ym, { landscape: true }); },
+});
 
 boot();
