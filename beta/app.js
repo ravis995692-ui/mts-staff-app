@@ -812,6 +812,7 @@ function render() {
   document.documentElement.lang = S.lang === 'hi' ? 'hi' : 'en';
   const u = me();
   if (!u) { app.innerHTML = viewLogin(); return; }
+  if (needsCheckIn(u)) { app.innerHTML = checkInLockHTML(u); return; }
   const items = navItems(u);
   if (!UI.view || !items.find(i => i[0] === UI.view)) UI.view = items[0][0];
   const unread = S.notifications.filter(n => n.userId === u.id && !n.read).length;
@@ -3959,7 +3960,7 @@ function viewAssistant() {
    teacher has not marked attendance yet, and every time "Mark my attendance" is tapped.
    ================================================================= */
 function needsCheckIn(u) {
-  if (!u || S.v2Missing || u.role === 'admin') return false;
+  if (!u || S.v2Missing || S.offline || u.role === 'admin') return false;
   const date = todayISO();
   if (dayIdx(date) < 0 || attStatus(u.id, date) !== 'not_in') return false;
   const cfg = campusCfg(), hm = nowHM();
@@ -3983,7 +3984,8 @@ function checkInPopupHTML() {
 function openCheckInPopup() { openModal(L('Mark your attendance', 'अपनी हाज़िरी लगाएँ'), checkInPopupHTML()); }
 function maybeCheckInPopup() {
   const u = me();
-  if (!needsCheckIn(u)) return;
+  if (!u || needsCheckIn(u)) return;   // the full lock screen is showing instead
+  return;
   if (document.getElementById('modal-root').innerHTML) return;
   const last = V2.checkPopAt || 0;
   if (Date.now() - last < 20 * 60 * 1000) return;   // not more than once in 20 minutes
@@ -3995,6 +3997,30 @@ Object.assign(ACTIONS, {
   checkInGo: () => { closeModal(); doCheck('in'); },
   checkInLater: () => { V2.checkPopAt = Date.now(); closeModal(); },
 });
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') setTimeout(maybeCheckInPopup, 800); });
+/* full screen shown instead of the app until attendance is marked (during check-in hours) */
+function checkInLockHTML(u) {
+  const cfg = campusCfg(), hm = nowHM(), date = todayISO(), d = dayIdx(date);
+  const late = hm > cfg.late, m = V2.checkMsg;
+  let first = null;
+  if (d >= 0) for (let p = 1; p <= PERIODS.length && !first; p++) { const l = teacherLessonAt(u.id, d, p); if (l) first = { p, l }; }
+  return `<div class="login-wrap"><div class="login-card checkin-lock">
+    <img class="login-logo" src="${LOGO_SRC}" alt="MTS logo">
+    <h1>${esc(L(`Good morning, ${u.name}`, `सुप्रभात, ${u.name}`))}</h1>
+    <p class="muted">${esc(fmtDate(date))} · ${L('Time now', 'अभी समय')} <b>${hm}</b></p>
+    <div class="banner ${late ? 'warn' : 'ok'}">${late
+      ? esc(L(`It is after ${cfg.late}, so this will be marked LATE.`, `${cfg.late} के बाद है, इसलिए यह देर (LATE) दर्ज होगी।`))
+      : esc(L(`You are on time. Mark before ${cfg.late} to avoid late.`, `आप समय पर हैं। देर से बचने के लिए ${cfg.late} से पहले लगाएँ।`))}</div>
+    <p><b>${esc(L('Mark your attendance to open the app.', 'ऐप खोलने के लिए पहले अपनी हाज़िरी लगाएँ।'))}</b></p>
+    ${first ? `<p class="muted">${esc(L('Your first period today', 'आज आपका पहला पीरियड'))}: <b>P${first.p}</b> · ${esc(first.l.label)} · ${esc(subjName(first.l.s))}</p>` : ''}
+    <button class="btn primary big block" data-act="checkInGo" ${V2.checkBusy ? 'disabled' : ''}>✅ ${esc(L('Mark present now', 'अभी उपस्थित दर्ज करें'))}</button>
+    ${m ? `<div class="banner ${m.kind === 'ok' ? 'ok' : m.kind === 'bad' ? 'bad' : ''}">${esc(m.text)}</div>` : ''}
+    <p class="hint">${esc(L('Mark only when you are inside the school, from your own phone. If it does not work, ask the office to mark you present — the app opens as soon as they do.', 'हाज़िरी तभी लगाएँ जब आप स्कूल में हों, अपने ही फ़ोन से। न लगे तो ऑफ़िस से उपस्थित दर्ज करवाएँ — वे दर्ज करते ही ऐप खुल जाएगा।'))}</p>
+    <div class="row-end"><button class="btn ghost small" data-act="toggleLang">${t('language')}</button><button class="btn ghost small" data-act="logout">${t('logout')}</button></div>
+  </div></div>`;
+}
+/* re-check every minute (check-in hours can start or end while the app is open) */
+V2.lockWas = null;
+setInterval(() => { const u = S && me(); if (!u) return; const now = needsCheckIn(u); if (V2.lockWas !== null && now !== V2.lockWas) render(); V2.lockWas = now; }, 30000);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && S && me() && needsCheckIn(me())) render(); });
 
 boot();
