@@ -3962,6 +3962,7 @@ function viewAssistant() {
 function needsCheckIn(u) {
   if (!u || S.v2Missing || S.offline || u.role === 'admin') return false;
   const date = todayISO();
+  if (absentRequestToday(u.id)) return false;   // has said "I am absent today" (or has leave) for the morning
   if (dayIdx(date) < 0 || attStatus(u.id, date) !== 'not_in') return false;
   const cfg = campusCfg(), hm = nowHM();
   return hm >= cfg.open && hm <= cfg.close;
@@ -4015,9 +4016,45 @@ function checkInLockHTML(u) {
     <button class="btn primary big block" data-act="checkInGo" ${V2.checkBusy ? 'disabled' : ''}>✅ ${esc(L('Mark present now', 'अभी उपस्थित दर्ज करें'))}</button>
     ${m ? `<div class="banner ${m.kind === 'ok' ? 'ok' : m.kind === 'bad' ? 'bad' : ''}">${esc(m.text)}</div>` : ''}
     <p class="hint">${esc(L('Mark only when you are inside the school, from your own phone. If it does not work, ask the office to mark you present — the app opens as soon as they do.', 'हाज़िरी तभी लगाएँ जब आप स्कूल में हों, अपने ही फ़ोन से। न लगे तो ऑफ़िस से उपस्थित दर्ज करवाएँ — वे दर्ज करते ही ऐप खुल जाएगा।'))}</p>
+    <button class="btn block" data-act="absentTodayDialog" style="margin-top:10px">🙋 ${esc(L('I am absent today', 'मैं आज अनुपस्थित हूँ'))}</button>
     <div class="row-end"><button class="btn ghost small" data-act="toggleLang">${t('language')}</button><button class="btn ghost small" data-act="logout">${t('logout')}</button></div>
   </div></div>`;
 }
+/* a leave (sent or approved) that covers this morning, so no need to mark present */
+function absentRequestToday(tid) {
+  const date = todayISO();
+  return S.leaves.some(l => l.teacherId === tid && l.from <= date && l.to >= date && (l.status === 'pending' || l.status === 'approved') && (l.scope === 'full' || l.scope === 'first'));
+}
+function absentTodayHTML() {
+  const types = ['Sick', 'Casual', 'Personal', 'Emergency'];
+  return `<form data-form="absentToday" class="stack">
+    <p>${esc(fmtDate(todayISO()))}</p>
+    <label>${esc(L('Reason', 'कारण'))}<select name="type">${types.map(tp => `<option value="${tp}">${esc(leaveTypeName(tp))}</option>`).join('')}</select></label>
+    <label>${esc(L('Absent for', 'कब तक अनुपस्थित'))}<select name="scope">
+      <option value="full">${esc(L('Full day', 'पूरा दिन'))}</option>
+      <option value="first">${esc(L('First half (I will come after lunch)', 'पहला भाग (लंच के बाद आऊँगा/आऊँगी)'))}</option></select></label>
+    <label>${esc(L('Short note for the office', 'ऑफ़िस के लिए छोटा संदेश'))}<textarea name="description" rows="3" required placeholder="${esc(L('e.g. fever, doctor visit', 'जैसे बुखार, डॉक्टर के पास'))}"></textarea></label>
+    <p class="hint">${esc(L('This goes to the office as a leave request for today. Your classes will be covered when they approve it.', 'यह आज की छुट्टी के आवेदन के रूप में ऑफ़िस जाएगा। स्वीकृत होते ही आपकी कक्षाओं का अरेंजमेंट हो जाएगा।'))}</p>
+    <div class="row-end"><button type="button" class="btn" data-act="closeModal">${t('cancel')}</button><button class="btn primary" type="submit">${esc(L('Send to office', 'ऑफ़िस को भेजें'))}</button></div></form>`;
+}
+Object.assign(ACTIONS, {
+  absentTodayDialog: () => openModal(L('Absent today', 'आज अनुपस्थित'), absentTodayHTML()),
+});
+Object.assign(FORMS, {
+  absentToday: (fd) => {
+    const u = me(), date = todayISO();
+    const description = String(fd.get('description') || '').trim();
+    if (!description) { toast(L('Please write a short note', 'कृपया छोटा संदेश लिखें')); return; }
+    const scope = fd.get('scope') === 'first' ? 'first' : 'full';
+    const type = fd.get('type');
+    const lv = { id: uid('lv'), teacherId: u.id, from: date, to: date, scope, periods: [], type, description, status: 'pending', remark: '', createdAt: nowStamp(), sameDay: true };
+    S.leaves.push(lv);
+    const part = scope === 'first' ? L(' (first half)', ' (पहला भाग)') : '';
+    notifyManagers({ en: `⚠️ ${u.name} is absent TODAY${scope === 'first' ? ' (first half)' : ''} — ${type}: ${description}. Please approve so classes get covered.`, hi: `⚠️ ${u.name} आज अनुपस्थित हैं${scope === 'first' ? ' (पहला भाग)' : ''} — ${({ Sick: 'बीमारी', Casual: 'आकस्मिक', Personal: 'निजी', Emergency: 'आपातकालीन' })[type] || type}: ${description}। कृपया स्वीकृत करें ताकि अरेंजमेंट हो सके।` });
+    logAudit(u.id, `Reported absent today (${scope}) from the attendance screen`);
+    closeModal(); commit(); toast(L('Sent to the office', 'ऑफ़िस को भेजा गया') + part);
+  },
+});
 /* re-check every minute (check-in hours can start or end while the app is open) */
 V2.lockWas = null;
 setInterval(() => { const u = S && me(); if (!u) return; const now = needsCheckIn(u); if (V2.lockWas !== null && now !== V2.lockWas) render(); V2.lockWas = now; }, 30000);
