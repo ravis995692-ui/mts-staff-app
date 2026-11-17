@@ -4108,7 +4108,7 @@ async function makePdf(docs, opt = {}) {
   const HEADER_H = 250, FOOT = 70;
   const newPage = () => { page = []; pages.push(page); y = M + HEADER_H; };
   const room = () => H - M - FOOT - y;
-  const stamp = new Date().toLocaleString(S.lang === 'hi' ? 'hi-IN' : 'en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  const stamp = new Date().toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
   for (const doc of docs) {
     newPage();
@@ -4138,6 +4138,12 @@ async function makePdf(docs, opt = {}) {
         if (sMin > avail) continue;
         if (sNat <= avail) widths = nat.map(w => w * avail / sNat);
         else { const extra = avail - sMin, grow = nat.map((w, i) => w - min[i]), sg = grow.reduce((a, b) => a + b, 0) || 1; widths = min.map((w, i) => w + extra * grow[i] / sg); }
+        if (sec.fitPage && fs > 16) {                         // keep the whole table on one page
+          const lhT = Math.round(fs * 1.3);
+          let total = 0;
+          rows.forEach((r, ri) => { ctx.font = F(fs, ri === 0); total += (r.span != null ? 1 : Math.max(...r.map((v, ci) => pdfWrap(ctx, v, widths[ci] - 2 * pad).length))) * lhT + 2 * pad; });
+          if (total > room() - (sec.heading ? 50 : 0)) { widths = null; continue; }
+        }
         break;
       }
       if (!widths) { fs = 11; widths = Array(nc).fill(avail / nc); }
@@ -4208,7 +4214,7 @@ async function makePdf(docs, opt = {}) {
     o.lineWidth = 4; o.beginPath(); o.moveTo(M, M + HEADER_H - 50); o.lineTo(W - M, M + HEADER_H - 50); o.stroke();
     pages[i].forEach(fn => { o.fillStyle = '#000'; fn(o); });
     o.fillStyle = '#000'; o.font = F(22); o.textAlign = 'center';
-    o.fillText(`${SCHOOL.name} · ${L('Made on', 'तैयार')} ${stamp} · ${L('Page', 'पृष्ठ')} ${i + 1} / ${pages.length}`, W / 2, H - M + 10);
+    o.fillText(`${SCHOOL.name} · Made on ${stamp} · Page ${i + 1} / ${pages.length}`, W / 2, H - M + 10);
     if (bw) imgs.push({ kind: 'bw', w: out.width, h: out.height, bytes: await pdfBitmap(o, out.width, out.height) });
     else imgs.push({ kind: 'jpg', w: out.width, h: out.height, bytes: b64bytes(out.toDataURL('image/jpeg', 0.75)) });
     await new Promise(r => setTimeout(r, 0));                 // keep the phone responsive
@@ -4285,7 +4291,7 @@ function pdfClassDoc(cls) {
   return {
     title: `${L('Class timetable', 'कक्षा समय-सारणी')} — ${cls}`,
     sub: ct ? `${L('Class teacher', 'कक्षा-शिक्षक')}: ${nameOf(ct)}` : '',
-    sections: [{ rows: pdfTimetableRows((d, p) => { const l = lessonAt(cls, d, p); return l ? `${cellSubj(l)}\n${cellTeachers(l)}${l.j ? '\n(' + L('combined', 'संयुक्त') + ')' : ''}` : '—'; }), equalCols: true, firstColBold: true, boldFirstLine: true, fontSize: 31 }],
+    sections: [{ rows: pdfTimetableRows((d, p) => { const l = lessonAt(cls, d, p); return l ? `${cellSubj(l)}\n${cellTeachers(l)}${l.j ? '\n(' + L('combined', 'संयुक्त') + ')' : ''}` : '—'; }), equalCols: true, firstColBold: true, boldFirstLine: true, fontSize: 31, fitPage: true }],
   };
 }
 function pdfTeacherDoc(tid) {
@@ -4293,7 +4299,7 @@ function pdfTeacherDoc(tid) {
   return {
     title: `${L('Teacher timetable', 'शिक्षक समय-सारणी')} — ${nameOf(tid)}`,
     sub: `${L('Periods a week', 'साप्ताहिक पीरियड')}: ${weeklyLoad(tid)}${ctOf.length ? ' · ' + L('Class teacher of', 'कक्षा-शिक्षक') + ' ' + ctOf.join(', ') : ''}`,
-    sections: [{ rows: pdfTimetableRows((d, p) => { const l = teacherLessonAt(tid, d, p); return l ? `${l.label}\n${subjName(l.s)}` : t('free'); }), equalCols: true, firstColBold: true, boldFirstLine: true, fontSize: 31 }],
+    sections: [{ rows: pdfTimetableRows((d, p) => { const l = teacherLessonAt(tid, d, p); return l ? `${l.label}\n${subjName(l.s)}` : t('free'); }), equalCols: true, firstColBold: true, boldFirstLine: true, fontSize: 31, fitPage: true }],
   };
 }
 function pdfArrangementDoc(date) {
@@ -4324,6 +4330,14 @@ Object.assign(ACTIONS, {
   printSalary: () => { const ym = UI.reportMonth || todayISO().slice(0, 7); const sh = salarySheets(ym); savePdf([{ title: `${L('Salary-ready attendance', 'वेतन हेतु हाज़िरी')} — ${ym}`, sections: [{ heading: sh[0].name, rows: sh[0].rows, firstColBold: true }, { heading: sh[2].name, rows: sh[2].rows, firstColBold: true }] }], `MTS-Salary-Attendance-${ym}.pdf`, ym, { landscape: true }); },
   examPrint: el => { const e = examById(el.dataset.id); savePdf([{ title: `${e.name} — ${L('Invigilation chart', 'निरीक्षण चार्ट')}`, sections: [{ rows: examSheet(e).rows, firstColBold: true }] }], `MTS-${pdfName(e.name)}-Duties.pdf`, e.name, { landscape: true }); },
   printReport: () => { const ym = UI.reportMonth || todayISO().slice(0, 7); savePdf([{ title: `${L('Monthly report', 'मासिक रिपोर्ट')} — ${ym}`, sections: [{ heading: L('Attendance', 'हाज़िरी'), rows: attendanceSheets(ym)[0].rows, firstColBold: true }, { heading: L('Workload', 'कार्यभार'), rows: workloadSheet(ym).rows, firstColBold: true }, { heading: L('Leave left', 'शेष छुट्टी'), rows: leaveSheets()[0].rows, firstColBold: true }] }], `MTS-Monthly-Report-${ym}.pdf`, ym, { landscape: true }); },
+});
+
+
+/* Files given out by the app (PDF, Excel, copied report) are always in English, whatever language the app shows. */
+function inEnglish(fn) { const keep = S.lang; S.lang = 'en'; try { return fn(); } finally { S.lang = keep; } }
+Object.keys(ACTIONS).forEach(name => {
+  const fn = ACTIONS[name], src = String(fn);
+  if (/savePdf\(|deliverFile\(|makeXlsx\(/.test(src) || name === 'copyReport') ACTIONS[name] = el => inEnglish(() => fn(el));
 });
 
 boot();
