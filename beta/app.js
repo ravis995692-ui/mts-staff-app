@@ -237,7 +237,9 @@ function lessonAt(cls, d, p) { return (S.tt[cls] && S.tt[cls][d] && S.tt[cls][d]
    j: true marks a combined class, where the same teacher takes two classes together. */
 function partsOf(l) { return l ? [{ s: l.s, t: l.t }].concat(Array.isArray(l.x) ? l.x.filter(g => g && g.s) : []) : []; }
 const cellSubj = l => partsOf(l).map(g => subjName(g.s)).join(' / ');
-const cellTeachers = (l, short) => partsOf(l).map(g => (short ? nameOf(g.t).split(' ')[0] : nameOf(g.t))).join(' / ');
+/* on timetables the wing tag is not shown: "Smita Ma'am (PRIMARY)" -> "Smita Ma'am" (staff list and pickers keep it) */
+const ttName = id => nameOf(id).replace(/\s*\(PRIMARY\)\s*$/i, '');
+const cellTeachers = (l, short) => partsOf(l).map(g => (short ? ttName(g.t).split(' ')[0] : ttName(g.t))).join(' / ');
 function teacherLessonAt(tid, d, p) {
   let hit = null;
   for (const c of CLASSES) {
@@ -1197,7 +1199,7 @@ function viewTimetable() {
       ${manager && mode === 'class' ? `<button class="btn ${V2.swapFrom ? 'primary' : 'ghost'}" data-act="swapMode">⇄ ${V2.swapFrom ? L('Done swapping', 'बदलना पूरा') : L('Swap periods', 'पीरियड बदलें')}</button>` : ''}
     </div></div>
     ${V2.swapFrom ? `<div class="banner">${V2.swapFrom === 'on' ? L('Tap the first period to move.', 'पहला पीरियड चुनें।') : L(`Now tap where ${dayName(V2.swapFrom.d)} P${V2.swapFrom.p} should go. The two periods change places if no teacher clashes.`, `अब वह जगह चुनें जहाँ ${dayName(V2.swapFrom.d)} P${V2.swapFrom.p} जाए। टकराव न हो तो दोनों पीरियड जगह बदल लेंगे।`)}</div>` : ''}
-    <p class="muted">${mode === 'class' ? `${L('Class teacher', 'कक्षा-शिक्षक')}: <b>${esc(nameOf(ct))}</b>` : `${L('Periods per week', 'प्रति सप्ताह पीरियड')}: <b>${weeklyLoad(UI.ttTeacher)}</b>`}
+    <p class="muted">${mode === 'class' ? `${L('Class teacher', 'कक्षा-शिक्षक')}: <b>${esc(ttName(ct))}</b>` : `${L('Periods per week', 'प्रति सप्ताह पीरियड')}: <b>${weeklyLoad(UI.ttTeacher)}</b>`}
     ${manager && mode === 'class' ? ` · ${L('Tap any period to change it. Clashes are blocked.', 'बदलने के लिए किसी पीरियड पर टैप करें। टकराव रोका जाता है।')}` : ''}</p>
     <div class="table-wrap"><table class="tt">${head}${rows}</table></div>`;
 }
@@ -4290,14 +4292,14 @@ function pdfClassDoc(cls) {
   const ct = S.classTeachers && S.classTeachers[cls];
   return {
     title: `${L('Class timetable', 'कक्षा समय-सारणी')} — ${cls}`,
-    sub: ct ? `${L('Class teacher', 'कक्षा-शिक्षक')}: ${nameOf(ct)}` : '',
+    sub: ct ? `${L('Class teacher', 'कक्षा-शिक्षक')}: ${ttName(ct)}` : '',
     sections: [{ rows: pdfTimetableRows((d, p) => { const l = lessonAt(cls, d, p); return l ? `${cellSubj(l)}\n${cellTeachers(l)}${l.j ? '\n(' + L('combined', 'संयुक्त') + ')' : ''}` : '—'; }), equalCols: true, firstColBold: true, boldFirstLine: true, fontSize: 31, fitPage: true }],
   };
 }
 function pdfTeacherDoc(tid) {
   const ctOf = Object.entries(S.classTeachers || {}).filter(([, v]) => v === tid).map(([k]) => k);
   return {
-    title: `${L('Teacher timetable', 'शिक्षक समय-सारणी')} — ${nameOf(tid)}`,
+    title: `${L('Teacher timetable', 'शिक्षक समय-सारणी')} — ${ttName(tid)}`,
     sub: `${L('Periods a week', 'साप्ताहिक पीरियड')}: ${weeklyLoad(tid)}${ctOf.length ? ' · ' + L('Class teacher of', 'कक्षा-शिक्षक') + ' ' + ctOf.join(', ') : ''}`,
     sections: [{ rows: pdfTimetableRows((d, p) => { const l = teacherLessonAt(tid, d, p); return l ? `${l.label}\n${subjName(l.s)}` : t('free'); }), equalCols: true, firstColBold: true, boldFirstLine: true, fontSize: 31, fitPage: true }],
   };
